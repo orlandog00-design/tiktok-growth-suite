@@ -213,6 +213,198 @@ function getFreshDynamicTrends(category = 'all', topic = '') {
     ];
   }
 
+  // 1.5 ROBLOX DEDICATED BREAKOUT SUITE
+  if (kw.includes('roblox')) {
+    return [
+      {
+        id: `rbx-dress-${Date.now()}-1`,
+        category: 'gaming',
+        title: 'The Secret Dress to Impress Speed Glitch Winning Every Master Server',
+        velocity: `🔥 ${(9.4 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'viral',
+        growth: '+920% this week',
+        freshness: '🔴 LIVE • Roblox Meta',
+        hookPattern: 'Glitch / Guaranteed Win Formula',
+        recommendedAudio: 'Brazilian Phonk (136 BPM) / Fast Drift',
+        audioId: 'phonk_drift',
+        tiktokAudioQuery: 'Brazilian Phonk Roblox Speed',
+        hashtags: ['#roblox', '#dresstoimpress', '#dti', '#robloxtips', '#robloxglitch'],
+        promptIdea: 'The secret Dress to Impress outfit stacking glitch that guarantees 5 stars on master servers.'
+      },
+      {
+        id: `rbx-blox-${Date.now()}-2`,
+        category: 'gaming',
+        title: 'Top 3 Working Blox Fruits PvP Combos That 1-Shot Bounty Hunters in Update 24',
+        velocity: `🔥 ${(8.9 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'viral',
+        growth: '+860% this week',
+        freshness: '🔴 LIVE • Update 24',
+        hookPattern: '1-Shot Combo / Bounty Hunt',
+        recommendedAudio: 'Dark 808 Drill (140 BPM - Heavy Sub-Bass & Wipes)',
+        audioId: 'dark_808_drill',
+        tiktokAudioQuery: 'Dark 808 Drill Blox Fruits PvP',
+        hashtags: ['#bloxfruits', '#robloxpvp', '#bloxfruitspvp', '#bountyhunting'],
+        promptIdea: 'The 3 uncounterable Blox Fruits fruit-and-sword combos that 1-shot max level players.'
+      },
+      {
+        id: `rbx-horror-${Date.now()}-3`,
+        category: 'gaming',
+        title: 'The Most Terrifying Roblox Horror Game of 2026 That Got Secretly Banned',
+        velocity: `🚀 ${(8.2 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'breakout',
+        growth: '+790% this week',
+        freshness: '⚡ SURGING • Horror',
+        hookPattern: 'Cursed Game / Creepypasta Mystery',
+        recommendedAudio: 'Suspense Countdown & Drop (130 BPM - Secret Class Reveal)',
+        audioId: 'suspense_drop',
+        tiktokAudioQuery: 'Roblox Scary Ambient Drone',
+        hashtags: ['#robloxhorror', '#scaryroblox', '#robloxfacts', '#creepyroblox'],
+        promptIdea: 'Do not play this hidden Roblox horror game at 3 AM unless you want nightmares for weeks.'
+      },
+      {
+        id: `rbx-doors-${Date.now()}-4`,
+        category: 'gaming',
+        title: 'The Hidden Secret in Doors Floor 2 That Nobody Has Figured Out Yet',
+        velocity: `🔥 ${(7.7 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'viral',
+        growth: '+710% this week',
+        freshness: '🔴 LIVE • Doors Mystery',
+        hookPattern: 'Secret Room / Easter Egg',
+        recommendedAudio: 'Sigma 808 Cinematic Drop (128 BPM - 1v4 Clutch)',
+        audioId: 'sigma_drop',
+        tiktokAudioQuery: 'Sigma 808 Drop Doors Roblox',
+        hashtags: ['#doorsroblox', '#doorsfloor2', '#robloxdoors', '#robloxsecrets'],
+        promptIdea: 'The secret puzzle hidden behind Room 150 in Doors Floor 2 that developers thought nobody would find.'
+      },
+      {
+        id: `rbx-robux-${Date.now()}-5`,
+        category: 'gaming',
+        title: 'How to Earn 50,000 Free Robux Legitimately Through Creator Marketplace',
+        velocity: `🚀 ${(8.5 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'breakout',
+        growth: '+830% this week',
+        freshness: '⚡ SURGING • Creator Tips',
+        hookPattern: 'Value Leak / Safe Legit Method',
+        recommendedAudio: 'Bouncy 808 Trap (132 BPM - Meta Recoil & Commentary)',
+        audioId: 'bouncy_trap',
+        tiktokAudioQuery: 'Bouncy 808 Trap Roblox UGC',
+        hashtags: ['#freerobux', '#robloxugc', '#robloxcreator', '#robloxhacks'],
+        promptIdea: 'Stop falling for fake Robux scams—here is the exact UGC catalog method that made me 50K Robux.'
+      },
+      {
+        id: `rbx-audio-${Date.now()}-6`,
+        category: 'gaming',
+        title: 'The 150 BPM Hardstyle Audio Dominating Roblox Speed Montages',
+        velocity: `⚡ ${(8.8 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'hot',
+        growth: '+740% this week',
+        freshness: '🔴 LIVE • Viral Beat',
+        hookPattern: 'Speed Edit / Adrenaline Surge',
+        recommendedAudio: 'Hyper-Drive Hardstyle (150 BPM - Camera Breaker)',
+        audioId: 'hyper_hardstyle',
+        tiktokAudioQuery: 'Hardstyle Tevvez Roblox Speed Edit',
+        hashtags: ['#robloxedit', '#robloxmontage', '#hardstyle', '#speedrunroblox'],
+        promptIdea: 'Why this 150 BPM hardstyle kick sound increases TikTok completion rate on Roblox clips by 400%.'
+      }
+    ];
+  }
+
+  // 1.8 CALL OF DUTY MULTIPLAYER DEDICATED BREAKOUT SUITE
+  if (kw.includes('multiplayer') || kw.includes('mp') || kw.includes('cod multiplayer')) {
+    return [
+      {
+        id: `codmp-jackal-${Date.now()}-1`,
+        category: 'gaming',
+        title: 'The S-Tier Jackal PDW Build Dominating Ranked Multiplayer Search & Destroy',
+        velocity: `🔥 ${(8.9 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'viral',
+        growth: '+880% this week',
+        freshness: '🔴 LIVE • Ranked MP Meta',
+        hookPattern: 'Fastest TTK / Snaking Laser',
+        recommendedAudio: 'Brazilian Phonk (136 BPM) / Fast Drift',
+        audioId: 'phonk_drift',
+        tiktokAudioQuery: 'Brazilian Phonk Ranked MP SnD',
+        hashtags: ['#codmultiplayer', '#rankedplay', '#snd', '#callofduty', '#codmeta'],
+        promptIdea: 'The banned-in-CDL Jackal PDW class setup melting ranked multiplayer lobbies in 3 bullets.'
+      },
+      {
+        id: `codmp-nuke-${Date.now()}-2`,
+        category: 'gaming',
+        title: 'How to Drop a 30-Streak Nuke Every Game With This Spawn Trap Route',
+        velocity: `🔥 ${(9.3 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'viral',
+        growth: '+940% this week',
+        freshness: '🔴 LIVE • Nuke Guide',
+        hookPattern: 'Spawn Logic / Unstoppable Streak',
+        recommendedAudio: 'Dark 808 Drill (140 BPM - Heavy Sub-Bass & Wipes)',
+        audioId: 'dark_808_drill',
+        tiktokAudioQuery: 'Dark 808 Drill COD Nuke Streak',
+        hashtags: ['#codnuke', '#spawntrap', '#multiplayer', '#streak', '#callofduty'],
+        promptIdea: 'The exact spawn manipulation route to guarantee a 30-kill streak nuke without camping.'
+      },
+      {
+        id: `codmp-aim-${Date.now()}-3`,
+        category: 'gaming',
+        title: "Turn ON 'Dynamic Response Curve' & 0.05 Deadzones for Sticky Aim Assist",
+        velocity: `⚡ ${(8.7 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'hot',
+        growth: '+810% this week',
+        freshness: '🔴 LIVE • Controller Setting',
+        hookPattern: 'Controller Aimbot / Settings Exploit',
+        recommendedAudio: 'Slowed + Reverb Phonk (115 BPM - Aesthetic Vibe)',
+        audioId: 'slowed_reverb_phonk',
+        tiktokAudioQuery: 'Slowed Reverb COD Aim Settings',
+        hashtags: ['#codsettings', '#aimassist', '#controllerplayer', '#deadzone', '#codtips'],
+        promptIdea: 'The secret controller response curve and rotational aim assist settings that make tracking impossible to break.'
+      },
+      {
+        id: `codmp-snipe-${Date.now()}-4`,
+        category: 'gaming',
+        title: 'The Fastest ADS 1-Shot Sniper Setup Dominating Shipment and Meat',
+        velocity: `🚀 ${(7.8 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'breakout',
+        growth: '+690% this week',
+        freshness: '⚡ SURGING • Small Maps',
+        hookPattern: 'Instant ADS / Clip Machine',
+        recommendedAudio: 'Montage Distortion Guitar (142 BPM - Sniper Headshots)',
+        audioId: 'guitar_montage',
+        tiktokAudioQuery: 'Distortion Guitar COD Quickscope Montage',
+        hashtags: ['#quickscope', '#shipment', '#codsniping', '#headshots', '#feed'],
+        promptIdea: 'The sub-200ms ADS sniper build that lets you hit effortless quad feeds on small maps.'
+      },
+      {
+        id: `codmp-move-${Date.now()}-5`,
+        category: 'gaming',
+        title: 'The Omnimovement Slide-Cancel Setting for Instant Snaking Behind Headglitches',
+        velocity: `🔥 ${(8.3 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'viral',
+        growth: '+760% this week',
+        freshness: '🔴 LIVE • Movement King',
+        hookPattern: 'Omnimovement Exploit / Snaking',
+        recommendedAudio: 'Hyper-Drive Hardstyle (150 BPM - Camera Breaker)',
+        audioId: 'hyper_hardstyle',
+        tiktokAudioQuery: 'Hardstyle COD Movement Demon',
+        hashtags: ['#omnimovement', '#snaking', '#camerabreak', '#codmovement'],
+        promptIdea: 'How to abuse omnimovement sprinting to become completely unhittable on headglitches.'
+      },
+      {
+        id: `codmp-hardpoint-${Date.now()}-6`,
+        category: 'gaming',
+        title: 'The Hardpoint Trophy & Flak Setup That Pro Teams Secretly Gentleman-Banned',
+        velocity: `🚀 ${(7.2 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'breakout',
+        growth: '+630% this week',
+        freshness: '⚡ SURGING • CDL Meta',
+        hookPattern: 'Gentlemen Agreement / Banned Strat',
+        recommendedAudio: 'Sigma 808 Cinematic Drop (128 BPM - 1v4 Clutch)',
+        audioId: 'sigma_drop',
+        tiktokAudioQuery: 'Sigma 808 Drop Ranked Hardpoint Clutch',
+        hashtags: ['#hardpoint', '#cdl', '#ga', '#competitivecod', '#esports'],
+        promptIdea: 'The hill-holding perk and tactical setup that makes breaking Hardpoints physically impossible.'
+      }
+    ];
+  }
+
   // 2. MINECRAFT DEDICATED VIRAL SUITE
   if (kw.includes('minecraft')) {
     return [

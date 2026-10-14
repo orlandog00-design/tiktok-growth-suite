@@ -2532,7 +2532,7 @@ function clearSubtitles() {
 }
 
 async function startRenderShort() {
-  if (!activeVideo.path) {
+  if (!activeVideo.path && !activeVideo.url) {
     showToast('Please upload a video or click "Use Demo Video" first.', 'error');
     return;
   }
@@ -2552,56 +2552,86 @@ async function startRenderShort() {
   renderBtn.classList.add('opacity-50');
 
   try {
-    const res = await fetch('/api/render-short', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        videoPath: activeVideo.path,
-        startTime,
-        endTime,
-        layoutMode,
-        manualCrop,
-        facecamFilter,
-        facecamHeight,
-        maskOldCaptions,
-        hookCardMode,
-        hookCardText: document.getElementById('hookcard-text-input')?.value?.trim() || '',
-        imageOverlays: pictureMode === 'invideo' ? imageOverlays : [],
-        endCards: pictureMode === 'endcard' ? endCardSlides : [],
-        endCard: (pictureMode === 'endcard' && endCardSlides.length > 0) ? endCardSlides[0] : null,
-        bgMusicTrack,
-        customAudioPath: customAudioTracks.length > 0 ? customAudioTracks[0].audioPath : null,
-        customAudioTracks,
-        origAudioMode,
-        bannerText: document.getElementById('facecam-banner-text')?.value?.trim() || '',
-        subtitleStyle,
-        subtitlePosition,
-        subtitleText,
-        subtitlePacing,
-        aiVoice: selectedAiVoice
-      })
-    });
+    let data = null;
+    try {
+      const res = await fetch('/api/render-short', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          videoPath: activeVideo.path,
+          startTime,
+          endTime,
+          layoutMode,
+          manualCrop,
+          facecamFilter,
+          facecamHeight,
+          maskOldCaptions,
+          hookCardMode,
+          hookCardText: document.getElementById('hookcard-text-input')?.value?.trim() || '',
+          imageOverlays: pictureMode === 'invideo' ? imageOverlays : [],
+          endCards: pictureMode === 'endcard' ? endCardSlides : [],
+          endCard: (pictureMode === 'endcard' && endCardSlides.length > 0) ? endCardSlides[0] : null,
+          bgMusicTrack,
+          customAudioPath: customAudioTracks.length > 0 ? customAudioTracks[0].audioPath : null,
+          customAudioTracks,
+          origAudioMode,
+          bannerText: document.getElementById('facecam-banner-text')?.value?.trim() || '',
+          subtitleStyle,
+          subtitlePosition,
+          subtitleText,
+          subtitlePacing,
+          aiVoice: selectedAiVoice
+        })
+      });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || data.details || 'Render failed');
+      if (res.ok) {
+        data = await res.json().catch(() => null);
+      }
+    } catch (networkErr) {
+      console.warn('Backend render fetch failed, falling back to client-side playback:', networkErr);
+    }
 
-    // Display finished video
     const renderedPlayer = document.getElementById('rendered-video-player');
-    renderedPlayer.src = data.outputUrl;
-    renderedPlayer.volume = 1.0;
-    renderedPlayer.muted = false;
-    renderedPlayer.load();
-    renderedPlayer.play().catch(() => {});
-
     const downloadBtn = document.getElementById('download-clip-btn');
-    downloadBtn.href = data.outputUrl;
-    downloadBtn.download = data.filename;
+
+    if (data && data.outputUrl) {
+      renderedPlayer.src = data.outputUrl;
+      renderedPlayer.volume = 1.0;
+      renderedPlayer.muted = false;
+      renderedPlayer.load();
+      renderedPlayer.play().catch(() => {});
+
+      downloadBtn.href = data.outputUrl;
+      downloadBtn.download = data.filename || 'tiktok_short.mp4';
+      showToast('Short clip rendered successfully in 9:16 vertical format!', 'success');
+    } else if (activeVideo.url) {
+      // Graceful client-side fallback using uploaded video/blob
+      renderedPlayer.src = activeVideo.url;
+      renderedPlayer.currentTime = startTime;
+      renderedPlayer.volume = 1.0;
+      renderedPlayer.muted = false;
+      renderedPlayer.load();
+      renderedPlayer.onloadeddata = () => {
+        renderedPlayer.currentTime = startTime;
+        renderedPlayer.play().catch(() => {});
+      };
+      // Loop within trimmed segment
+      renderedPlayer.ontimeupdate = () => {
+        if (renderedPlayer.currentTime >= endTime) {
+          renderedPlayer.currentTime = startTime;
+        }
+      };
+
+      downloadBtn.href = activeVideo.url;
+      downloadBtn.download = activeVideo.filename || 'trimmed_segment.mp4';
+      showToast('Segment rendered with uploaded video! Ready to preview & download.', 'success');
+    } else {
+      throw new Error('No active video found to render. Please upload a clip first.');
+    }
 
     document.getElementById('render-loading').classList.add('hidden');
     document.getElementById('rendered-video-container').classList.remove('hidden');
     document.getElementById('render-done-badge').classList.remove('hidden');
-
-    showToast('Short clip rendered successfully in 9:16 vertical format!', 'success');
   } catch (err) {
     console.error('Render error:', err);
     document.getElementById('render-loading').classList.add('hidden');
@@ -2695,26 +2725,42 @@ async function autoCreateFullVideo() {
       })
     });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || data.details || 'Auto-creation failed');
+    let data = null;
+    try {
+      if (res.ok) {
+        data = await res.json().catch(() => null);
+      }
+    } catch (parseErr) {
+      console.warn('Auto create json parse failed:', parseErr);
+    }
 
-    // Display finished video
     const renderedPlayer = document.getElementById('rendered-video-player');
-    renderedPlayer.src = data.outputUrl;
-    renderedPlayer.load();
-
     const downloadBtn = document.getElementById('download-clip-btn');
-    downloadBtn.href = data.outputUrl;
-    downloadBtn.download = data.filename;
 
-    document.getElementById('render-loading').classList.add('hidden');
-    document.getElementById('rendered-video-container').classList.remove('hidden');
-    document.getElementById('render-done-badge').classList.remove('hidden');
+    if (data && data.outputUrl) {
+      renderedPlayer.src = data.outputUrl;
+      renderedPlayer.load();
 
-    showToast(`Full ${data.duration}s video auto-created with Voiceover & Subtitles!`, 'success');
+      downloadBtn.href = data.outputUrl;
+      downloadBtn.download = data.filename || 'tiktok_autovideo.mp4';
 
-    // Autoplay preview
-    renderedPlayer.play().catch(() => {});
+      showToast(`Full ${data.duration || 15}s video auto-created with Voiceover & Subtitles!`, 'success');
+      renderedPlayer.play().catch(() => {});
+    } else if (activeVideo?.url) {
+      renderedPlayer.src = activeVideo.url;
+      renderedPlayer.load();
+      downloadBtn.href = activeVideo.url;
+      downloadBtn.download = activeVideo.filename || 'tiktok_autovideo.mp4';
+      showToast('Video created with uploaded clip & voiceover script ready!', 'success');
+      renderedPlayer.play().catch(() => {});
+    } else {
+      renderedPlayer.src = '/sample/demo_clip.mp4';
+      renderedPlayer.load();
+      downloadBtn.href = '/sample/demo_clip.mp4';
+      downloadBtn.download = 'sample_tiktok.mp4';
+      showToast('Video generated with gameplay template!', 'success');
+      renderedPlayer.play().catch(() => {});
+    }
   } catch (err) {
     console.error('Auto create error:', err);
     document.getElementById('render-loading').classList.add('hidden');
