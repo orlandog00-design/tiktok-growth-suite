@@ -4,8 +4,14 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const { spawn, spawnSync } = require('child_process');
-const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
-const ffprobeInstaller = require('@ffprobe-installer/ffprobe');
+let ffmpegInstaller = null;
+let ffprobeInstaller = null;
+try {
+  ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
+} catch (e) {}
+try {
+  ffprobeInstaller = require('@ffprobe-installer/ffprobe');
+} catch (e) {}
 
 function getFfmpegPath() {
   if (process.env.FFMPEG_PATH && fs.existsSync(process.env.FFMPEG_PATH)) {
@@ -14,7 +20,7 @@ function getFfmpegPath() {
   if (fs.existsSync('/usr/bin/ffmpeg')) {
     return '/usr/bin/ffmpeg';
   }
-  return ffmpegInstaller.path;
+  return ffmpegInstaller?.path || 'ffmpeg';
 }
 
 function getFfprobePath() {
@@ -24,7 +30,7 @@ function getFfprobePath() {
   if (fs.existsSync('/usr/bin/ffprobe')) {
     return '/usr/bin/ffprobe';
   }
-  return ffprobeInstaller.path;
+  return ffprobeInstaller?.path || 'ffprobe';
 }
 
 function getYtDlpPath() {
