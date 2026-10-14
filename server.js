@@ -134,80 +134,98 @@ const TRENDS_DATA = [
   {
     id: 'trend-cod-1',
     category: 'gaming',
-    title: 'The Broken Zero-Recoil SMG Meta That Melts in 420ms',
-    velocity: '🔥 5.4M Views/Day',
+    title: 'The S-Tier Voyak KT-3 Build Dominating Warzone Season 6',
+    velocity: '🔥 7.8M Views/Day',
     velocityType: 'viral',
-    growth: '+620% this week',
-    hookPattern: 'Secret Broken Class / No Recoil',
-    recommendedAudio: 'Brazilian Phonk (140 BPM) / Fast Drift',
+    growth: '+820% this week',
+    freshness: '🔴 LIVE • S6 Meta',
+    hookPattern: 'Laser Beam / Season 6 Recoil Buff',
+    recommendedAudio: 'Brazilian Phonk (136 BPM) / Fast Drift',
+    audioId: 'phonk_drift',
+    tiktokAudioQuery: 'Brazilian Phonk Fast Drift',
     soundMood: 'Hyper-Aggressive & Hype',
-    hashtags: ['#warzone', '#warzoneloadout', '#codwarzone', '#warzoneclips', '#rebirthisland'],
-    promptIdea: 'The broken zero-recoil SMG class in Warzone with secret attachment tuning that beats every meta.'
+    hashtags: ['#voyakkt3', '#warzone', '#warzonemeta', '#season6', '#rebirthisland'],
+    promptIdea: 'The absolute S-tier Voyak KT-3 assault rifle class with -8% recoil dominating Warzone Season 6.'
   },
   {
     id: 'trend-cod-2',
     category: 'gaming',
-    title: 'Pro Movement Secret That Breaks Cameras in Rebirth Island',
-    velocity: '🚀 4.1M Views/Day',
-    velocityType: 'breakout',
-    growth: '+380% this week',
-    hookPattern: 'Camera Breaker / Pro Movement',
-    recommendedAudio: 'Aggressive Cyber Trap / Bass Drop',
+    title: 'The Broken Season 6 VMP Build Wiping Rebirth Island in 400ms',
+    velocity: '🔥 8.4M Views/Day',
+    velocityType: 'viral',
+    growth: '+740% this week',
+    freshness: '🔴 LIVE • S6 Meta',
+    hookPattern: 'Fastest TTK / Room-Clearing SMG',
+    recommendedAudio: 'Dark 808 Drill (140 BPM - Heavy Sub-Bass & Wipes)',
+    audioId: 'dark_808_drill',
+    tiktokAudioQuery: 'Dark 808 Drill Warzone Montage',
     soundMood: 'Sweaty & High Octane',
-    hashtags: ['#warzonemovement', '#warzone', '#codmovement', '#rebirthclips', '#callofduty'],
-    promptIdea: 'The snaking and camera-breaking movement trick that top Warzone pros use to win 1v4s.'
+    hashtags: ['#vmp', '#vmploadout', '#warzoneclips', '#season6meta', '#rebirth'],
+    promptIdea: 'The broken S-tier VMP SMG loadout in Warzone Season 6 that melts enemies in 400ms.'
   },
   {
     id: 'trend-cod-3',
     category: 'gaming',
-    title: 'Turn OFF This Default Controller Setting for Instant Aimbot',
-    velocity: '⚡ 4.8M Views/Day',
-    velocityType: 'viral',
-    growth: '+450% this week',
-    hookPattern: 'Hidden Setting / Rotational Aim Assist',
-    recommendedAudio: 'Dark Synthwave / Fast Electronic',
-    soundMood: 'Technical & Game-Changing',
-    hashtags: ['#warzonesettings', '#aimassist', '#controllerplayer', '#codsettings', '#warzonetips'],
-    promptIdea: 'The hidden deadzone and aim assist curve setting that makes rotational tracking effortless.'
+    title: 'The Zero-Recoil MPC-25 Setup Taking Over Ranked Resurgence',
+    velocity: '🚀 6.1M Views/Day',
+    velocityType: 'breakout',
+    growth: '+590% this week',
+    freshness: '⚡ SURGING • S6 Meta',
+    hookPattern: 'Laser Steady / Max Mobility',
+    recommendedAudio: 'Sigma 808 Cinematic Drop (128 BPM - 1v4 Clutch)',
+    audioId: 'sigma_drop',
+    tiktokAudioQuery: 'Sigma 808 Drop Warzone Clutch',
+    soundMood: 'Competitive & Laser Accurate',
+    hashtags: ['#mpc25', '#warzonebuilds', '#rankedresurgence', '#season6', '#codmeta'],
+    promptIdea: 'The zero-recoil MPC-25 SMG build taking over Warzone Season 6 Ranked Resurgence.'
   },
   {
     id: 'trend-cod-4',
     category: 'gaming',
-    title: 'How I 1v4 Wiped a Full Squad of Iris (Tactical Breakdown)',
-    velocity: '🔥 3.9M Views/Day',
-    velocityType: 'breakout',
-    growth: '+290% this week',
-    hookPattern: 'Live Clutch Breakdown / IQ Play',
-    recommendedAudio: 'Suspense Drone into Heavy Phonk Drop',
-    soundMood: 'Clutch & Suspenseful',
-    hashtags: ['#warzoneclutch', '#warzoneplays', '#warzoneclips', '#rebirthclutch', '#gamertok'],
-    promptIdea: 'Step-by-step tactical breakdown of a 1v4 squad wipe on Rebirth Island showing high IQ positioning.'
+    title: 'The 1-Shot Strider 300 Sniper Class Season 6 Pros Secretly Run',
+    velocity: '🔥 6.9M Views/Day',
+    velocityType: 'viral',
+    growth: '+650% this week',
+    freshness: '🔴 LIVE • S6 Meta',
+    hookPattern: '1-Shot Down / Max Bullet Velocity',
+    recommendedAudio: 'Montage Distortion Guitar (142 BPM - Sniper Headshots)',
+    audioId: 'guitar_montage',
+    tiktokAudioQuery: 'Distortion Guitar Rock Phonk',
+    soundMood: 'Sniper Clips & Headshots',
+    hashtags: ['#strider300', '#warzonesniper', '#oneshotsniper', '#season6', '#quickscope'],
+    promptIdea: 'The fastest ADS 1-shot Strider 300 sniper class dominating Warzone Season 6.'
   },
   {
     id: 'trend-cod-5',
     category: 'gaming',
-    title: 'The Funniest Hot Mic Death Comms That Made Him Rage Quit',
-    velocity: '🔥 6.2M Views/Day',
-    velocityType: 'viral',
-    growth: '+580% this week',
-    hookPattern: 'Rage Death Comms / Funny Reactions',
-    recommendedAudio: 'Upbeat Meme Bass / Record Scratch',
-    soundMood: 'Hilarious & Chaotic',
-    hashtags: ['#deathcomms', '#warzonefunny', '#codrage', '#warzonememes', '#funnymoments'],
-    promptIdea: 'Hilarious compilation of hot mic death comms after executing sweats and campers.'
+    title: 'The Season 6 DS20 Mirage Setup With Literally Zero Screen Shake',
+    velocity: '🚀 5.2M Views/Day',
+    velocityType: 'breakout',
+    growth: '+480% this week',
+    freshness: '⚡ SURGING • S6 Meta',
+    hookPattern: 'Zero Bounce / Sniper Support',
+    recommendedAudio: 'Cyber Combat Rush (148 BPM - Fast Adrenaline)',
+    audioId: 'cyber_rush',
+    tiktokAudioQuery: 'Cyber Rush Fast Electronic Bass',
+    soundMood: 'Clean & Technical',
+    hashtags: ['#ds20mirage', '#warzoneloadout', '#season6meta', '#codwarzone'],
+    promptIdea: 'The ultra-stable DS20 Mirage assault rifle build with zero screen shake in Warzone Season 6.'
   },
   {
     id: 'trend-cod-6',
     category: 'gaming',
-    title: 'The Secret High-Ground Spot in Rebirth Nobody Checks',
-    velocity: '🚀 3.2M Views/Day',
-    velocityType: 'breakout',
-    growth: '+310% this week',
-    hookPattern: 'Hidden Map Spot / Free Team Wipes',
-    recommendedAudio: 'Mystery Synth into Phonk Drop',
-    soundMood: 'Sneaky & Rewarding',
-    hashtags: ['#rebirthisland', '#warzonehacks', '#warzoneglitch', '#codtips', '#warzonelocations'],
-    promptIdea: 'Show a little-known parkour jump spot on Rebirth Island that gives unfair line-of-sight for squad wipes.'
+    title: 'Turn ON "Headphones Bass Boost" for Legal Footstep Audio Wallhacks',
+    velocity: '⚡ 6.5M Views/Day',
+    velocityType: 'hot',
+    growth: '+530% this week',
+    freshness: '🔴 LIVE • S6 Meta',
+    hookPattern: 'Footstep Amplification / Audio EQ Setting',
+    recommendedAudio: 'Slowed + Reverb Phonk (115 BPM - Aesthetic Vibe)',
+    audioId: 'slowed_reverb_phonk',
+    tiktokAudioQuery: 'Slowed Reverb Phonk Drift',
+    soundMood: 'Game-Changing Audio Tips',
+    hashtags: ['#warzoneaudiosettings', '#footsteps', '#warzonetips', '#season6', '#codsettings'],
+    promptIdea: 'The secret Headphones Bass Boost and Windows Loudness EQ audio settings that make enemy footsteps 10x louder in Warzone Season 6.'
   },
   {
     id: 'trend-1',
@@ -289,8 +307,8 @@ const TRENDS_DATA = [
   }
 ];
 
-// REAL-TIME NEWS & RSS HEADLINE FETCHER
-async function fetchLiveNewsHeadlines(query = 'Warzone Call of Duty meta') {
+// REAL-TIME NEWS & RSS HEADLINE FETCHER (STRICT SEASON 6 FILTER)
+async function fetchLiveNewsHeadlines(query = 'Warzone Season 6 meta loadout') {
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 3500);
@@ -309,7 +327,13 @@ async function fetchLiveNewsHeadlines(query = 'Warzone Call of Duty meta') {
       if (tm && tm[1]) {
         let clean = tm[1].replace(/ - [^-]+$/, '').trim();
         clean = clean.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-        if (clean.length > 15 && !clean.toLowerCase().includes('google news')) {
+
+        // STRICT FILTER: Discard outdated seasons, fake rumors, and obsolete guns
+        const isOutdated = /season\s*[1-5]\b/i.test(clean) || 
+                           /black ops 7/i.test(clean) || 
+                           /\b(c9|krig|jackal|model l|superi|fjx|striker 9|iso|lachmann|prowler)\b/i.test(clean);
+
+        if (!isOutdated && clean.length > 15 && !clean.toLowerCase().includes('google news')) {
           headlines.push(clean);
         }
       }
@@ -320,78 +344,98 @@ async function fetchLiveNewsHeadlines(query = 'Warzone Call of Duty meta') {
   }
 }
 
-// DYNAMIC LIVE TREND GENERATOR (REAL-TIME FLUCTUATION, LIVE NEWS & AUDIOS)
+// DYNAMIC LIVE TREND GENERATOR (VERIFIED WARZONE SEASON 6 METAS & VIRAL AUDIOS)
 function generateLiveDynamicTrends(category = 'all', liveHeadlines = []) {
   const gamingTemplates = [
     {
-      title: "The Silent Buff to the Jackal PDW That Beats Every SMG",
-      growth: "+780% this week",
-      hook: "Silent Nerf & Secret Buff",
+      title: "The S-Tier Voyak KT-3 Build Dominating Warzone Season 6",
+      growth: "+820% this week",
+      hook: "Laser Beam / Season 6 Recoil Buff",
       audio: "Brazilian Phonk (136 BPM) / Fast Drift",
       audioId: "phonk_drift",
       tiktokAudioQuery: "Brazilian Phonk Fast Drift Kordhell",
-      hashtags: ["#warzone", "#warzoneloadout", "#jackalpdw", "#rebirthisland", "#bo6"],
-      prompt: "The silent buff to the Jackal PDW that beats every SMG in Warzone Season 1."
+      hashtags: ["#voyakkt3", "#warzone", "#warzonemeta", "#season6", "#rebirthisland"],
+      prompt: "The absolute S-tier Voyak KT-3 assault rifle class with -8% recoil dominating Warzone Season 6."
     },
     {
-      title: "Pro Movement Trick: Omnimovement Slide-Cancel Camera Breaker",
-      growth: "+620% this week",
-      hook: "Camera Breaker / Pro Setting",
+      title: "The Broken Season 6 VMP Build Wiping Rebirth Island in 400ms",
+      growth: "+740% this week",
+      hook: "Fastest TTK / Room-Clearing SMG",
       audio: "Dark 808 Drill (140 BPM - Heavy Sub-Bass & Wipes)",
       audioId: "dark_808_drill",
       tiktokAudioQuery: "Dark 808 Drill Warzone Montage",
-      hashtags: ["#warzonemovement", "#omnimovement", "#codwarzone", "#rebirthisland", "#gamingtips"],
-      prompt: "How to break cameras with omnimovement in Rebirth Island."
+      hashtags: ["#vmp", "#vmploadout", "#warzoneclips", "#season6meta", "#rebirth"],
+      prompt: "The broken S-tier VMP SMG loadout in Warzone Season 6 that melts enemies in 400ms."
     },
     {
-      title: "The Zero-Recoil Model L Setup Dominating Long Range",
-      growth: "+540% this week",
-      hook: "Laser Beam / Zero Recoil",
+      title: "The Zero-Recoil MPC-25 Setup Taking Over Ranked Resurgence",
+      growth: "+590% this week",
+      hook: "Laser Steady / Max Mobility",
+      audio: "Sigma 808 Cinematic Drop (128 BPM - 1v4 Clutch)",
+      audioId: "sigma_drop",
+      tiktokAudioQuery: "Sigma 808 Drop Warzone Clutch",
+      hashtags: ["#mpc25", "#warzonebuilds", "#rankedresurgence", "#season6", "#codmeta"],
+      prompt: "The zero-recoil MPC-25 SMG build taking over Warzone Season 6 Ranked Resurgence."
+    },
+    {
+      title: "The 1-Shot Strider 300 Sniper Class Season 6 Pros Secretly Run",
+      growth: "+650% this week",
+      hook: "1-Shot Down / Max Bullet Velocity",
       audio: "Montage Distortion Guitar (142 BPM - Sniper Headshots)",
       audioId: "guitar_montage",
       tiktokAudioQuery: "Distortion Guitar Rock Phonk",
-      hashtags: ["#modell", "#warzonemeta", "#codloadout", "#longrange", "#warzoneclips"],
-      prompt: "The zero-recoil Model L assault rifle class that beams cross-map."
+      hashtags: ["#strider300", "#warzonesniper", "#oneshotsniper", "#season6", "#quickscope"],
+      prompt: "The fastest ADS 1-shot Strider 300 sniper class dominating Warzone Season 6."
     },
     {
-      title: "This 1v4 Clutch Audio Cue Tells You Exactly Where They Are",
-      growth: "+490% this week",
-      hook: "Secret Audio Setting",
-      audio: "Sigma 808 Cinematic Drop (128 BPM - 1v4 Clutch)",
-      audioId: "sigma_drop",
-      tiktokAudioQuery: "Sigma 808 Cinematic Bass Drop",
-      hashtags: ["#warzoneaudiosettings", "#1v4clutch", "#codtactics", "#rebirth"],
-      prompt: "The secret audio EQ setting in Warzone that makes enemy footsteps 10x louder."
-    },
-    {
-      title: "The 1-Shot LR 7.62 Sniper Class That Wipes Squads in 3 Seconds",
-      growth: "+830% this week",
-      hook: "One-Shot Bullet Velocity",
-      audio: "Hyper-Drive Hardstyle (150 BPM - Camera Breaker)",
-      audioId: "hyper_hardstyle",
-      tiktokAudioQuery: "Hardstyle Tevvez Kick Adrenaline",
-      hashtags: ["#lr762", "#sniper", "#warzoneclips", "#oneshotsniper", "#quickscope"],
-      prompt: "The fastest ADS 1-shot sniper loadout in Warzone."
-    },
-    {
-      title: "The Secret Hipfire C9 Build That Wins Every Close-Range Fight",
-      growth: "+410% this week",
-      hook: "Never ADS / Hipfire Spray",
-      audio: "Slowed + Reverb Phonk (115 BPM - Aesthetic Vibe)",
-      audioId: "slowed_reverb_phonk",
-      tiktokAudioQuery: "Slowed Reverb Phonk Drift",
-      hashtags: ["#c9smg", "#hipfirebuild", "#warzonemeta", "#codclips"],
-      prompt: "The broken hipfire C9 build in Warzone where you never have to aim down sights."
-    },
-    {
-      title: "The Broken Krig C Class With Zero Damage Dropoff Cross-Map",
-      growth: "+670% this week",
-      hook: "Hidden Velocity Barrel",
+      title: "The Season 6 DS20 Mirage Setup With Literally Zero Screen Shake",
+      growth: "+480% this week",
+      hook: "Zero Bounce / Sniper Support",
       audio: "Cyber Combat Rush (148 BPM - Fast Adrenaline)",
       audioId: "cyber_rush",
       tiktokAudioQuery: "Cyber Rush Fast Electronic Bass",
-      hashtags: ["#krigc", "#warzonemeta", "#blackops6", "#codclips"],
-      prompt: "The secret Krig C attachments that remove damage dropoff across Rebirth Island."
+      hashtags: ["#ds20mirage", "#warzoneloadout", "#season6meta", "#codwarzone"],
+      prompt: "The ultra-stable DS20 Mirage assault rifle build with zero screen shake in Warzone Season 6."
+    },
+    {
+      title: "The High-Mobility Ryden 45K SMG Pocket Rocket for Fast Squad Wipes",
+      growth: "+610% this week",
+      hook: "Max Strafe Speed / Sprint-to-Fire",
+      audio: "Hyper-Drive Hardstyle (150 BPM - Camera Breaker)",
+      audioId: "hyper_hardstyle",
+      tiktokAudioQuery: "Hardstyle Tevvez Kick Adrenaline",
+      hashtags: ["#ryden45k", "#rev46", "#warzonemovement", "#season6", "#rebirthisland"],
+      prompt: "The highest strafe speed Ryden 45K pocket rocket build for aggressive Resurgence players in Season 6."
+    },
+    {
+      title: "The High-Damage TR51 Para Long-Range Meta Laser in Season 6",
+      growth: "+530% this week",
+      hook: "Extreme Range / High Bullet Velocity",
+      audio: "Brazilian Phonk (136 BPM) / Fast Drift",
+      audioId: "phonk_drift",
+      tiktokAudioQuery: "Brazilian Phonk Fast Drift",
+      hashtags: ["#tr51para", "#warzonemeta", "#season6", "#longrange", "#codloadout"],
+      prompt: "The high-damage TR51 Para assault rifle setup with zero damage dropoff in Warzone Season 6."
+    },
+    {
+      title: "Turn ON 'Headphones Bass Boost' for Legal Footstep Audio Wallhacks",
+      growth: "+570% this week",
+      hook: "Footstep Amplification / Audio EQ Setting",
+      audio: "Slowed + Reverb Phonk (115 BPM - Aesthetic Vibe)",
+      audioId: "slowed_reverb_phonk",
+      tiktokAudioQuery: "Slowed Reverb Phonk Drift",
+      hashtags: ["#warzoneaudiosettings", "#footsteps", "#warzonetips", "#season6", "#codsettings"],
+      prompt: "The secret Headphones Bass Boost and Windows Loudness EQ audio settings that make enemy footsteps 10x louder in Warzone Season 6."
+    },
+    {
+      title: "Turn ON 'Slide Only' & 'Auto Tac-Sprint' for Instant Camera Breaks",
+      growth: "+690% this week",
+      hook: "No Dive Delay / Omnimovement",
+      audio: "Dark 808 Drill (140 BPM - Heavy Sub-Bass & Wipes)",
+      audioId: "dark_808_drill",
+      tiktokAudioQuery: "Dark 808 Drill Warzone Montage",
+      hashtags: ["#warzonemovement", "#omnimovement", "#slidecancel", "#season6", "#rebirthisland"],
+      prompt: "The exact movement settings in Season 6 that remove dolphin dive delays and enable instant slide-cancels."
     }
   ];
 
@@ -552,9 +596,21 @@ app.post('/api/trends/refresh', async (req, res) => {
           ? `Current real-time breaking headlines today: \n${liveHeadlines.map(h => `- ${h}`).join('\n')}` 
           : '';
 
-        const systemPrompt = `You are an elite viral trend intelligence system monitoring TikTok, YouTube Shorts, and Call of Duty Warzone / Black Ops 6 algorithms.
+        const systemPrompt = `You are an elite viral trend intelligence system monitoring TikTok, YouTube Shorts, and Call of Duty Warzone Season 6 algorithms.
 Generate 6 REAL-TIME, high-velocity breakout viral trends right now for category: "${category}".
 ${headlineContext}
+
+CRITICAL ACCURACY GUARDRAIL:
+The current active game is strictly Warzone SEASON 6.
+The verified S-Tier meta weapons right now are:
+- Voyak KT-3 (#1 S-Tier Assault Rifle with -8% recoil buff)
+- VMP (#1 S-Tier Close-Range SMG with fastest TTK)
+- MPC-25 (S-Tier steady SMG)
+- Strider 300 (S-Tier 1-shot sniper)
+- DS20 Mirage (S-Tier zero-screen-shake support AR)
+- Ryden 45K (Max mobility pocket rocket SMG)
+- TR51 Para (Long range laser AR)
+DO NOT mention outdated past seasons (Season 1 to 5) or obsolete weapons (C9, Krig C, Model L, Jackal PDW, Superi).
 Ensure every trend has:
 - Hyper-specific topic title (e.g. "The Broken Zero-Recoil Jackal PDW Setup in Rebirth", "Dark Psychology Secrets of FBI Interrogators", "The 140 BPM Drift Phonk Meta That Quadrupled Watch Time").
 - Real viral velocity (e.g. "🔥 6.8M Views/Day" or "🚀 4.5M Views/Day").
