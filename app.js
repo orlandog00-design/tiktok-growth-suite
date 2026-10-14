@@ -6,7 +6,13 @@ let currentTrends = [];
 let currentScript = null;
 let selectedHookIndex = 0;
 
-// Video Clipper State
+// Video Clipper State & Multi-Clip Timeline Reel
+let videoClips = []; // Array of { id, filename, videoUrl, videoPath, file, duration, startTime, endTime, width, height }
+let activeClipIndex = 0;
+let isPreviewingTrimOnly = false;
+let isTimelineDragging = false;
+let dragHandleType = null;
+
 let activeVideo = {
   path: null,
   url: null,
@@ -1158,39 +1164,507 @@ function setVideoSource(data) {
     url: data.videoUrl,
     duration: data.duration,
     width: data.width,
-    height: data.height
+    height: data.height,
+    file: data.file || null
   };
 
+  // Manage videoClips sequence array
+  const defaultTrimEnd = Math.min(10, data.duration);
+  if (videoClips.length === 0) {
+    videoClips.push({
+      id: 'clip_' + Date.now(),
+      filename: data.filename || 'Clip 1',
+      videoUrl: data.videoUrl,
+      videoPath: data.videoPath,
+      file: data.file || null,
+      duration: data.duration,
+      startTime: 0,
+      endTime: defaultTrimEnd,
+      width: data.width,
+      height: data.height
+    });
+    activeClipIndex = 0;
+  } else if (activeClipIndex >= 0 && activeClipIndex < videoClips.length) {
+    videoClips[activeClipIndex] = {
+      ...videoClips[activeClipIndex],
+      filename: data.filename || videoClips[activeClipIndex].filename,
+      videoUrl: data.videoUrl,
+      videoPath: data.videoPath,
+      file: data.file || null,
+      duration: data.duration,
+      width: data.width,
+      height: data.height,
+      startTime: 0,
+      endTime: defaultTrimEnd
+    };
+  }
+
   const player = document.getElementById('source-video-player');
-  player.src = data.videoUrl;
-  player.load();
+  if (player) {
+    player.src = data.videoUrl;
+    player.load();
+  }
 
   const label = document.getElementById('upload-label');
   if (label && data.filename) {
     label.textContent = `Active: ${data.filename.length > 25 ? data.filename.slice(0, 22) + '...' : data.filename}`;
   }
 
-  document.getElementById('source-meta-badge').textContent = `${data.filename ? data.filename + ' • ' : ''}${data.width}x${data.height} • ${data.duration}s`;
+  const titleEl = document.getElementById('source-preview-title');
+  if (titleEl && data.filename) {
+    titleEl.textContent = `Clip ${activeClipIndex + 1}: ${data.filename.length > 25 ? data.filename.slice(0, 22) + '...' : data.filename}`;
+  }
+
+  const badgeEl = document.getElementById('source-meta-badge');
+  if (badgeEl) {
+    badgeEl.textContent = `${data.filename ? data.filename + ' • ' : ''}${data.width}x${data.height} • ${data.duration}s`;
+  }
 
   // Set trimmer default bounds
   const startInput = document.getElementById('trim-start');
   const endInput = document.getElementById('trim-end');
 
-  startInput.max = data.duration;
-  startInput.value = '0.0';
+  if (startInput) {
+    startInput.max = data.duration;
+    startInput.value = '0.0';
+  }
+  if (endInput) {
+    endInput.max = data.duration;
+    endInput.value = defaultTrimEnd.toFixed(1);
+  }
 
-  endInput.max = data.duration;
-  endInput.value = Math.min(10, data.duration).toFixed(1);
-
+  renderClipSequenceReel();
   updateTrimTimes();
+  setupPlayerTimelineEvents();
 }
 
+// MULTI-CLIP SEQUENCE REEL MANAGEMENT (CAPCUT-STYLE)
+async function handleAddAnotherClip(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  try {
+    const localUrl = URL.createObjectURL(file);
+    const tempVideo = document.createElement('video');
+    tempVideo.preload = 'metadata';
+    tempVideo.src = localUrl;
+
+    tempVideo.onloadedmetadata = () => {
+      const duration = Math.round(tempVideo.duration) || 15;
+      const width = tempVideo.videoWidth || 1920;
+      const height = tempVideo.videoHeight || 1080;
+
+      const newClip = {
+        id: 'clip_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        filename: file.name,
+        videoUrl: localUrl,
+        videoPath: file.name,
+        file: file,
+        duration: duration,
+        startTime: 0,
+        endTime: Math.min(10, duration),
+        width: width,
+        height: height
+      };
+
+      videoClips.push(newClip);
+      activeClipIndex = videoClips.length - 1;
+      selectActiveClip(activeClipIndex);
+      showToast(`Added "${file.name}" to sequence reel! (${videoClips.length} total clips)`, 'success');
+    };
+
+    tempVideo.onerror = () => {
+      const newClip = {
+        id: 'clip_' + Date.now(),
+        filename: file.name,
+        videoUrl: localUrl,
+        videoPath: file.name,
+        file: file,
+        duration: 15,
+        startTime: 0,
+        endTime: 10,
+        width: 1920,
+        height: 1080
+      };
+      videoClips.push(newClip);
+      activeClipIndex = videoClips.length - 1;
+      selectActiveClip(activeClipIndex);
+      showToast(`Added "${file.name}" to sequence reel!`, 'success');
+    };
+  } catch (err) {
+    console.error('Error adding clip:', err);
+    showToast('Failed to add clip: ' + err.message, 'error');
+  }
+}
+
+function selectActiveClip(index) {
+  if (index < 0 || index >= videoClips.length) return;
+  activeClipIndex = index;
+  const clip = videoClips[index];
+
+  activeVideo = {
+    path: clip.videoPath,
+    url: clip.videoUrl,
+    duration: clip.duration,
+    width: clip.width,
+    height: clip.height,
+    file: clip.file || null
+  };
+
+  const player = document.getElementById('source-video-player');
+  if (player && player.src !== clip.videoUrl) {
+    player.src = clip.videoUrl;
+    player.load();
+  }
+
+  const titleEl = document.getElementById('source-preview-title');
+  if (titleEl) {
+    titleEl.textContent = `Clip ${index + 1}: ${clip.filename.length > 22 ? clip.filename.slice(0, 20) + '...' : clip.filename}`;
+  }
+
+  const badgeEl = document.getElementById('source-meta-badge');
+  if (badgeEl) {
+    badgeEl.textContent = `${clip.filename} • ${clip.width}x${clip.height} • ${clip.duration}s`;
+  }
+
+  const startInput = document.getElementById('trim-start');
+  const endInput = document.getElementById('trim-end');
+  if (startInput) {
+    startInput.max = clip.duration;
+    startInput.value = (clip.startTime || 0).toFixed(1);
+  }
+  if (endInput) {
+    endInput.max = clip.duration;
+    endInput.value = (clip.endTime || Math.min(10, clip.duration)).toFixed(1);
+  }
+
+  renderClipSequenceReel();
+  updateTrimTimes();
+  setupPlayerTimelineEvents();
+}
+
+function removeClip(index, event) {
+  if (event) event.stopPropagation();
+  if (videoClips.length <= 1) {
+    showToast('Cannot remove the only clip. Use "Start Fresh" to clear everything.', 'info');
+    return;
+  }
+  const removed = videoClips.splice(index, 1)[0];
+  if (activeClipIndex >= videoClips.length) {
+    activeClipIndex = videoClips.length - 1;
+  }
+  selectActiveClip(activeClipIndex);
+  showToast(`Removed "${removed.filename}" from reel`, 'info');
+}
+
+function moveClip(index, direction, event) {
+  if (event) event.stopPropagation();
+  const targetIndex = index + direction;
+  if (targetIndex < 0 || targetIndex >= videoClips.length) return;
+
+  const temp = videoClips[index];
+  videoClips[index] = videoClips[targetIndex];
+  videoClips[targetIndex] = temp;
+
+  activeClipIndex = targetIndex;
+  selectActiveClip(activeClipIndex);
+}
+
+function renderClipSequenceReel() {
+  const container = document.getElementById('multi-clip-reel-container');
+  const countBadge = document.getElementById('multi-clip-count-badge');
+  const durationBadge = document.getElementById('reel-total-duration-badge');
+  if (!container) return;
+
+  if (videoClips.length === 0) {
+    container.innerHTML = `<div class="text-[11px] text-slate-500 italic py-1">Upload a video or click "Load Demo Gameplay" to start your sequence reel.</div>`;
+    if (countBadge) countBadge.textContent = '0 Clips';
+    if (durationBadge) durationBadge.textContent = 'Reel: 0.0s';
+    return;
+  }
+
+  let totalReelDuration = 0;
+  videoClips.forEach(c => {
+    const start = parseFloat(c.startTime) || 0;
+    const end = parseFloat(c.endTime) || c.duration;
+    totalReelDuration += Math.max(0.5, end - start);
+  });
+
+  if (countBadge) {
+    countBadge.textContent = `${videoClips.length} ${videoClips.length === 1 ? 'Clip' : 'Clips'}`;
+  }
+  if (durationBadge) {
+    durationBadge.textContent = `Reel: ${totalReelDuration.toFixed(1)}s Total`;
+  }
+
+  container.innerHTML = videoClips.map((clip, idx) => {
+    const isActive = idx === activeClipIndex;
+    const clipStart = parseFloat(clip.startTime) || 0;
+    const clipEnd = parseFloat(clip.endTime) || clip.duration;
+    const trimLen = Math.max(0.5, clipEnd - clipStart).toFixed(1);
+
+    return `
+      <div onclick="selectActiveClip(${idx})" class="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl border transition cursor-pointer select-none ${isActive ? 'bg-brand-cyan/20 border-brand-cyan shadow-lg shadow-cyan-500/10' : 'bg-brand-card/90 border-brand-border hover:border-slate-500 text-slate-400'}">
+        <div class="flex items-center gap-1.5">
+          <span class="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-black ${isActive ? 'bg-brand-cyan text-black' : 'bg-white/10 text-slate-300'}">
+            ${idx + 1}
+          </span>
+          <div class="max-w-[120px] truncate text-[11px] font-bold ${isActive ? 'text-white' : 'text-slate-300'}">
+            ${clip.filename}
+          </div>
+        </div>
+
+        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/60 ${isActive ? 'text-cyan-300 border border-brand-cyan/40 font-bold' : 'text-slate-400 border border-brand-border'}">
+          ${trimLen}s
+        </span>
+
+        <div class="flex items-center gap-1 ml-1">
+          ${idx > 0 ? `<button type="button" onclick="moveClip(${idx}, -1, event)" class="p-1 hover:text-white rounded hover:bg-white/10 transition" title="Move Left"><i data-lucide="chevron-left" class="w-3 h-3"></i></button>` : ''}
+          ${idx < videoClips.length - 1 ? `<button type="button" onclick="moveClip(${idx}, 1, event)" class="p-1 hover:text-white rounded hover:bg-white/10 transition" title="Move Right"><i data-lucide="chevron-right" class="w-3 h-3"></i></button>` : ''}
+          ${videoClips.length > 1 ? `<button type="button" onclick="removeClip(${idx}, event)" class="p-1 hover:text-brand-red rounded hover:bg-white/10 transition" title="Remove clip"><i data-lucide="x" class="w-3 h-3"></i></button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  lucide.createIcons();
+}
+
+// CAPCUT-STYLE VISUAL TIMELINE & TRIM TRACK ENGINE
 function updateTrimTimes() {
-  const start = parseFloat(document.getElementById('trim-start').value) || 0;
-  const end = parseFloat(document.getElementById('trim-end').value) || 10;
+  const startInput = document.getElementById('trim-start');
+  const endInput = document.getElementById('trim-end');
+  const total = activeVideo?.duration || 15;
+
+  let start = parseFloat(startInput?.value) || 0;
+  let end = parseFloat(endInput?.value) || Math.min(10, total);
+
+  // Guard bounds
+  if (start < 0) start = 0;
+  if (end > total) end = total;
+  if (start >= end) start = Math.max(0, end - 0.5);
+
   const diff = Math.max(0.5, end - start);
 
-  document.getElementById('trim-duration-badge').textContent = `Clip Length: ${diff.toFixed(1)}s`;
+  const badge1 = document.getElementById('trim-duration-badge');
+  if (badge1) badge1.textContent = `Clip Length: ${diff.toFixed(1)}s`;
+
+  const badge2 = document.getElementById('visual-trim-length-badge');
+  if (badge2) badge2.textContent = `✂️ Trimmed: ${diff.toFixed(1)}s`;
+
+  // Update current active clip object in sequence
+  if (videoClips[activeClipIndex]) {
+    videoClips[activeClipIndex].startTime = start;
+    videoClips[activeClipIndex].endTime = end;
+  }
+
+  updateVisualTimeline(start, end, total);
+}
+
+function updateVisualTimeline(start, end, total) {
+  if (!total || total <= 0) total = 15;
+  const leftPct = Math.max(0, Math.min(100, (start / total) * 100));
+  const rightPct = Math.max(0, Math.min(100, ((total - end) / total) * 100));
+  const widthPct = Math.max(1, 100 - leftPct - rightPct);
+
+  const dimLeft = document.getElementById('timeline-dim-left');
+  const dimRight = document.getElementById('timeline-dim-right');
+  const activeRegion = document.getElementById('timeline-active-region');
+  const regionLabel = document.getElementById('timeline-region-label');
+  const maxLabel = document.getElementById('timeline-max-label');
+
+  if (dimLeft) dimLeft.style.width = `${leftPct}%`;
+  if (dimRight) dimRight.style.width = `${rightPct}%`;
+  if (activeRegion) {
+    activeRegion.style.left = `${leftPct}%`;
+    activeRegion.style.width = `${widthPct}%`;
+  }
+  if (regionLabel) {
+    regionLabel.textContent = `${(end - start).toFixed(1)}s`;
+  }
+  if (maxLabel) {
+    maxLabel.textContent = `${Math.round(total)}s`;
+  }
+
+  // Update ticks layer
+  const ticksLayer = document.getElementById('timeline-ticks-layer');
+  if (ticksLayer) {
+    ticksLayer.innerHTML = `
+      <span>0s</span>
+      <span>${Math.round(total * 0.25)}s</span>
+      <span>${Math.round(total * 0.5)}s</span>
+      <span>${Math.round(total * 0.75)}s</span>
+      <span>${Math.round(total)}s</span>
+    `;
+  }
+}
+
+function setupPlayerTimelineEvents() {
+  const player = document.getElementById('source-video-player');
+  if (!player) return;
+
+  player.ontimeupdate = () => {
+    const cur = player.currentTime || 0;
+    const dur = player.duration || activeVideo.duration || 15;
+
+    const pct = Math.max(0, Math.min(100, (cur / dur) * 100));
+    const playhead = document.getElementById('timeline-playhead');
+    if (playhead) playhead.style.left = `${pct}%`;
+
+    const timeLabel = document.getElementById('timeline-current-time');
+    if (timeLabel) {
+      timeLabel.textContent = `${formatTimestamp(cur)} / ${formatTimestamp(dur)}`;
+    }
+
+    // If previewing trimmed segment only, loop within start and end
+    if (isPreviewingTrimOnly) {
+      const end = parseFloat(document.getElementById('trim-end')?.value) || dur;
+      const start = parseFloat(document.getElementById('trim-start')?.value) || 0;
+      if (cur >= end) {
+        player.currentTime = start;
+        player.play().catch(() => {});
+      }
+    }
+  };
+}
+
+function formatTimestamp(sec) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${s < 10 ? '0' : ''}${s}`;
+}
+
+function handleTimelineTrackClick(event) {
+  if (isTimelineDragging) return;
+  const track = document.getElementById('visual-timeline-track');
+  const player = document.getElementById('source-video-player');
+  if (!track || !player) return;
+
+  const rect = track.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+  const dur = player.duration || activeVideo.duration || 15;
+
+  player.currentTime = ratio * dur;
+}
+
+function startHandleDrag(event, type) {
+  event.stopPropagation();
+  event.preventDefault();
+  isTimelineDragging = true;
+  dragHandleType = type;
+
+  const track = document.getElementById('visual-timeline-track');
+  const total = activeVideo?.duration || 15;
+
+  const onMouseMove = (e) => {
+    if (!isTimelineDragging || !track) return;
+    const rect = track.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const newTime = parseFloat((ratio * total).toFixed(1));
+
+    const startInput = document.getElementById('trim-start');
+    const endInput = document.getElementById('trim-end');
+
+    if (dragHandleType === 'start') {
+      const currentEnd = parseFloat(endInput.value) || total;
+      if (newTime >= 0 && newTime < currentEnd - 0.5) {
+        startInput.value = newTime.toFixed(1);
+        const player = document.getElementById('source-video-player');
+        if (player) player.currentTime = newTime;
+        updateTrimTimes();
+      }
+    } else if (dragHandleType === 'end') {
+      const currentStart = parseFloat(startInput.value) || 0;
+      if (newTime <= total && newTime > currentStart + 0.5) {
+        endInput.value = newTime.toFixed(1);
+        const player = document.getElementById('source-video-player');
+        if (player) player.currentTime = newTime;
+        updateTrimTimes();
+      }
+    }
+  };
+
+  const onMouseUp = () => {
+    isTimelineDragging = false;
+    dragHandleType = null;
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+    renderClipSequenceReel();
+  };
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+}
+
+function setTrimStartToCurrentTime() {
+  const player = document.getElementById('source-video-player');
+  if (!player) return;
+  const cur = parseFloat((player.currentTime || 0).toFixed(1));
+  const endInput = document.getElementById('trim-end');
+  const end = parseFloat(endInput?.value) || activeVideo.duration;
+
+  if (cur >= end) {
+    showToast('Start time must be before end time', 'info');
+    return;
+  }
+  const startInput = document.getElementById('trim-start');
+  if (startInput) {
+    startInput.value = cur.toFixed(1);
+    updateTrimTimes();
+    showToast(`Set trim start to ${cur}s`, 'success');
+  }
+}
+
+function setTrimEndToCurrentTime() {
+  const player = document.getElementById('source-video-player');
+  if (!player) return;
+  const cur = parseFloat((player.currentTime || 0).toFixed(1));
+  const startInput = document.getElementById('trim-start');
+  const start = parseFloat(startInput?.value) || 0;
+
+  if (cur <= start) {
+    showToast('End time must be after start time', 'info');
+    return;
+  }
+  const endInput = document.getElementById('trim-end');
+  if (endInput) {
+    endInput.value = cur.toFixed(1);
+    updateTrimTimes();
+    showToast(`Set trim end to ${cur}s`, 'success');
+  }
+}
+
+function resetFullClipTrim() {
+  const total = activeVideo?.duration || 15;
+  const startInput = document.getElementById('trim-start');
+  const endInput = document.getElementById('trim-end');
+  if (startInput) startInput.value = '0.0';
+  if (endInput) endInput.value = total.toFixed(1);
+  updateTrimTimes();
+  showToast('Reset trim to full clip duration', 'info');
+}
+
+function previewTrimmedOnly() {
+  const player = document.getElementById('source-video-player');
+  const btn = document.getElementById('preview-trim-btn');
+  const text = document.getElementById('preview-trim-btn-text');
+  if (!player) return;
+
+  const start = parseFloat(document.getElementById('trim-start')?.value) || 0;
+
+  if (isPreviewingTrimOnly) {
+    isPreviewingTrimOnly = false;
+    player.pause();
+    if (text) text.textContent = 'Play Trim Only';
+    if (btn) btn.classList.remove('bg-brand-red/30', 'border-brand-red', 'text-brand-red');
+  } else {
+    isPreviewingTrimOnly = true;
+    player.currentTime = start;
+    player.play().catch(() => {});
+    if (text) text.textContent = 'Stop Trim Loop';
+    if (btn) btn.classList.add('bg-brand-red/30', 'border-brand-red', 'text-brand-red');
+  }
 }
 
 let manualCrop = {
@@ -1727,7 +2201,10 @@ function resetEditorState() {
   endCardSlides = [];
   customAudioTracks = [];
   imageOverlays = [];
-  activeVideo = null;
+  videoClips = [];
+  activeClipIndex = 0;
+  activeVideo = { path: null, url: null, duration: 15, width: 1280, height: 720 };
+  renderClipSequenceReel();
 
   const subtitlesInput = document.getElementById('subtitles-input');
   if (subtitlesInput) subtitlesInput.value = '';
