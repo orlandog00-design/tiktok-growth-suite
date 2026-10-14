@@ -1,0 +1,17 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: DefaultStyle,Impact,78,&H0000A5FF,&H0000A5FF,&H00000000,&H90000000,1,0,0,0,100,100,0,0,1,10,5,2,40,40,920,1
+Style: EndCardTitle,Arial,52,&H0000FFFF,&H0000FFFF,&H00000000,&H90000000,1,0,0,0,100,100,0,0,1,6,3,5,20,20,10,1
+Style: EndCardSub,Arial,38,&H00FFFFFF,&H00FFFFFF,&H00000000,&H90000000,1,0,0,0,100,100,0,0,1,5,2,5,20,20,10,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.00,0:00:02.00,DefaultStyle,,0,0,0,,GAMEPLAY WIPES SWEAT
+Dialogue: 0,0:00:02.00,0:00:04.00,DefaultStyle,,0,0,0,,TRY THIS CLASS
+Dialogue: 0,0:00:04.00,0:00:07.00,EndCardTitle,,0,0,0,,{\an5\pos(540,240)}🔥 SAVE THIS CLASS SETUP 👇
+Dialogue: 0,0:00:04.00,0:00:07.00,EndCardSub,,0,0,0,,{\an5\pos(540,1710)}💬 Screenshot & save for your next match

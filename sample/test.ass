@@ -1,0 +1,18 @@
+[Script Info]
+Title: TikTok Style Subtitles
+ScriptType: v4.00+
+Collisions: Normal
+PlayDepth: 0
+PlayResX: 1080
+PlayResY: 1920
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: HormoziYellow,Arial,72,&H0000FFFF,&H0000FFFF,&H00000000,&H80000000,1,0,0,0,100,100,0,0,1,8,4,2,40,40,350,1
+Style: BeastWhite,Arial,72,&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,1,0,0,0,100,100,0,0,1,8,4,2,40,40,350,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.00,0:00:02.50,HormoziYellow,,0,0,0,,STOP SCROLLING RIGHT NOW!
+Dialogue: 0,0:00:02.50,0:00:05.00,BeastWhite,,0,0,0,,THIS HACK WILL CHANGE EVERYTHING
+Dialogue: 0,0:00:05.00,0:00:08.00,HormoziYellow,,0,0,0,,WATCH UNTIL THE VERY END

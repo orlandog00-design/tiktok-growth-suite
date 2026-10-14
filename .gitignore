@@ -1,0 +1,8 @@
+node_modules/
+output/
+uploads/
+cloudflared.exe
+yt-dlp.exe
+*.log
+.DS_Store
+.env

@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TikTok Creator & Engagement Suite</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              red: '#FE2C55',
+              cyan: '#25F4EE',
+              dark: '#0B0C10',
+              card: '#161822',
+              border: '#25293A'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-brand-dark text-slate-100 min-h-screen flex flex-col font-sans selection:bg-brand-red selection:text-white">
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="border-b border-brand-border bg-brand-card/80 backdrop-blur sticky top-0 z-50 px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-red to-brand-cyan flex items-center justify-center shadow-lg shadow-brand-red/20">
+          <i data-lucide="zap" class="w-6 h-6 text-black fill-current"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight flex items-center gap-2">
+            TikTok Growth Suite
+            <span class="text-xs px-2 py-0.5 rounded-full bg-brand-red/10 border border-brand-red/30 text-brand-red font-medium">Pro Studio</span>
+          </h1>
+          <p class="text-xs text-slate-400">Viral Script Studio • 9:16 Short Clipper • Kinetic Captions • Trend Radar</p>
+        </div>
+      </div>
+
+      <!-- TAB BUTTONS -->
+      <nav class="flex items-center gap-2 bg-brand-dark/60 p-1.5 rounded-xl border border-brand-border">
+        <button id="tab-trends-btn" onclick="switchTab('trends')" class="tab-btn active px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all">
+          <i data-lucide="flame" class="w-4 h-4 text-orange-500"></i>
+          Trend Radar
+        </button>
+        <button id="tab-script-btn" onclick="switchTab('script')" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all">
+          <i data-lucide="file-text" class="w-4 h-4 text-brand-cyan"></i>
+          AI Script Studio
+        </button>
+        <button id="tab-clipper-btn" onclick="switchTab('clipper')" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all">
+          <i data-lucide="scissors" class="w-4 h-4 text-brand-red"></i>
+          Shorts Clipper & Captions
+        </button>
+        <button id="tab-hashtags-btn" onclick="switchTab('hashtags')" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all">
+          <i data-lucide="hash" class="w-4 h-4 text-emerald-400"></i>
+          Viral Hashtags & SEO
+        </button>
+      </nav>
+
+      <!-- SYSTEM STATUS BADGE -->
+      <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        FFmpeg Engine Ready
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-6">
+
+    <!-- ======================================================== -->
+    <!-- TAB 1: TREND RADAR                                       -->
+    <!-- ======================================================== -->
+    <section id="tab-trends" class="tab-content">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 class="text-2xl font-bold flex items-center gap-2">
+            🔥 Breakout Trend Radar
+          </h2>
+          <p class="text-sm text-slate-400">High-velocity viral topics, audio recommendations, and retention patterns.</p>
+        </div>
+
+        <!-- CATEGORY FILTERS -->
+        <div class="flex flex-wrap items-center gap-2" id="trend-categories">
+          <button onclick="filterTrends('all')" class="cat-pill active px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-border text-white border border-slate-600 transition">All Niches</button>
+          <button onclick="filterTrends('gaming')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-amber-400 border border-amber-500/30 hover:text-white transition">🎮 Warzone & COD</button>
+          <button onclick="filterTrends('tech')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">🤖 Tech & AI</button>
+          <button onclick="filterTrends('finance')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">💼 Wealth & Finance</button>
+          <button onclick="filterTrends('fitness')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">💪 Fitness & Health</button>
+          <button onclick="filterTrends('ecommerce')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">🛍️ E-Commerce</button>
+          <button onclick="filterTrends('storytelling')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">🕵️ Storytelling</button>
+          <button onclick="filterTrends('psychology')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">🧠 Psychology</button>
+        </div>
+      </div>
+
+      <!-- TRENDS GRID -->
+      <div id="trends-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Rendered dynamically via app.js -->
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- TAB 2: AI SCRIPT & HOOK STUDIO                           -->
+    <!-- ======================================================== -->
+    <section id="tab-script" class="tab-content hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- LEFT CONFIGURATION COLUMN -->
+        <div class="lg:col-span-5 bg-brand-card p-6 rounded-2xl border border-brand-border flex flex-col gap-5 shadow-xl">
+          <div class="border-b border-brand-border pb-4">
+            <h2 class="text-xl font-bold flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-5 h-5 text-brand-cyan"></i>
+              Viral Script Generator
+            </h2>
+            <p class="text-xs text-slate-400">Generates 4 high-retention hooks, visual pacing cues, and engagement CTAs.</p>
+          </div>
+
+          <form id="script-form" class="flex flex-col gap-4">
+            <!-- TOPIC INPUT -->
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Video Topic / Concept</label>
+              <textarea id="script-topic" rows="3" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-brand-cyan text-slate-100 placeholder-slate-500 resize-none transition" placeholder="e.g. 3 AI websites that feel illegal to know for college students..."></textarea>
+            </div>
+
+            <!-- NICHE & TONE ROW -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Niche</label>
+                <select id="script-niche" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brand-cyan text-slate-200">
+                  <option value="Call of Duty / Warzone Meta">🎮 Warzone Meta & Loadouts</option>
+                  <option value="Warzone Movement & Rebirth">🏃 Warzone Movement & Tips</option>
+                  <option value="Gaming Clutch & Rage Comms">🔥 1v4 Clutch & Rage Comms</option>
+                  <option value="Tech & AI">Tech & AI</option>
+                  <option value="Personal Finance">Personal Finance</option>
+                  <option value="Fitness & Health">Fitness & Health</option>
+                  <option value="E-Commerce / TikTok Shop">E-Commerce</option>
+                  <option value="Storytelling & Mystery">Storytelling</option>
+                  <option value="Self Improvement">Self Improvement</option>
+                  <option value="General Entertainment">Entertainment</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Tone & Pacing</label>
+                <select id="script-tone" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brand-cyan text-slate-200">
+                  <option value="High Energy & Urgent">High Energy & Urgent</option>
+                  <option value="Secretive & Whispered">Secretive / Insider</option>
+                  <option value="Authoritative & Direct">Authoritative & Direct</option>
+                  <option value="Sarcastic & Relatable">Sarcastic & Relatable</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- DURATION & GOAL ROW -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Target Length</label>
+                <select id="script-duration" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brand-cyan text-slate-200">
+                  <option value="30">~30 Seconds (Fast)</option>
+                  <option value="45">~45 Seconds (Balanced)</option>
+                  <option value="60">~60 Seconds (Deep Dive)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Engagement Goal</label>
+                <select id="script-goal" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brand-cyan text-slate-200">
+                  <option value="comments">Max Comments & Debate</option>
+                  <option value="saves">Max Saves & Bookmarks</option>
+                  <option value="follows">Profile Visits & Follows</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- GENERATE BUTTON -->
+            <button type="submit" id="generate-script-btn" class="w-full mt-2 bg-gradient-to-r from-brand-red to-pink-600 hover:from-red-600 hover:to-pink-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-brand-red/25 flex items-center justify-center gap-2 transition-all transform active:scale-[0.98]">
+              <i data-lucide="wand-2" class="w-5 h-5"></i>
+              Generate Viral Script
+            </button>
+          </form>
+        </div>
+
+        <!-- RIGHT OUTPUT COLUMN -->
+        <div class="lg:col-span-7 flex flex-col gap-5">
+
+          <!-- HOOK SELECTOR CAROUSEL / GRID -->
+          <div class="bg-brand-card p-5 rounded-2xl border border-brand-border">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="anchor" class="w-4 h-4 text-brand-red"></i>
+                Select Viral Hook (First 3 Seconds)
+              </h3>
+              <span class="text-xs text-brand-cyan font-mono" id="selected-hook-badge">Hook #1 Selected</span>
+            </div>
+
+            <div id="hooks-container" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="p-3.5 rounded-xl border border-brand-border bg-brand-dark/50 text-xs text-slate-400">
+                Generate a script to see 4 retention-tested hook variations.
+              </div>
+            </div>
+          </div>
+
+          <!-- TELEPROMPTER SCRIPT VIEWER -->
+          <div class="bg-brand-card p-5 rounded-2xl border border-brand-border flex-1 flex flex-col">
+            <div class="flex items-center justify-between mb-3 border-b border-brand-border pb-3">
+              <div class="flex items-center gap-2">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                  <i data-lucide="tv" class="w-4 h-4 text-brand-cyan"></i>
+                  Teleprompter Script with Cues
+                </h3>
+              </div>
+              <div class="flex items-center gap-3 text-xs font-mono text-slate-400" id="script-metrics">
+                <span>0 Words</span>
+                <span>•</span>
+                <span>~0s Est.</span>
+              </div>
+            </div>
+
+            <!-- SCRIPT SEGMENTS LIST -->
+            <div id="script-segments" class="space-y-3 flex-1 overflow-y-auto max-h-[380px] pr-1">
+              <div class="text-center py-12 text-slate-500 text-sm">
+                Enter a topic on the left and click "Generate Viral Script" to populate your teleprompter.
+              </div>
+            </div>
+
+            <!-- SEO & ACTION BAR -->
+            <div class="border-t border-brand-border pt-4 mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div class="text-xs text-slate-400 truncate max-w-sm" id="seo-preview">
+                SEO: Ready to optimize
+              </div>
+
+              <div class="flex items-center gap-2 w-full sm:w-auto">
+                <button onclick="copyFullScript()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-200 flex items-center gap-1.5 transition">
+                  <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy
+                </button>
+                <button onclick="downloadScriptTxt()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-200 flex items-center gap-1.5 transition">
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i> Save
+                </button>
+                <button onclick="sendScriptToClipper()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-200 flex items-center gap-1.5 transition">
+                  <i data-lucide="scissors" class="w-3.5 h-3.5 text-brand-cyan"></i> To Clipper
+                </button>
+                <button onclick="autoCreateVideoFromScript()" class="px-4 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-amber-400 to-orange-500 text-black hover:from-amber-300 hover:to-orange-400 flex items-center gap-1.5 shadow-lg shadow-amber-500/20 transition">
+                  <i data-lucide="zap" class="w-3.5 h-3.5 fill-current"></i> Auto-Create Video
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- TAB 3: SHORTS CLIPPER & SUBTITLE ENGINE                   -->
+    <!-- ======================================================== -->
+    <section id="tab-clipper" class="tab-content hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- LEFT COLUMN: CONTROLS & SUBTITLE BUILDER -->
+        <div class="lg:col-span-5 bg-brand-card p-6 rounded-2xl border border-brand-border flex flex-col gap-5 shadow-xl">
+          <div class="border-b border-brand-border pb-4 flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold flex items-center gap-2">
+                <i data-lucide="scissors" class="w-5 h-5 text-brand-red"></i>
+                9:16 Shorts Clipper
+              </h2>
+              <p class="text-xs text-slate-400">Reframe to vertical TikTok aspect ratio and burn kinetic captions.</p>
+            </div>
+          </div>
+
+          <!-- VIDEO SOURCE SELECTOR -->
+          <div class="space-y-3 bg-brand-dark/40 p-4 rounded-xl border border-brand-border">
+            <div class="flex items-center justify-between">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Video Source</label>
+              <span class="text-[10px] text-amber-400 font-bold">🎯 Tip: Record in Shooting Range for best original reach!</span>
+            </div>
+
+            <!-- UPLOAD OR SAMPLE ROW -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <label class="cursor-pointer bg-brand-dark hover:bg-slate-800 border border-dashed border-slate-600 hover:border-brand-cyan rounded-xl p-3 text-center transition flex items-center justify-center gap-2">
+                <i data-lucide="target" class="w-4 h-4 text-amber-400"></i>
+                <span class="text-xs font-semibold text-slate-200" id="upload-label">Upload Shooting Range / Gun Clip</span>
+                <input type="file" id="video-file-input" accept="video/*" class="hidden" onchange="handleFileUpload(event)">
+              </label>
+
+              <button type="button" onclick="loadSampleVideo()" class="px-3.5 py-2.5 rounded-xl bg-brand-dark hover:bg-slate-800 border border-brand-border text-xs font-semibold text-slate-300 flex items-center justify-center gap-2 transition">
+                <i data-lucide="play-circle" class="w-4 h-4 text-brand-red"></i>
+                <span>Load Demo Gameplay</span>
+              </button>
+            </div>
+
+            <!-- IMPORT VIA URL (YT / TWITCH / TIKTOK) -->
+            <div class="pt-1 border-t border-brand-border/60">
+              <label class="block text-[11px] font-semibold text-slate-400 mb-1.5 flex items-center gap-1.5">
+                <i data-lucide="link" class="w-3.5 h-3.5 text-brand-cyan"></i>
+                Import Video from Link (YouTube / TikTok / Twitch):
+              </label>
+              <div class="flex items-center gap-2">
+                <input type="url" id="import-url-input" placeholder="Paste YouTube / Twitch / TikTok video URL here..." class="flex-1 bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-xs font-mono text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-cyan">
+                <button type="button" id="import-url-btn" onclick="importFromUrl()" class="px-3.5 py-2 rounded-xl bg-brand-cyan text-black text-xs font-bold hover:bg-cyan-400 flex items-center gap-1.5 transition shrink-0">
+                  <i data-lucide="download-cloud" class="w-3.5 h-3.5"></i>
+                  <span>Import</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- TIMELINE TRIMMER -->
+          <div class="space-y-2 bg-brand-dark/40 p-4 rounded-xl border border-brand-border">
+            <div class="flex items-center justify-between text-xs font-semibold">
+              <span class="text-slate-300">Trim Segment</span>
+              <span class="text-brand-cyan font-mono" id="trim-duration-badge">Clip Length: 10.0s</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-2">
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">Start Time (sec)</label>
+                <input type="number" id="trim-start" min="0" step="0.5" value="0.0" class="w-full bg-brand-dark border border-brand-border rounded-lg px-3 py-1.5 text-xs text-slate-100 font-mono focus:border-brand-cyan" onchange="updateTrimTimes()">
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">End Time (sec)</label>
+                <input type="number" id="trim-end" min="1" step="0.5" value="10.0" class="w-full bg-brand-dark border border-brand-border rounded-lg px-3 py-1.5 text-xs text-slate-100 font-mono focus:border-brand-cyan" onchange="updateTrimTimes()">
+              </div>
+            </div>
+          </div>
+
+          <!-- 9:16 LAYOUT SELECTION -->
+          <div class="space-y-2">
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Vertical 9:16 Reframe Mode</label>
+            <div class="grid grid-cols-3 gap-2">
+              <button type="button" onclick="selectLayout('blur_pad')" id="layout-blur_pad" class="layout-btn active p-2.5 rounded-xl border border-brand-cyan bg-brand-cyan/10 text-left transition">
+                <div class="text-xs font-bold text-white flex items-center gap-1.5 mb-0.5">
+                  <i data-lucide="layers" class="w-3.5 h-3.5 text-brand-cyan"></i>
+                  Blurred Mirror
+                </div>
+                <p class="text-[9px] text-slate-400">Preserves full 16:9 clip.</p>
+              </button>
+
+              <button type="button" onclick="selectLayout('center_crop')" id="layout-center_crop" class="layout-btn p-2.5 rounded-xl border border-brand-border bg-brand-dark text-left hover:border-slate-600 transition">
+                <div class="text-xs font-bold text-white flex items-center gap-1.5 mb-0.5">
+                  <i data-lucide="crop" class="w-3.5 h-3.5 text-brand-red"></i>
+                  Center Crop
+                </div>
+                <p class="text-[9px] text-slate-400">Auto zooms to fill 9:16.</p>
+              </button>
+
+              <button type="button" onclick="selectLayout('manual_crop')" id="layout-manual_crop" class="layout-btn p-2.5 rounded-xl border border-brand-border bg-brand-dark text-left hover:border-slate-600 transition">
+                <div class="text-xs font-bold text-white flex items-center gap-1.5 mb-0.5">
+                  <i data-lucide="sliders" class="w-3.5 h-3.5 text-amber-400"></i>
+                  Manual Crop
+                </div>
+                <p class="text-[9px] text-slate-400">Custom top/side cuts.</p>
+              </button>
+            </div>
+
+            <!-- MANUAL CROP SLIDERS PANEL -->
+            <div id="manual-crop-panel" class="hidden space-y-2.5 bg-brand-dark/60 p-3 rounded-xl border border-amber-500/40">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-amber-400 flex items-center gap-1">
+                  <i data-lucide="crop" class="w-3.5 h-3.5"></i>
+                  Manual Crop Boundaries
+                </span>
+                <span class="text-[10px] text-slate-400">Drag sliders to adjust</span>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 text-[11px]">
+                <div>
+                  <div class="flex justify-between text-slate-400 mb-0.5">
+                    <span>Cut Top:</span>
+                    <span id="crop-top-val" class="font-mono text-amber-400 font-bold">0%</span>
+                  </div>
+                  <input type="range" id="crop-top-slider" min="0" max="45" value="0" step="1" oninput="updateManualCrop('cropTop', this.value)" class="w-full accent-amber-400 cursor-pointer">
+                </div>
+                <div>
+                  <div class="flex justify-between text-slate-400 mb-0.5">
+                    <span>Cut Bottom:</span>
+                    <span id="crop-bottom-val" class="font-mono text-amber-400 font-bold">0%</span>
+                  </div>
+                  <input type="range" id="crop-bottom-slider" min="0" max="45" value="0" step="1" oninput="updateManualCrop('cropBottom', this.value)" class="w-full accent-amber-400 cursor-pointer">
+                </div>
+                <div>
+                  <div class="flex justify-between text-slate-400 mb-0.5">
+                    <span>Cut Left:</span>
+                    <span id="crop-left-val" class="font-mono text-amber-400 font-bold">0%</span>
+                  </div>
+                  <input type="range" id="crop-left-slider" min="0" max="45" value="0" step="1" oninput="updateManualCrop('cropLeft', this.value)" class="w-full accent-amber-400 cursor-pointer">
+                </div>
+                <div>
+                  <div class="flex justify-between text-slate-400 mb-0.5">
+                    <span>Cut Right:</span>
+                    <span id="crop-right-val" class="font-mono text-amber-400 font-bold">0%</span>
+                  </div>
+                  <input type="range" id="crop-right-slider" min="0" max="45" value="0" step="1" oninput="updateManualCrop('cropRight', this.value)" class="w-full accent-amber-400 cursor-pointer">
+                </div>
+              </div>
+
+              <!-- FIT MODE -->
+              <div class="flex items-center justify-between pt-1 border-t border-brand-border/60 text-[11px]">
+                <span class="text-slate-400">Cropped Framing:</span>
+                <div class="flex items-center gap-3">
+                  <label class="flex items-center gap-1 cursor-pointer text-slate-300">
+                    <input type="radio" name="manual-fit" value="fill" checked onchange="updateManualCrop('fitMode', 'fill')" class="accent-amber-400">
+                    <span>Fill 9:16 (Zoom)</span>
+                  </label>
+                  <label class="flex items-center gap-1 cursor-pointer text-slate-300">
+                    <input type="radio" name="manual-fit" value="blur_fit" onchange="updateManualCrop('fitMode', 'blur_fit')" class="accent-amber-400">
+                    <span>Blurred Mirror Fit</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STREAMER FACECAM REMOVAL & MASKING -->
+          <div class="space-y-3 bg-brand-dark/40 p-4 rounded-xl border border-brand-border">
+            <div class="flex items-center justify-between">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="user-x" class="w-4 h-4 text-brand-red"></i>
+                Streamer Facecam Removal
+              </label>
+              <span class="text-[10px] text-amber-400 font-bold">🎯 Remove creator face from reposts</span>
+            </div>
+
+            <!-- PRESET BUTTONS -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <button type="button" onclick="selectFacecamMode('none')" id="facecam-none" class="facecam-btn active px-2.5 py-2 rounded-xl border border-brand-cyan bg-brand-cyan/10 text-xs font-bold text-white text-center transition">
+                None (Original)
+              </button>
+              <button type="button" onclick="selectFacecamMode('crop_gameplay')" id="facecam-crop_gameplay" class="facecam-btn px-2.5 py-2 rounded-xl border border-brand-border bg-brand-dark hover:border-slate-500 text-xs font-bold text-slate-300 text-center transition">
+                ✂️ Crop Facecam
+              </button>
+              <button type="button" onclick="selectFacecamMode('cover_banner')" id="facecam-cover_banner" class="facecam-btn px-2.5 py-2 rounded-xl border border-brand-border bg-brand-dark hover:border-slate-500 text-xs font-bold text-slate-300 text-center transition">
+                🛡️ Cover Banner
+              </button>
+              <button type="button" onclick="selectFacecamMode('blur_top')" id="facecam-blur_top" class="facecam-btn px-2.5 py-2 rounded-xl border border-brand-border bg-brand-dark hover:border-slate-500 text-xs font-bold text-slate-300 text-center transition">
+                🌫️ Blur Facecam
+              </button>
+            </div>
+
+            <!-- DYNAMIC CONTROLS (HEIGHT SLIDER & BANNER TITLE) -->
+            <div id="facecam-settings-panel" class="hidden space-y-3 pt-2 border-t border-brand-border/60">
+              <div class="flex items-center justify-between text-xs">
+                <label class="text-slate-400">Top Cutoff Height (Facecam Area):</label>
+                <span id="facecam-height-val" class="text-amber-400 font-mono font-bold">33% (Top 1/3)</span>
+              </div>
+              <input type="range" id="facecam-height-slider" min="18" max="45" value="33" step="1" oninput="updateFacecamHeight(this.value)" class="w-full accent-amber-400 cursor-pointer">
+
+              <div id="facecam-banner-input-box" class="hidden space-y-1">
+                <label class="block text-[11px] text-slate-400">Tactical Header Title (Over Facecam):</label>
+                <input type="text" id="facecam-banner-text" placeholder="e.g. VOYAK KT-3 LOADOUT (or leave empty for default)" class="w-full bg-brand-dark border border-brand-border rounded-lg px-3 py-1.5 text-xs text-slate-100 font-mono focus:border-brand-cyan">
+              </div>
+            </div>
+          </div>
+
+          <!-- TOP VIRAL HOOK TITLE CARD (REPLACE/COVER TITLE) -->
+          <div class="space-y-3 bg-brand-dark/40 p-4 rounded-xl border border-brand-border">
+            <div class="flex items-center justify-between">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="tag" class="w-4 h-4 text-brand-red"></i>
+                Top Hook Title Card
+              </label>
+              <span class="text-[10px] text-brand-cyan font-bold">🎯 100% Full-Width Wipe & Replace</span>
+            </div>
+            <p class="text-[10px] text-slate-400">Full-width 1080px header banner wipes 100% of any existing creator title and auto-wraps your title cleanly.</p>
+
+            <!-- HOOK CARD STYLE BUTTONS -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <button type="button" onclick="selectHookCardMode('viral_white')" id="hookcard-viral_white" class="hookcard-btn active px-2.5 py-2 rounded-xl border border-brand-cyan bg-brand-cyan/10 text-xs font-bold text-white text-center transition">
+                🃏 Viral White (Full Wipe)
+              </button>
+              <button type="button" onclick="selectHookCardMode('cod_tactical')" id="hookcard-cod_tactical" class="hookcard-btn px-2.5 py-2 rounded-xl border border-brand-border bg-brand-dark hover:border-slate-500 text-xs font-bold text-slate-300 text-center transition">
+                🖤 Tactical Dark Card
+              </button>
+              <button type="button" onclick="selectHookCardMode('wipe_only')" id="hookcard-wipe_only" class="hookcard-btn px-2.5 py-2 rounded-xl border border-brand-border bg-brand-dark hover:border-slate-500 text-xs font-bold text-slate-300 text-center transition">
+                🧹 Wipe Only (No Banner)
+              </button>
+              <button type="button" onclick="selectHookCardMode('none')" id="hookcard-none" class="hookcard-btn px-2.5 py-2 rounded-xl border border-brand-border bg-brand-dark hover:border-slate-500 text-xs font-bold text-slate-300 text-center transition">
+                Off
+              </button>
+            </div>
+
+            <!-- HOOK CARD CUSTOM TEXT INPUT -->
+            <div id="hookcard-input-box" class="space-y-1 pt-1">
+              <label class="block text-[11px] text-slate-400">Your Custom Hook Title:</label>
+              <input type="text" id="hookcard-text-input" value="“This VOYAK Class Is Straight-Up Illegal”" placeholder="e.g. “This SUPERI 46 Class Is Straight-Up Illegal”" class="w-full bg-brand-dark border border-brand-border rounded-lg px-3 py-1.5 text-xs text-slate-100 font-mono focus:border-brand-cyan">
+            </div>
+          </div>
+
+          <!-- WEAPON BUILD / LOADOUT END-CARD & PICTURE OVERLAYS -->
+          <div class="space-y-3 bg-brand-dark/40 p-4 rounded-xl border border-brand-border">
+            <div class="flex items-center justify-between">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="image" class="w-4 h-4 text-emerald-400"></i>
+                Weapon Build / Loadout Outro
+              </label>
+              <label class="cursor-pointer px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-[11px] flex items-center gap-1 transition shadow-sm">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>+ Add Weapon Build</span>
+                <input type="file" id="overlay-img-input" accept="image/*" multiple class="hidden" onchange="handleOverlayImageUpload(event)">
+              </label>
+            </div>
+            <p class="text-[10px] text-slate-400">Displays your loadout screenshot(s) full-screen after the clip. Add multiple pictures for videos showing 2+ weapon classes!</p>
+
+            <!-- MODE SELECTOR TABS -->
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" onclick="selectPictureMode('endcard')" id="picmode-endcard" class="picmode-btn active px-2.5 py-1.5 rounded-xl border border-emerald-400 bg-emerald-500/15 text-xs font-bold text-white text-center transition flex items-center justify-center gap-1.5">
+                <span>🎯 Full-Screen Outro (After Clip)</span>
+              </button>
+              <button type="button" onclick="selectPictureMode('invideo')" id="picmode-invideo" class="picmode-btn px-2.5 py-1.5 rounded-xl border border-brand-border bg-brand-dark hover:border-slate-500 text-xs font-bold text-slate-400 text-center transition flex items-center justify-center gap-1.5">
+                <span>📌 In-Video Floating Overlay</span>
+              </button>
+            </div>
+
+            <!-- END-CARD VIEW (SUPPORTS MULTIPLE SLIDES) -->
+            <div id="endcard-panel" class="space-y-3">
+              <div id="endcard-empty" class="hidden p-3.5 rounded-xl border border-dashed border-slate-700 bg-brand-dark/50 text-center">
+                <p class="text-xs text-slate-400">No weapon build slides loaded yet.</p>
+                <p class="text-[10px] text-slate-500 mt-0.5">Click <strong class="text-emerald-400">+ Add Weapon Build</strong> above to attach 1 or more class screenshots!</p>
+              </div>
+
+              <!-- DYNAMIC LIST OF SLIDES -->
+              <div id="endcard-slides-list" class="space-y-3">
+                <!-- Rendered dynamically by renderEndCardState() -->
+              </div>
+
+              <!-- BUTTON TO ADD MORE SLIDES -->
+              <div id="endcard-add-more-row" class="pt-1">
+                <label class="cursor-pointer w-full py-2 px-3 rounded-xl border border-dashed border-emerald-500/50 bg-emerald-500/5 hover:bg-emerald-500/15 text-emerald-400 font-bold text-xs flex items-center justify-center gap-1.5 transition">
+                  <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                  <span>+ Add Another Weapon Slide (e.g. Secondary Weapon Build)</span>
+                  <input type="file" accept="image/*" multiple class="hidden" onchange="handleOverlayImageUpload(event)">
+                </label>
+              </div>
+            </div>
+
+            <!-- IN-VIDEO FLOATING OVERLAYS VIEW (HIDDEN IN ENDCARD MODE) -->
+            <div id="invideo-panel" class="hidden space-y-3">
+              <div id="overlay-images-list" class="space-y-3">
+                <div id="overlay-empty-state" class="p-3.5 rounded-xl border border-dashed border-slate-700 bg-brand-dark/50 text-center">
+                  <p class="text-xs text-slate-400">No floating overlays added yet.</p>
+                  <p class="text-[10px] text-slate-500 mt-0.5">Click <strong class="text-emerald-400">+ Add Weapon Build</strong> above to place an image over gameplay.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUBTITLE TEXT INPUT -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Burned Kinetic Subtitles</label>
+              <button onclick="clearSubtitles()" class="text-[11px] text-slate-500 hover:text-slate-300">Clear</button>
+            </div>
+            <textarea id="subtitles-input" rows="3" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2 text-xs font-mono focus:outline-none focus:border-brand-cyan text-slate-100 placeholder-slate-500 resize-none" placeholder="Enter words or phrase to burn onto clip... (e.g. STOP SCROLLING! THIS HACK CHANGES EVERYTHING)"></textarea>
+
+            <!-- CAPTION SPEED / PACING CONTROLLER -->
+            <div class="space-y-1.5 p-2.5 rounded-xl bg-brand-dark/70 border border-brand-border">
+              <div class="flex items-center justify-between">
+                <label class="block text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
+                  <i data-lucide="gauge" class="w-3.5 h-3.5 text-brand-cyan"></i>
+                  Caption Pop Speed:
+                </label>
+                <span class="text-[9px] text-amber-400 font-mono font-bold">⚡ Timing Control</span>
+              </div>
+              <div class="grid grid-cols-4 gap-1 text-[10px]">
+                <button type="button" onclick="selectSubtitlePacing('hyper')" id="subpacing-hyper" class="subpacing-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark text-slate-400 hover:text-white font-bold text-center transition">
+                  ⚡ 0.8s Rapid
+                </button>
+                <button type="button" onclick="selectSubtitlePacing('fast')" id="subpacing-fast" class="subpacing-btn active px-2 py-1.5 rounded-lg border border-brand-cyan bg-brand-cyan/20 text-white font-bold text-center transition">
+                  🔥 1.2s TikTok
+                </button>
+                <button type="button" onclick="selectSubtitlePacing('normal')" id="subpacing-normal" class="subpacing-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark text-slate-400 hover:text-white font-bold text-center transition">
+                  🎯 1.8s Normal
+                </button>
+                <button type="button" onclick="selectSubtitlePacing('auto')" id="subpacing-auto" class="subpacing-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark text-slate-400 hover:text-white font-bold text-center transition">
+                  🔄 Auto-Fit
+                </button>
+              </div>
+              <p class="text-[10px] text-slate-400">💡 <em>Tip: Put each caption on a new line in the box above to control exactly what words appear in each frame!</em></p>
+            </div>
+
+            <!-- WIPE OLD CAPTIONS TOGGLE -->
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-brand-dark/60 border border-brand-border">
+              <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-200">
+                <input type="checkbox" id="mask-old-captions-toggle" onchange="toggleMaskOldCaptions(this.checked)" class="accent-brand-cyan w-4 h-4 rounded">
+                <span class="font-bold text-amber-300 flex items-center gap-1.5">
+                  <i data-lucide="eraser" class="w-3.5 h-3.5"></i>
+                  🧹 Wipe Old Burned Captions
+                </span>
+              </label>
+              <span class="text-[10px] text-slate-400">Smooths over text on pre-made clips</span>
+            </div>
+          </div>
+
+          <!-- WARZONE VIRAL AUDIO SELECTOR -->
+          <div class="space-y-3 bg-brand-dark/40 p-3.5 rounded-xl border border-brand-border">
+            <div class="flex items-center justify-between">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="music" class="w-4 h-4 text-brand-cyan"></i>
+                Warzone Viral Audio / Music
+              </label>
+              <span class="text-[10px] text-amber-400 font-bold">🎵 Trending COD TikTok Beats</span>
+            </div>
+            <select id="bg-music-select" onchange="handleSelectBgMusic(this.value)" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-xs font-bold text-slate-100 focus:outline-none focus:border-brand-cyan">
+              <option value="phonk_drift">🔥 Brazilian Phonk Drift (136 BPM - Movement/Kills)</option>
+              <option value="dark_808_drill">💀 Dark 808 Drill (140 BPM - Heavy Sub-Bass & Wipes)</option>
+              <option value="guitar_montage">🎸 Montage Distortion Guitar (142 BPM - Sniper Headshots)</option>
+              <option value="sigma_drop">🗿 Sigma 808 Cinematic Drop (128 BPM - 1v4 Clutch)</option>
+              <option value="hyper_hardstyle">🚀 Hyper-Drive Hardstyle (150 BPM - Camera Breaker)</option>
+              <option value="slowed_reverb_phonk">🌌 Slowed + Reverb Phonk (115 BPM - Aesthetic Vibe)</option>
+              <option value="cyber_rush">⚡ Cyber Combat Rush (148 BPM - Fast Adrenaline)</option>
+              <option value="suspense_drop">⏱️ Suspense Countdown & Drop (130 BPM - Secret Class Reveal)</option>
+              <option value="bouncy_trap">🎯 Bouncy 808 Trap (132 BPM - Meta Recoil & Commentary)</option>
+              <option value="lofi_gunsmith">☕ Chill Lofi Gunsmith (90 BPM - Attachment Breakdown)</option>
+              <option value="none">🔇 No Music (Voiceover / Clean SFX Only)</option>
+            </select>
+
+            <!-- CUSTOM AUDIO UPLOAD & FREE VIRAL MP3 SITES -->
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+              <label class="cursor-pointer px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold text-[11px] flex items-center gap-1.5 transition shadow-sm">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5 text-emerald-400"></i>
+                <span>+ Upload MP3s (Select Multiple)</span>
+                <input type="file" id="custom-audio-input" accept="audio/*" multiple class="hidden" onchange="handleCustomAudioUpload(event)">
+              </label>
+
+              <button type="button" onclick="openViralSoundsModal()" class="px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-brand-red to-pink-600 hover:opacity-90 text-white font-bold text-[11px] flex items-center gap-1.5 transition shadow-sm">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                <span>🔥 Free Viral TikTok MP3 Hub ↗</span>
+              </button>
+            </div>
+
+            <!-- MULTI-AUDIO TRACKS PLAYLIST & SEQUENCER -->
+            <div id="custom-audio-playlist-container" class="space-y-2 p-3 rounded-xl bg-black/50 border border-brand-border">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-amber-400 flex items-center gap-1.5">
+                  <i data-lucide="list-music" class="w-3.5 h-3.5 text-amber-400"></i>
+                  <span id="audio-playlist-header">Custom Audio Sequencer</span>
+                </span>
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] text-emerald-400 font-mono font-bold" id="audio-total-duration">0.0s total</span>
+                  <button type="button" onclick="clearAllAudioTracks()" class="text-[10px] text-rose-400 hover:text-white hover:underline transition" title="Clear all tracks">Clear All</button>
+                </div>
+              </div>
+
+              <!-- EMPTY STATE -->
+              <div id="audio-playlist-empty" class="text-center py-2 px-3 border border-dashed border-slate-700/80 rounded-lg text-slate-400 text-[11px]">
+                No custom MP3s loaded yet. Upload multiple short MP3s or extract sound links below!
+              </div>
+
+              <!-- TRACKS LIST CONTAINER -->
+              <div id="custom-audio-playlist-items" class="space-y-1.5"></div>
+
+              <div class="text-[10px] text-slate-400 flex items-center justify-between pt-1 border-t border-brand-border/40">
+                <span>💡 Click <strong>▲ / ▼</strong> to set the exact playing order.</span>
+                <span class="text-emerald-400 font-mono">Sequenced & Looped</span>
+              </div>
+            </div>
+
+            <!-- AUDIO PREVIEW PLAYER (HIDDEN) -->
+            <audio id="audio-preview-player" class="hidden" onended="onAudioPreviewEnded()"></audio>
+
+            <!-- INSTANT URL TO MP3 EXTRACTOR -->
+            <div class="mt-1.5 p-2.5 bg-black/40 rounded-xl border border-brand-border/70 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-brand-cyan flex items-center gap-1">
+                  <i data-lucide="link" class="w-3.5 h-3.5"></i>
+                  Paste TikTok / YouTube Link → 1-Click MP3
+                </span>
+                <span class="text-[9px] text-slate-400 font-mono">yt-dlp auto extractor</span>
+              </div>
+              <div class="flex gap-1.5">
+                <input type="text" id="audio-url-input" placeholder="Paste link (TikTok, YouTube Shorts, Sound URL)..." class="flex-1 bg-brand-dark border border-brand-border rounded-lg px-2.5 py-1.5 text-xs text-slate-100 font-mono focus:border-brand-cyan">
+                <button type="button" id="extract-audio-url-btn" onclick="handleExtractAudioFromUrl()" class="px-3 py-1.5 bg-brand-cyan hover:bg-cyan-400 text-black font-bold text-xs rounded-lg transition shrink-0 flex items-center gap-1">
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                  <span>Extract MP3</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- ORIGINAL CLIP AUDIO BEHAVIOR -->
+            <div class="pt-2 border-t border-brand-border/60">
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-[11px] font-semibold text-slate-300 flex items-center gap-1">
+                  <i data-lucide="volume-x" class="w-3.5 h-3.5 text-amber-400"></i>
+                  Original Video Audio:
+                </label>
+                <span class="text-[10px] text-emerald-400 font-bold">🎯 Removes old streamer voice</span>
+              </div>
+              <div class="grid grid-cols-3 gap-1.5">
+                <button type="button" onclick="selectOrigAudioMode('mute')" id="origaudio-mute" class="origaudio-btn active px-2 py-1.5 rounded-lg border border-brand-cyan bg-brand-cyan/10 text-[11px] font-bold text-white text-center transition">
+                  🔇 Mute Old Audio
+                </button>
+                <button type="button" onclick="selectOrigAudioMode('low')" id="origaudio-low" class="origaudio-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark hover:border-slate-500 text-[11px] font-bold text-slate-300 text-center transition">
+                  🔉 Low Game SFX
+                </button>
+                <button type="button" onclick="selectOrigAudioMode('full')" id="origaudio-full" class="origaudio-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark hover:border-slate-500 text-[11px] font-bold text-slate-300 text-center transition">
+                  🔊 Keep 100%
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUBTITLE STYLE PRESETS -->
+          <div class="space-y-2">
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Caption Style & Position</label>
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+              <button type="button" onclick="selectSubStyle('warzone')" id="substyle-warzone" class="substyle-btn px-2 py-2 rounded-lg border border-amber-500 bg-amber-500/10 text-xs font-bold text-amber-300 text-center">
+                COD Gold
+              </button>
+              <button type="button" onclick="selectSubStyle('hormozi')" id="substyle-hormozi" class="substyle-btn active px-2 py-2 rounded-lg border border-yellow-400 bg-yellow-400/10 text-xs font-bold text-yellow-300 text-center">
+                Hormozi
+              </button>
+              <button type="button" onclick="selectSubStyle('beast')" id="substyle-beast" class="substyle-btn px-2.5 py-2 rounded-lg border border-brand-border bg-brand-dark text-xs font-bold text-white text-center hover:border-slate-500">
+                Beast
+              </button>
+              <button type="button" onclick="selectSubStyle('cyber')" id="substyle-cyber" class="substyle-btn px-2.5 py-2 rounded-lg border border-brand-border bg-brand-dark text-xs font-bold text-brand-cyan text-center hover:border-slate-500">
+                Cyber
+              </button>
+              <button type="button" onclick="selectSubStyle('minimal')" id="substyle-minimal" class="substyle-btn px-2.5 py-2 rounded-lg border border-brand-border bg-brand-dark text-xs font-bold text-slate-300 text-center hover:border-slate-500">
+                Minimal
+              </button>
+            </div>
+
+            <div class="flex items-center gap-3 pt-1 text-xs">
+              <span class="text-slate-400">Vertical Position:</span>
+              <label class="flex items-center gap-1.5 cursor-pointer text-slate-300">
+                <input type="radio" name="sub-pos" value="middle" checked onchange="subtitlePosition = 'middle'" class="accent-brand-cyan">
+                Center Eye-Level
+              </label>
+              <label class="flex items-center gap-1.5 cursor-pointer text-slate-300">
+                <input type="radio" name="sub-pos" value="lower" onchange="subtitlePosition = 'lower'" class="accent-brand-cyan">
+                Lower-Third
+              </label>
+            <div class="space-y-1.5 bg-brand-dark/40 p-3 rounded-xl border border-brand-border">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Auto Video Background</label>
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <label class="flex items-center gap-2 p-2 rounded-lg bg-brand-dark border border-brand-border cursor-pointer hover:border-slate-500">
+                  <input type="radio" name="auto-bg-type" value="gameplay" checked onchange="autoBgType = 'gameplay'" class="accent-brand-cyan">
+                  <span>🎮 Warzone Gameplay</span>
+                </label>
+                <label class="flex items-center gap-2 p-2 rounded-lg bg-brand-dark border border-brand-border cursor-pointer hover:border-slate-500">
+                  <input type="radio" name="auto-bg-type" value="cyber_hud" onchange="autoBgType = 'cyber_hud'" class="accent-brand-cyan">
+                  <span>🎯 Cyber Radar HUD</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1-CLICK AUTO-CREATE BUTTON -->
+          <button type="button" id="auto-create-btn" onclick="autoCreateFullVideo()" class="w-full bg-gradient-to-r from-amber-400 via-orange-500 to-brand-red hover:from-amber-300 hover:to-orange-600 text-black font-black py-4 px-4 rounded-xl shadow-xl shadow-orange-500/20 flex items-center justify-center gap-2 transition-all transform active:scale-[0.98] text-sm">
+            <i data-lucide="zap" class="w-5 h-5 fill-black"></i>
+            ⚡ 1-Click Auto-Create Video (Voiceover + Subtitles)
+          </button>
+
+          <div class="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase justify-center tracking-widest my-0.5">
+            <span>── Or Manual Custom Clip ──</span>
+          </div>
+
+          <!-- MANUAL RENDER BUTTON -->
+          <button type="button" id="render-btn" onclick="startRenderShort()" class="w-full bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 text-xs transition">
+            <i data-lucide="scissors" class="w-4 h-4 text-brand-cyan"></i>
+            Render Manual Segment (With Uploaded Video)
+          </button>
+        </div>
+
+        <!-- RIGHT COLUMN: VIDEO PLAYERS & FINAL DOWNLOAD -->
+        <div class="lg:col-span-7 flex flex-col gap-6">
+
+          <!-- SOURCE VIDEO PREVIEW PLAYER -->
+          <div class="bg-brand-card p-5 rounded-2xl border border-brand-border">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="play" class="w-4 h-4 text-brand-cyan"></i>
+                Source Video Preview
+              </h3>
+              <span class="text-xs font-mono text-slate-400" id="source-meta-badge">No video loaded</span>
+            </div>
+
+            <div class="relative bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center border border-brand-border" id="source-player-container">
+              <video id="source-video-player" controls class="w-full h-full object-contain"></video>
+              <!-- LIVE CROP GUIDE OVERLAY -->
+              <div id="manual-crop-guide" class="absolute pointer-events-none border-2 border-dashed border-amber-400 bg-amber-400/15 hidden transition-all duration-75">
+                <span class="absolute top-1 left-1.5 bg-black/80 text-[9px] text-amber-400 font-mono font-bold px-1.5 py-0.5 rounded border border-amber-500/40">Crop Keep Region</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- RENDERED OUTPUT PREVIEW & DOWNLOAD -->
+          <div class="bg-brand-card p-5 rounded-2xl border border-brand-border flex-1 flex flex-col">
+            <div class="flex items-center justify-between mb-3 border-b border-brand-border pb-3">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="check-circle" class="w-4 h-4 text-brand-red"></i>
+                Exported Vertical 9:16 Short (1080x1920)
+              </h3>
+              <span class="text-xs font-mono text-emerald-400 hidden" id="render-done-badge">Ready for TikTok</span>
+            </div>
+
+            <!-- RENDER PLACEHOLDER / VIDEO CONTAINER -->
+            <div class="flex-1 flex flex-col items-center justify-center min-h-[300px]">
+              <!-- SPINNER -->
+              <div id="render-loading" class="hidden flex-col items-center justify-center gap-3 py-10">
+                <div class="w-12 h-12 border-4 border-brand-cyan/30 border-t-brand-cyan rounded-full animate-spin"></div>
+                <p class="text-sm font-semibold text-slate-300 animate-pulse">Rendering 9:16 clip & burning subtitles via FFmpeg...</p>
+                <p class="text-xs text-slate-500">This usually takes ~3 to 8 seconds.</p>
+              </div>
+
+              <!-- EMPTY STATE -->
+              <div id="render-empty" class="text-center py-10 text-slate-500 flex flex-col items-center gap-2">
+                <div class="w-14 h-20 border-2 border-dashed border-slate-700 rounded-lg flex items-center justify-center">
+                  <i data-lucide="smartphone" class="w-6 h-6 text-slate-600"></i>
+                </div>
+                <p class="text-xs">Your rendered vertical short clip will appear here with burned captions.</p>
+              </div>
+
+              <!-- RENDERED VIDEO PLAYER -->
+              <div id="rendered-video-container" class="hidden flex flex-col items-center w-full max-w-xs">
+                <div class="w-full rounded-2xl overflow-hidden shadow-2xl border border-brand-cyan/40 bg-black aspect-[9/16]">
+                  <video id="rendered-video-player" controls class="w-full h-full object-cover"></video>
+                </div>
+
+                <a id="download-clip-btn" href="#" download="tiktok_short.mp4" class="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 text-center flex items-center justify-center gap-2 transition">
+                  <i data-lucide="download" class="w-4 h-4"></i>
+                  Download 1080x1920 MP4
+                </a>
+
+                <!-- SHORTCUT TO VIRAL HASHTAGS GENERATOR -->
+                <button type="button" onclick="sendToHashtagsGenerator()" class="w-full mt-2.5 bg-brand-dark hover:bg-slate-800 border border-emerald-500/40 text-emerald-300 font-bold py-2.5 px-4 rounded-xl text-center flex items-center justify-center gap-2 text-xs transition shadow-sm">
+                  <i data-lucide="hash" class="w-4 h-4 text-emerald-400"></i>
+                  <span>Find Viral Captions & Hashtags For This Clip ➔</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- TAB 4: VIRAL HASHTAGS & TIKTOK SEO GENERATOR             -->
+    <!-- ======================================================== -->
+    <section id="tab-hashtags" class="tab-content hidden">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 class="text-2xl font-bold flex items-center gap-2">
+            <span class="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center">
+              <i data-lucide="hash" class="w-6 h-6"></i>
+            </span>
+            Viral Hashtags & TikTok Caption Generator
+          </h2>
+          <p class="text-sm text-slate-400 mt-1">Generate high-retention post descriptions, ranked hashtag tiers, and 1-click ready-to-paste bundles.</p>
+        </div>
+
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-semibold">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-400"></i>
+          TikTok SEO Engine 2026 Ready
+        </div>
+      </div>
+
+      <!-- SEARCH & TOPIC INPUT CARD -->
+      <div class="bg-brand-card p-6 rounded-2xl border border-brand-border shadow-xl mb-6">
+        <form onsubmit="handleGenerateHashtags(event)" class="space-y-4">
+          <div class="flex flex-col md:flex-row gap-3">
+            <div class="relative flex-1">
+              <i data-lucide="search" class="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
+              <input type="text" id="hashtag-topic-input" value="warzone clips" placeholder="Enter topic: e.g. warzone clips, broken smg loadout, rebirth island clutch, sniper montage..." class="w-full bg-brand-dark border border-brand-border rounded-xl pl-12 pr-4 py-3.5 text-sm font-semibold text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-cyan transition shadow-inner">
+            </div>
+            <button type="submit" id="gen-hashtags-btn" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-black font-extrabold px-6 py-3.5 rounded-xl shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 text-sm transition transform active:scale-95 whitespace-nowrap">
+              <i data-lucide="sparkles" class="w-4 h-4 fill-black"></i>
+              <span>Generate Viral Bundle</span>
+            </button>
+          </div>
+
+          <!-- QUICK SUGGESTION CHIPS -->
+          <div class="flex flex-wrap items-center gap-2 pt-1">
+            <span class="text-xs text-slate-400 font-semibold mr-1">🔥 Quick Warzone Topics:</span>
+            <button type="button" onclick="setHashtagTopic('warzone clips')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-brand-dark hover:bg-slate-800 text-slate-300 border border-brand-border hover:border-slate-500 transition">🎮 Warzone Clips</button>
+            <button type="button" onclick="setHashtagTopic('broken smg loadout')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-brand-dark hover:bg-slate-800 text-slate-300 border border-brand-border hover:border-slate-500 transition">💥 Broken SMG Loadout</button>
+            <button type="button" onclick="setHashtagTopic('rebirth island sniper')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-brand-dark hover:bg-slate-800 text-slate-300 border border-brand-border hover:border-slate-500 transition">🎯 Rebirth Sniper 1v4</button>
+            <button type="button" onclick="setHashtagTopic('camera break movement')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-brand-dark hover:bg-slate-800 text-slate-300 border border-brand-border hover:border-slate-500 transition">⚡ Movement Demon</button>
+            <button type="button" onclick="setHashtagTopic('funny death comms rage')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-brand-dark hover:bg-slate-800 text-slate-300 border border-brand-border hover:border-slate-500 transition">💀 Rage Death Comms</button>
+            <button type="button" onclick="setHashtagTopic('1v4 squad wipe clutch')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-brand-dark hover:bg-slate-800 text-slate-300 border border-brand-border hover:border-slate-500 transition">🏆 1v4 Squad Wipe</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- RESULTS SECTION -->
+      <div id="hashtags-results-container" class="space-y-6">
+
+        <!-- READY-TO-POST POST BUNDLE CARD -->
+        <div class="bg-gradient-to-br from-brand-card via-brand-card to-emerald-950/20 p-6 rounded-2xl border-2 border-emerald-500/40 shadow-2xl relative overflow-hidden">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+                <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+              </span>
+              <div>
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                  Ready-To-Post TikTok Caption Bundle
+                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">1-Click Copy</span>
+                </h3>
+                <p class="text-xs text-slate-400">Complete caption with selected hook + 5-8 ranked high-yield hashtags.</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span id="caption-length-badge" class="text-xs font-mono px-2.5 py-1 rounded-lg bg-brand-dark border border-brand-border text-emerald-400">
+                118 / 150 chars (Optimal Hook)
+              </span>
+              <button type="button" onclick="copyFullBundle()" class="bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition active:scale-95">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                <span id="copy-bundle-btn-text">Copy Full Bundle</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- BUNDLE PREVIEW BOX -->
+          <div class="bg-brand-dark/90 p-4 rounded-xl border border-brand-border font-mono text-xs text-slate-200 leading-relaxed relative">
+            <div id="bundle-preview-text" class="whitespace-pre-wrap select-all">Loading recommendation...</div>
+          </div>
+        </div>
+
+        <!-- 2-COLUMN GRID: HOOK CAPTIONS & HASHTAG TIERS -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+          <!-- LEFT COLUMN: 4 ALGORITHMIC HOOK CAPTIONS (7 COLS) -->
+          <div class="lg:col-span-7 space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                <i data-lucide="anchor" class="w-4 h-4 text-brand-cyan"></i>
+                Hook Caption Variations
+              </h3>
+              <span class="text-xs text-slate-400">Click any card to select for bundle</span>
+            </div>
+
+            <div id="captions-list" class="space-y-3">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN: RANKED HASHTAG TIERS & SEO TIPS (5 COLS) -->
+          <div class="lg:col-span-5 space-y-5">
+
+            <!-- RANKED HASHTAGS CARD -->
+            <div class="bg-brand-card p-5 rounded-2xl border border-brand-border space-y-4 shadow-lg">
+              <div class="flex items-center justify-between border-b border-brand-border pb-3">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                  <i data-lucide="tag" class="w-4 h-4 text-emerald-400"></i>
+                  Ranked Hashtag Tiers
+                </h3>
+                <button type="button" onclick="copyAllHashtags()" class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1">
+                  <i data-lucide="copy" class="w-3 h-3"></i>
+                  Copy All
+                </button>
+              </div>
+
+              <!-- TIER 1: MEGA VIRAL -->
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between text-[11px]">
+                  <span class="font-bold text-amber-400 flex items-center gap-1">
+                    <span>🌟 Tier 1: Mega Viral</span>
+                    <span class="text-[9px] text-slate-400">(1M+ Views / Broad Reach)</span>
+                  </span>
+                </div>
+                <div id="tier-mega-tags" class="flex flex-wrap gap-1.5">
+                  <!-- Populated -->
+                </div>
+              </div>
+
+              <!-- TIER 2: NICHE SEARCH SEO -->
+              <div class="space-y-1.5 pt-2 border-t border-brand-border/60">
+                <div class="flex items-center justify-between text-[11px]">
+                  <span class="font-bold text-brand-cyan flex items-center gap-1">
+                    <span>🎯 Tier 2: Niche Search SEO</span>
+                    <span class="text-[9px] text-slate-400">(Warzone & COD Community)</span>
+                  </span>
+                </div>
+                <div id="tier-niche-tags" class="flex flex-wrap gap-1.5">
+                  <!-- Populated -->
+                </div>
+              </div>
+
+              <!-- TIER 3: ALGORITHM FEED BOOSTERS -->
+              <div class="space-y-1.5 pt-2 border-t border-brand-border/60">
+                <div class="flex items-center justify-between text-[11px]">
+                  <span class="font-bold text-brand-red flex items-center gap-1">
+                    <span>🚀 Tier 3: Feed Boosters</span>
+                    <span class="text-[9px] text-slate-400">(FYP & Gaming Feed Distribution)</span>
+                  </span>
+                </div>
+                <div id="tier-algo-tags" class="flex flex-wrap gap-1.5">
+                  <!-- Populated -->
+                </div>
+              </div>
+            </div>
+
+            <!-- TIKTOK SEO BEST PRACTICES CARD -->
+            <div class="bg-brand-card p-5 rounded-2xl border border-brand-border space-y-3 shadow-lg">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="info" class="w-4 h-4 text-amber-400"></i>
+                TikTok SEO & Retention Rules
+              </h3>
+
+              <div id="seo-tips-list" class="space-y-2 text-xs text-slate-300">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-brand-card border border-brand-border px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-sm">
+    <i data-lucide="info" class="w-5 h-5 text-brand-cyan" id="toast-icon"></i>
+    <span id="toast-msg">Notification message</span>
+  </div>
+
+  <!-- MODAL: FREE VIRAL TIKTOK SOUND HUBS -->
+  <div id="viral-sounds-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-brand-card border border-brand-border rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-brand-border pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="p-2 rounded-xl bg-brand-red/10 border border-brand-red/30 text-brand-red">
+            <i data-lucide="music" class="w-5 h-5"></i>
+          </span>
+          <div>
+            <h3 class="text-base font-bold text-white">Free Viral TikTok MP3 & Audio Hubs</h3>
+            <p class="text-xs text-slate-400">Verified 100% active websites with trending TikTok sounds ready to download.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeViralSoundsModal()" class="text-slate-400 hover:text-white p-1 rounded-lg text-lg">✕</button>
+      </div>
+
+      <!-- 1-CLICK DIRECT EXTRACTOR INSIDE MODAL -->
+      <div class="p-3.5 rounded-xl border border-brand-cyan/40 bg-brand-cyan/5 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-brand-cyan flex items-center gap-1.5">
+            <i data-lucide="zap" class="w-4 h-4"></i>
+            1-Click Auto Extractor (No Website Leaving Needed):
+          </span>
+          <span class="text-[10px] text-emerald-400 font-mono font-bold">⚡ Instant Attach</span>
+        </div>
+        <p class="text-[11px] text-slate-300">
+          Have a link to a TikTok video or YouTube Short with a sound you love? Paste it here and we will extract and attach the MP3 directly to your video!
+        </p>
+        <div class="flex gap-2">
+          <input type="text" id="modal-audio-url-input" placeholder="Paste link (https://www.tiktok.com/@... or YouTube Shorts)..." class="flex-1 bg-black/70 border border-brand-border rounded-lg px-2.5 py-1.5 text-xs text-slate-100 font-mono focus:border-brand-cyan">
+          <button type="button" id="modal-extract-btn" onclick="handleExtractAudioFromUrl('modal-audio-url-input', 'modal-extract-btn')" class="px-3.5 py-1.5 bg-brand-cyan hover:bg-cyan-400 text-black font-bold text-xs rounded-lg transition shrink-0 flex items-center gap-1">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>Attach Sound</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider pt-1 flex items-center gap-2">
+        <span>Verified Free MP3 Download Sites</span>
+        <div class="flex-1 h-[1px] bg-brand-border"></div>
+      </div>
+
+      <div class="space-y-3">
+        <!-- SITE 1: MIXKIT TIKTOK HUB (200 OK - Direct 1-Click Free MP3 Download) -->
+        <div class="p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/5 flex items-start justify-between gap-3 hover:border-emerald-400/60 transition">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-sm text-emerald-400">Mixkit Trending TikTok Sounds</span>
+              <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-mono font-bold">⭐ #1 Best Free MP3s</span>
+            </div>
+            <p class="text-xs text-slate-300">Huge library of viral TikTok beats, trap rhythms, and phonk. <strong>Direct 1-click free MP3 download</strong> on every song. No sign-up, zero copyright strikes.</p>
+          </div>
+          <a href="https://mixkit.co/free-stock-music/discover/tiktok/" target="_blank" rel="noopener noreferrer" class="shrink-0 px-3.5 py-2 rounded-lg bg-emerald-500 text-black font-bold text-xs flex items-center gap-1 hover:bg-emerald-400 transition shadow">
+            Open Mixkit ↗
+          </a>
+        </div>
+
+        <!-- SITE 2: MIXKIT GAMING & MONTAGE BEATS (200 OK) -->
+        <div class="p-3.5 rounded-xl border border-purple-500/30 bg-purple-500/5 flex items-start justify-between gap-3 hover:border-purple-400/60 transition">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-sm text-purple-400">Mixkit High-Octane Gaming Music</span>
+              <span class="text-[10px] bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded font-mono font-bold">Fast Beats & Bass</span>
+            </div>
+            <p class="text-xs text-slate-300">Fast-paced electronic, trap drops, and aggressive hype tracks specifically designed for Warzone clutches and gameplay clips.</p>
+          </div>
+          <a href="https://mixkit.co/free-stock-music/tag/gaming/" target="_blank" rel="noopener noreferrer" class="shrink-0 px-3.5 py-2 rounded-lg bg-purple-500 text-white font-bold text-xs flex items-center gap-1 hover:bg-purple-600 transition shadow">
+            Open Gaming ↗
+          </a>
+        </div>
+
+        <!-- SITE 3: SSSTIK 1-CLICK TIKTOK MP3 EXTRACTOR (200 OK) -->
+        <div class="p-3.5 rounded-xl border border-brand-border bg-brand-dark/70 flex items-start justify-between gap-3 hover:border-brand-cyan/60 transition">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-sm text-brand-cyan">SSSTik TikTok MP3 Downloader</span>
+              <span class="text-[10px] bg-cyan-500/20 text-cyan-300 px-1.5 py-0.5 rounded font-mono font-bold">Web Extractor</span>
+            </div>
+            <p class="text-xs text-slate-300">Paste any viral TikTok link into their search bar to instantly download the original TikTok background audio file as an MP3.</p>
+          </div>
+          <a href="https://ssstik.io/download-tiktok-mp3" target="_blank" rel="noopener noreferrer" class="shrink-0 px-3.5 py-2 rounded-lg bg-brand-cyan text-black font-bold text-xs flex items-center gap-1 hover:bg-cyan-300 transition">
+            Open SSSTik ↗
+          </a>
+        </div>
+
+        <!-- SITE 4: OFFICIAL TIKTOK CREATIVE CENTER TREND RADAR (WORKING ACTIVE URL) -->
+        <div class="p-3.5 rounded-xl border border-brand-border bg-brand-dark/70 flex items-start justify-between gap-3 hover:border-brand-red/60 transition">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-sm text-brand-red">TikTok Creative Center Trend Radar</span>
+              <span class="text-[10px] bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded font-mono font-bold">Official TikTok</span>
+            </div>
+            <p class="text-xs text-slate-300">Official live ranking of the top 100 breakout songs and sounds on TikTok right now across the United States.</p>
+          </div>
+          <a href="https://ads.tiktok.com/business/creativecenter/inspiration/popular/music/pc/en" target="_blank" rel="noopener noreferrer" class="shrink-0 px-3.5 py-2 rounded-lg bg-brand-red text-white font-bold text-xs flex items-center gap-1 hover:bg-red-600 transition">
+            Open Radar ↗
+          </a>
+        </div>
+
+        <!-- SITE 5: MYINSTANTS COD SFX (200 OK) -->
+        <div class="p-3.5 rounded-xl border border-brand-border bg-brand-dark/70 flex items-start justify-between gap-3 hover:border-amber-400/60 transition">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-sm text-amber-400">MyInstants COD Sounds & Meme SFX</span>
+              <span class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-mono font-bold">SFX & Memes</span>
+            </div>
+            <p class="text-xs text-slate-300">Instant MP3 download of Warzone hitmarkers, sniper headshots, rage quit hot mics, and viral meme audio.</p>
+          </div>
+          <a href="https://www.myinstants.com/en/search/?name=call+of+duty" target="_blank" rel="noopener noreferrer" class="shrink-0 px-3.5 py-2 rounded-lg bg-amber-500 text-black font-bold text-xs flex items-center gap-1 hover:bg-amber-400 transition">
+            Open SFX ↗
+          </a>
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button type="button" onclick="closeViralSoundsModal()" class="px-5 py-2 rounded-xl bg-brand-dark border border-brand-border text-xs font-bold text-slate-200 hover:text-white transition">
+          Close Window
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
