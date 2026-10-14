@@ -1,29 +1,3 @@
 {
-  "version": 2,
-  "rewrites": [
-    {
-      "source": "/",
-      "destination": "/public/index.html"
-    },
-    {
-      "source": "/app.js",
-      "destination": "/public/app.js"
-    },
-    {
-      "source": "/style.css",
-      "destination": "/public/style.css"
-    },
-    {
-      "source": "/tracks/(.*)",
-      "destination": "/public/tracks/$1"
-    },
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/index.js"
-    },
-    {
-      "source": "/health",
-      "destination": "/api/index.js"
-    }
-  ]
+  "version": 2
 }

@@ -1,3 +1,3 @@
-const app = require('../server.js');
-
-module.exports = app;
+module.exports = (req, res) => {
+  res.json({ status: 'ok', service: 'TikTok Growth Suite API', timestamp: Date.now() });
+};
