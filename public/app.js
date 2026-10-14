@@ -180,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
   initGeminiKeyStatus();
   loadTrends();
+  initTrendAutoSync();
   loadHashtagsData('warzone clips');
   renderEndCardState();
   renderAudioPlaylist();
@@ -205,12 +206,84 @@ function switchTab(tabId) {
 }
 
 // ==========================================
-// TAB 1: TREND RADAR
+// TAB 1: TREND RADAR (AUTO-UPDATING VIRAL METAS & AUDIOS)
 // ==========================================
+// TAB 1: TREND RADAR (REAL-TIME AUTO-UPDATING METAS & AUDIOS)
+// ==========================================
+let currentTrendCategory = 'all';
+let autoTrendSyncEnabled = true;
+let autoTrendSyncCountdown = 60;
+let autoTrendSyncTimer = null;
+let trendLastUpdatedTimestamp = Date.now();
+let currentPlayingTrendAudioId = null;
+
+function initTrendAutoSync() {
+  if (autoTrendSyncTimer) clearInterval(autoTrendSyncTimer);
+
+  autoTrendSyncTimer = setInterval(() => {
+    // Update "Updated X ago" label
+    const lastUpdatedEl = document.getElementById('trend-last-updated');
+    if (lastUpdatedEl) {
+      const elapsedSec = Math.floor((Date.now() - trendLastUpdatedTimestamp) / 1000);
+      if (elapsedSec < 15) {
+        lastUpdatedEl.textContent = 'Just now';
+      } else if (elapsedSec < 60) {
+        lastUpdatedEl.textContent = `${elapsedSec}s ago`;
+      } else {
+        lastUpdatedEl.textContent = `${Math.floor(elapsedSec / 60)}m ago`;
+      }
+    }
+
+    if (!autoTrendSyncEnabled) return;
+
+    autoTrendSyncCountdown--;
+    const countdownEl = document.getElementById('trend-countdown');
+    if (countdownEl) {
+      countdownEl.textContent = `${autoTrendSyncCountdown}s`;
+    }
+
+    // Trigger auto-refresh when countdown hits 0
+    if (autoTrendSyncCountdown <= 0) {
+      autoTrendSyncCountdown = 60;
+      refreshLiveTrendsWithAi(true);
+    }
+  }, 1000);
+}
+
+function toggleAutoTrendSync() {
+  autoTrendSyncEnabled = !autoTrendSyncEnabled;
+  const label = document.getElementById('auto-sync-label');
+  const dot = document.getElementById('auto-sync-dot');
+  const btn = document.getElementById('auto-sync-toggle-btn');
+
+  if (autoTrendSyncEnabled) {
+    autoTrendSyncCountdown = 60;
+    if (label) label.textContent = 'Auto-Refresh: ON';
+    if (dot) {
+      dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse';
+    }
+    if (btn) {
+      btn.className = 'px-3 py-2 rounded-xl bg-brand-card hover:bg-slate-800 border border-brand-border text-emerald-400 text-xs font-bold flex items-center gap-1.5 transition';
+    }
+    showToast('⚡ Auto-Refresh enabled: Updating trends every 60 seconds', 'info');
+  } else {
+    if (label) label.textContent = 'Auto-Refresh: OFF';
+    if (dot) {
+      dot.className = 'w-1.5 h-1.5 rounded-full bg-slate-500';
+    }
+    if (btn) {
+      btn.className = 'px-3 py-2 rounded-xl bg-brand-card hover:bg-slate-800 border border-brand-border text-slate-400 text-xs font-bold flex items-center gap-1.5 transition';
+    }
+    showToast('Auto-Refresh paused', 'info');
+  }
+}
+
 async function loadTrends(category = 'all') {
+  currentTrendCategory = category;
   try {
     const res = await fetch(`/api/trends?category=${category}`);
     currentTrends = await res.json();
+    trendLastUpdatedTimestamp = Date.now();
     renderTrends(currentTrends);
   } catch (err) {
     console.error('Failed to load trends:', err);
@@ -218,10 +291,142 @@ async function loadTrends(category = 'all') {
   }
 }
 
+async function refreshLiveTrendsWithAi(isAuto = false) {
+  const btn = document.getElementById('refresh-trends-btn');
+  const icon = document.getElementById('refresh-trends-icon');
+  const originalHtml = btn?.innerHTML;
+
+  if (!isAuto) {
+    if (icon) icon.classList.add('animate-spin');
+    if (btn) btn.disabled = true;
+  }
+
+  try {
+    const apiKey = getGeminiKey();
+    const model = getGeminiModel();
+
+    const res = await fetch('/api/trends/refresh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ category: currentTrendCategory, apiKey, model })
+    });
+
+    const data = await res.json();
+    if (data.trends && Array.isArray(data.trends)) {
+      currentTrends = data.trends;
+      trendLastUpdatedTimestamp = Date.now();
+      autoTrendSyncCountdown = 60;
+      renderTrends(currentTrends);
+
+      if (!isAuto) {
+        if (data.source === 'gemini') {
+          showToast('🔥 Trend Radar refreshed with live Gemini intelligence & viral audios!', 'success');
+        } else if (data.source === 'live-rss') {
+          showToast('⚡ Trend Radar synchronized with live breaking game patches & news!', 'success');
+        } else {
+          showToast('⚡ Trend Radar updated with fresh breakout metas & audios!', 'success');
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Failed to refresh trends:', err);
+    if (!isAuto) showToast('Failed to refresh trends', 'error');
+  } finally {
+    if (!isAuto) {
+      if (icon) icon.classList.remove('animate-spin');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+      }
+    }
+    lucide.createIcons();
+  }
+}
+
 function filterTrends(category) {
-  document.querySelectorAll('.cat-pill').forEach(pill => pill.classList.remove('active'));
-  event.target.classList.add('active');
+  currentTrendCategory = category;
+  document.querySelectorAll('.cat-pill').forEach(pill => pill.classList.remove('active', 'bg-brand-border', 'text-white'));
+  document.querySelectorAll('.cat-pill').forEach(pill => pill.classList.add('bg-brand-card', 'text-slate-400'));
+  event.target.classList.add('active', 'bg-brand-border', 'text-white');
+  event.target.classList.remove('bg-brand-card', 'text-slate-400');
   loadTrends(category);
+}
+
+function previewTrendAudio(audioId) {
+  if (!audioId) return;
+  const player = document.getElementById('audio-preview-player');
+  if (!player) return;
+
+  const audioMap = {
+    'phonk_drift': '/tracks/phonk_drift.wav',
+    'dark_808_drill': '/tracks/dark_808_drill.wav',
+    'guitar_montage': '/tracks/guitar_montage.wav',
+    'sigma_drop': '/tracks/sigma_drop.wav',
+    'hyper_hardstyle': '/tracks/hyper_hardstyle.wav',
+    'slowed_reverb_phonk': '/tracks/slowed_reverb_phonk.wav',
+    'cyber_rush': '/tracks/cyber_rush.wav',
+    'suspense_drop': '/tracks/suspense_drop.wav',
+    'bouncy_trap': '/tracks/bouncy_trap.wav',
+    'lofi_gunsmith': '/tracks/lofi_gunsmith.wav'
+  };
+
+  const src = audioMap[audioId] || `/tracks/${audioId}.wav`;
+
+  // If already playing this track, toggle PAUSE
+  if (currentPlayingTrendAudioId === audioId && !player.paused) {
+    player.pause();
+    currentPlayingTrendAudioId = null;
+    renderTrends(currentTrends);
+    showToast('Paused audio preview', 'info');
+    return;
+  }
+
+  currentPlayingTrendAudioId = audioId;
+  player.src = src;
+  player.currentTime = 0;
+  player.play().catch(e => console.warn('Preview playback error:', e));
+
+  renderTrends(currentTrends);
+  showToast(`🎧 Playing viral audio: ${audioId.replace(/_/g, ' ').toUpperCase()}`, 'info');
+
+  // Auto stop preview after 8 seconds
+  setTimeout(() => {
+    if (currentPlayingTrendAudioId === audioId) {
+      player.pause();
+      currentPlayingTrendAudioId = null;
+      renderTrends(currentTrends);
+    }
+  }, 8500);
+}
+
+function useTrendInClipper(trendId) {
+  const trend = currentTrends.find(t => t.id === trendId);
+  if (!trend) return;
+
+  // Set hook card title in Clipper
+  const hookInput = document.getElementById('hookcard-text-input');
+  if (hookInput) {
+    hookInput.value = `“${trend.title.length > 55 ? trend.title.slice(0, 52) + '...' : trend.title} 💀🔥”`;
+  }
+
+  // Set banner text
+  const bannerInput = document.getElementById('facecam-banner-text');
+  if (bannerInput && (trend.title.includes('SMG') || trend.title.includes('Meta') || trend.title.includes('Class'))) {
+    bannerInput.value = trend.title.toUpperCase();
+  }
+
+  // Auto-select the matching viral audio track in the dropdown!
+  if (trend.audioId) {
+    const bgSelect = document.getElementById('bg-music-select');
+    if (bgSelect) {
+      bgSelect.value = trend.audioId;
+      handleSelectBgMusic(trend.audioId);
+    }
+  }
+
+  // Switch to clipper tab
+  switchTab('clipper');
+  showToast(`Loaded trend & synced viral audio in Clipper!`, 'success');
 }
 
 function renderTrends(trends) {
@@ -238,43 +443,77 @@ function renderTrends(trends) {
     if (t.velocityType === 'viral') velocityBadge = 'bg-red-500/10 text-brand-red border-brand-red/30';
     if (t.velocityType === 'breakout') velocityBadge = 'bg-cyan-500/10 text-brand-cyan border-brand-cyan/30';
 
+    const isPlaying = currentPlayingTrendAudioId === t.audioId;
+    const tiktokSearchUrl = `https://www.tiktok.com/search?q=${encodeURIComponent(t.tiktokAudioQuery || t.recommendedAudio || t.title)}`;
+
     return `
-      <div class="bg-brand-card p-5 rounded-2xl border border-brand-border hover:border-slate-600 transition flex flex-col justify-between shadow-lg">
+      <div class="bg-brand-card p-5 rounded-2xl border border-brand-border hover:border-slate-600 transition flex flex-col justify-between shadow-lg relative group">
         <div>
-          <!-- BADGES -->
-          <div class="flex items-center justify-between gap-2 mb-3">
+          <!-- BADGES & FRESHNESS -->
+          <div class="flex items-center justify-between gap-2 mb-3 flex-wrap">
             <span class="text-[11px] font-bold px-2.5 py-1 rounded-full border ${velocityBadge} flex items-center gap-1">
               ${t.velocity}
             </span>
-            <span class="text-[11px] font-mono text-emerald-400 font-semibold">${t.growth}</span>
+            <div class="flex items-center gap-1.5">
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-emerald-400 border border-emerald-500/20 font-bold">
+                ${t.freshness || '🔴 LIVE NOW'}
+              </span>
+              <span class="text-[11px] font-mono text-emerald-400 font-semibold">${t.growth}</span>
+            </div>
           </div>
 
           <!-- TITLE -->
           <h3 class="font-bold text-base text-slate-100 mb-2 leading-snug">${t.title}</h3>
 
-          <!-- DETAILS -->
-          <div class="space-y-2 text-xs text-slate-400 mb-4 bg-brand-dark/50 p-3 rounded-xl border border-brand-border">
+          <!-- DETAILS & VIRAL AUDIO BAR -->
+          <div class="space-y-2.5 text-xs text-slate-400 mb-4 bg-brand-dark/50 p-3 rounded-xl border border-brand-border">
             <div class="flex items-center gap-1.5">
-              <span class="text-slate-500 font-medium">Hook Strategy:</span>
+              <span class="text-slate-500 font-medium">Hook Pattern:</span>
               <span class="text-slate-200 font-medium">${t.hookPattern}</span>
             </div>
-            <div class="flex items-center gap-1.5">
-              <span class="text-slate-500 font-medium">Audio Mood:</span>
-              <span class="text-brand-cyan font-mono">${t.recommendedAudio}</span>
+
+            <!-- AUDIO BAR -->
+            <div class="flex flex-col gap-1.5 pt-1 border-t border-brand-border/60">
+              <div class="flex items-center justify-between gap-1.5">
+                <div class="flex items-center gap-1.5 overflow-hidden">
+                  <i data-lucide="music" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
+                  <span class="text-amber-400 font-mono text-[11px] font-bold truncate">${t.recommendedAudio}</span>
+                </div>
+              </div>
+
+              <!-- AUDIO INTERACTION CONTROLS -->
+              <div class="flex items-center justify-between gap-2 pt-1">
+                ${t.audioId ? `
+                  <button type="button" onclick="previewTrendAudio('${t.audioId}')" class="px-2.5 py-1 rounded-lg ${isPlaying ? 'bg-amber-500 text-black font-black animate-pulse' : 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300'} text-[11px] font-bold flex items-center gap-1.5 transition">
+                    <span>${isPlaying ? '⏸ Stop Audio' : '▶ Play Preview'}</span>
+                  </button>
+                ` : '<span></span>'}
+
+                <a href="${tiktokSearchUrl}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 text-slate-300 hover:text-white text-[11px] font-medium flex items-center gap-1 transition border border-brand-border">
+                  <span>🎵 TikTok Sound</span>
+                  <i data-lucide="external-link" class="w-3 h-3 text-slate-400"></i>
+                </a>
+              </div>
             </div>
           </div>
 
           <!-- HASHTAGS -->
           <div class="flex flex-wrap gap-1.5 mb-4">
-            ${t.hashtags.map(h => `<span class="text-[10px] px-2 py-0.5 rounded-md bg-brand-dark text-slate-400 border border-brand-border">${h}</span>`).join('')}
+            ${(t.hashtags || []).map(h => `<span class="text-[10px] px-2 py-0.5 rounded-md bg-brand-dark text-slate-400 border border-brand-border">${h}</span>`).join('')}
           </div>
         </div>
 
-        <!-- ACTION BUTTON -->
-        <button onclick="useTrendInScript('${t.id}')" class="w-full py-2.5 px-3 rounded-xl bg-brand-dark hover:bg-brand-red hover:text-white border border-brand-border hover:border-brand-red text-slate-200 text-xs font-bold flex items-center justify-center gap-2 transition group shadow-sm">
-          <span>Generate Script From Trend</span>
-          <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"></i>
-        </button>
+        <!-- ACTION BUTTONS -->
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="useTrendInScript('${t.id}')" class="py-2 px-3 rounded-xl bg-brand-dark hover:bg-brand-cyan hover:text-black border border-brand-border hover:border-brand-cyan text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition">
+            <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+            <span>To Script</span>
+          </button>
+          <button onclick="useTrendInClipper('${t.id}')" class="py-2 px-3 rounded-xl bg-gradient-to-r from-brand-red to-orange-500 hover:from-red-500 hover:to-orange-400 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-md shadow-red-500/20">
+            <i data-lucide="scissors" class="w-3.5 h-3.5"></i>
+            <span>Clip & Audio</span>
+          </button>
+        </div>
       </div>
     `;
   }).join('');

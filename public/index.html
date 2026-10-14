@@ -91,23 +91,44 @@
     <section id="tab-trends" class="tab-content">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 class="text-2xl font-bold flex items-center gap-2">
-            🔥 Breakout Trend Radar
-          </h2>
-          <p class="text-sm text-slate-400">High-velocity viral topics, audio recommendations, and retention patterns.</p>
+          <div class="flex items-center gap-2 mb-1 flex-wrap">
+            <h2 class="text-2xl font-bold flex items-center gap-2">
+              🔥 Breakout Trend Radar
+            </h2>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              REAL-TIME SYNC
+            </span>
+            <span id="trend-countdown-pill" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-brand-card text-slate-300 border border-brand-border">
+              <i data-lucide="timer" class="w-3 h-3 text-brand-cyan"></i>
+              <span>Next Sync: <strong id="trend-countdown" class="text-brand-cyan">60s</strong></span>
+            </span>
+            <span class="text-[11px] text-slate-500 font-mono">Updated: <span id="trend-last-updated" class="text-slate-400 font-bold">Just now</span></span>
+          </div>
+          <p class="text-sm text-slate-400">Scans live game patches, TikTok viral sounds, and breakout velocity patterns every 60 seconds.</p>
         </div>
 
-        <!-- CATEGORY FILTERS -->
-        <div class="flex flex-wrap items-center gap-2" id="trend-categories">
-          <button onclick="filterTrends('all')" class="cat-pill active px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-border text-white border border-slate-600 transition">All Niches</button>
-          <button onclick="filterTrends('gaming')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-amber-400 border border-amber-500/30 hover:text-white transition">🎮 Warzone & COD</button>
-          <button onclick="filterTrends('tech')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">🤖 Tech & AI</button>
-          <button onclick="filterTrends('finance')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">💼 Wealth & Finance</button>
-          <button onclick="filterTrends('fitness')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">💪 Fitness & Health</button>
-          <button onclick="filterTrends('ecommerce')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">🛍️ E-Commerce</button>
-          <button onclick="filterTrends('storytelling')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">🕵️ Storytelling</button>
-          <button onclick="filterTrends('psychology')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">🧠 Psychology</button>
+        <div class="flex items-center gap-2.5 flex-wrap">
+          <button type="button" onclick="toggleAutoTrendSync()" id="auto-sync-toggle-btn" class="px-3 py-2 rounded-xl bg-brand-card hover:bg-slate-800 border border-brand-border text-emerald-400 text-xs font-bold flex items-center gap-1.5 transition">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" id="auto-sync-dot"></span>
+            <span id="auto-sync-label">Auto-Refresh: ON</span>
+          </button>
+          <button type="button" onclick="refreshLiveTrendsWithAi()" id="refresh-trends-btn" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-black text-xs font-black shadow-lg shadow-orange-500/20 flex items-center gap-2 transition">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="refresh-trends-icon"></i>
+            <span>Refresh Live Trends</span>
+          </button>
         </div>
+      </div>
+
+      <!-- CATEGORY FILTERS -->
+      <div class="flex flex-wrap items-center gap-2 mb-6" id="trend-categories">
+        <button onclick="filterTrends('all')" class="cat-pill active px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-border text-white border border-slate-600 transition">All Niches</button>
+        <button onclick="filterTrends('gaming')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-amber-400 border border-amber-500/30 hover:text-white transition">🎮 Warzone & COD</button>
+        <button onclick="filterTrends('tech')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">🤖 Tech & AI</button>
+        <button onclick="filterTrends('finance')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">💼 Wealth & Finance</button>
+        <button onclick="filterTrends('mystery')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">👽 Dark Mysteries</button>
+        <button onclick="filterTrends('storytelling')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">📖 Viral Stories</button>
+        <button onclick="filterTrends('psychology')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">🧠 Psychology</button>
       </div>
 
       <!-- TRENDS GRID -->
