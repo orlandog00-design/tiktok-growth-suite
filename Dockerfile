@@ -29,8 +29,8 @@ COPY . .
 # Create uploads and output directories
 RUN mkdir -p uploads output
 
-# Expose server port
-EXPOSE 3000
+# Expose server ports (3000 for standard, 10000 for Render default)
+EXPOSE 3000 10000
 
 ENV PORT=3000
 ENV NODE_ENV=production
