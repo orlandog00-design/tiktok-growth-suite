@@ -1,28 +1,29 @@
 # Production Dockerfile for TikTok Growth Suite & Clipper
-FROM node:20-bullseye-slim
+FROM node:20-bookworm-slim
 
-# Install system dependencies: FFmpeg, Python, PIP, curl, ca-certificates
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install system dependencies: FFmpeg, curl, ca-certificates
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
-    python3 \
-    python3-pip \
     curl \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Install edge-tts (viral TikTok voiceovers) and yt-dlp
-RUN pip3 install --no-cache-dir edge-tts yt-dlp
+# Install standalone yt-dlp binary
+RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp \
+    && chmod a+rx /usr/local/bin/yt-dlp
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files first for Docker layer caching
+# Copy package files first for caching
 COPY package*.json ./
 
-# Install npm production dependencies
+# Install dependencies
 RUN npm install --omit=dev
 
-# Copy application source files
+# Copy application source
 COPY . .
 
 # Create uploads and output directories
@@ -34,5 +35,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV NODE_ENV=production
 
-# Start Express application
+# Start application
 CMD ["node", "server.js"]
