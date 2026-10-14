@@ -2634,8 +2634,8 @@ app.post('/api/auto-create-video', async (req, res) => {
 // Export app for serverless platforms (Vercel)
 module.exports = app;
 
-// Only start standalone listener when not running in Vercel serverless environment
-if (process.env.VERCEL !== '1') {
+// Only start standalone listener when running directly with node server.js
+if (require.main === module && !process.env.VERCEL) {
   // Start Server with 0.0.0.0 binding (crucial for Docker / Cloud platforms like Render)
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`=======================================================`);
