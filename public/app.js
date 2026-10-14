@@ -19,9 +19,166 @@ let subtitleStyle = 'warzone';
 let subtitlePosition = 'middle';
 let autoBgType = 'gameplay';
 
+// ==========================================
+// GOOGLE GEMINI PRO / FLASH API KEY MANAGEMENT (LOCALSTORAGE)
+// ==========================================
+const GEMINI_KEY_STORAGE = 'user_gemini_api_key';
+const GEMINI_MODEL_STORAGE = 'user_gemini_model';
+
+function getGeminiKey() {
+  return localStorage.getItem(GEMINI_KEY_STORAGE) || '';
+}
+
+function getGeminiModel() {
+  return localStorage.getItem(GEMINI_MODEL_STORAGE) || 'gemini-1.5-flash';
+}
+
+function openApiKeyModal() {
+  const modal = document.getElementById('gemini-modal');
+  const input = document.getElementById('gemini-key-input');
+  const select = document.getElementById('gemini-model-select');
+  const result = document.getElementById('gemini-key-verify-result');
+
+  if (input) input.value = getGeminiKey();
+  if (select) select.value = getGeminiModel();
+  if (result) result.classList.add('hidden');
+
+  modal?.classList.remove('hidden');
+  lucide.createIcons();
+}
+
+function closeApiKeyModal() {
+  document.getElementById('gemini-modal')?.classList.add('hidden');
+}
+
+function toggleKeyVisibility() {
+  const input = document.getElementById('gemini-key-input');
+  if (!input) return;
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+async function saveAndVerifyGeminiKey() {
+  const input = document.getElementById('gemini-key-input');
+  const modelSelect = document.getElementById('gemini-model-select');
+  const resultEl = document.getElementById('gemini-key-verify-result');
+  const btn = document.getElementById('save-gemini-key-btn');
+
+  const key = input?.value?.trim();
+  const model = modelSelect?.value || 'gemini-1.5-flash';
+
+  if (!key) {
+    showToast('Please paste a Gemini API key or click Remove Key.', 'error');
+    return;
+  }
+
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = `<span class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Verifying...`;
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/gemini/verify-key', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKey: key })
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.valid) {
+      throw new Error(data.error || 'Invalid API key');
+    }
+
+    // Save to localStorage
+    localStorage.setItem(GEMINI_KEY_STORAGE, key);
+    localStorage.setItem(GEMINI_MODEL_STORAGE, model);
+
+    resultEl.className = 'p-2.5 rounded-lg text-xs font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+    resultEl.textContent = `✅ Verified! Successfully connected to Google Gemini (${model}).`;
+    resultEl.classList.remove('hidden');
+
+    updateGeminiKeyBadge(true, model);
+    showToast('Gemini API Key saved and verified!', 'success');
+
+    setTimeout(() => {
+      closeApiKeyModal();
+    }, 1200);
+  } catch (err) {
+    resultEl.className = 'p-2.5 rounded-lg text-xs font-mono bg-rose-500/20 text-rose-300 border border-rose-500/40';
+    resultEl.textContent = `❌ Verification failed: ${err.message}`;
+    resultEl.classList.remove('hidden');
+    showToast(err.message, 'error');
+  } finally {
+    btn.innerHTML = originalHtml;
+    btn.disabled = false;
+    lucide.createIcons();
+  }
+}
+
+function clearGeminiKey() {
+  localStorage.removeItem(GEMINI_KEY_STORAGE);
+  const input = document.getElementById('gemini-key-input');
+  if (input) input.value = '';
+  const resultEl = document.getElementById('gemini-key-verify-result');
+  if (resultEl) {
+    resultEl.className = 'p-2.5 rounded-lg text-xs font-mono bg-brand-dark text-slate-400 border border-brand-border';
+    resultEl.textContent = 'Key removed from your browser storage.';
+    resultEl.classList.remove('hidden');
+  }
+  updateGeminiKeyBadge(false);
+  showToast('Gemini API Key removed.', 'info');
+}
+
+function updateGeminiKeyBadge(isConnected, model = 'gemini-1.5-flash') {
+  const statusText = document.getElementById('gemini-key-status-text');
+  const indicator = document.getElementById('gemini-key-indicator');
+  const btn = document.getElementById('gemini-key-btn');
+
+  if (isConnected) {
+    const isPro = model.includes('pro');
+    if (statusText) statusText.textContent = isPro ? 'Gemini 1.5 Pro' : 'Gemini 1.5 Flash';
+    if (indicator) {
+      indicator.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+    }
+    btn?.classList.add('border-emerald-500/40', 'bg-emerald-500/10', 'text-emerald-300');
+    btn?.classList.remove('border-purple-500/40', 'bg-purple-500/10', 'text-purple-300');
+  } else {
+    if (statusText) statusText.textContent = 'Connect Gemini Key';
+    if (indicator) {
+      indicator.className = 'w-2 h-2 rounded-full bg-slate-500';
+    }
+    btn?.classList.remove('border-emerald-500/40', 'bg-emerald-500/10', 'text-emerald-300');
+    btn?.classList.add('border-purple-500/40', 'bg-purple-500/10', 'text-purple-300');
+  }
+}
+
+function initGeminiKeyStatus() {
+  const key = getGeminiKey();
+  if (key && key.length > 10) {
+    updateGeminiKeyBadge(true, getGeminiModel());
+  } else {
+    updateGeminiKeyBadge(false);
+  }
+}
+
+// AI VOICE NARRATOR STATE
+let selectedAiVoice = 'christopher';
+
+function selectAiVoice(voice) {
+  selectedAiVoice = voice;
+  document.querySelectorAll('.voice-btn').forEach(b => {
+    b.classList.remove('active', 'border-purple-500', 'bg-purple-500/20', 'text-white');
+    b.classList.add('border-brand-border', 'bg-brand-dark', 'text-slate-400');
+  });
+  const activeBtn = document.getElementById(`voice-btn-${voice}`);
+  if (activeBtn) {
+    activeBtn.classList.add('active', 'border-purple-500', 'bg-purple-500/20', 'text-white');
+    activeBtn.classList.remove('border-brand-border', 'bg-brand-dark', 'text-slate-400');
+  }
+}
+
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
+  initGeminiKeyStatus();
   loadTrends();
   loadHashtagsData('warzone clips');
   renderEndCardState();
@@ -170,13 +327,14 @@ document.getElementById('script-form')?.addEventListener('submit', async (e) => 
   const btn = document.getElementById('generate-script-btn');
   const originalHtml = btn.innerHTML;
   btn.innerHTML = `<span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Generating Viral Content...`;
-  btn.disabled = true;
+  const apiKey = getGeminiKey();
+  const model = getGeminiModel();
 
   try {
     const res = await fetch('/api/generate-script', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ topic, niche, tone, duration, goal })
+      body: JSON.stringify({ topic, niche, tone, duration, goal, apiKey, model })
     });
 
     const data = await res.json();
@@ -185,7 +343,12 @@ document.getElementById('script-form')?.addEventListener('submit', async (e) => 
     currentScript = data;
     selectedHookIndex = 0;
     renderScriptOutput(data);
-    showToast('Viral script generated with 4 hooks!', 'success');
+
+    if (data.source === 'gemini') {
+      showToast(`⚡ Script generated with Google Gemini (${data.model})!`, 'success');
+    } else {
+      showToast('Viral script generated with 4 hooks!', 'success');
+    }
   } catch (err) {
     console.error('Error generating script:', err);
     showToast(err.message, 'error');
@@ -1308,7 +1471,8 @@ async function startRenderShort() {
         subtitleStyle,
         subtitlePosition,
         subtitleText,
-        subtitlePacing
+        subtitlePacing,
+        aiVoice: selectedAiVoice
       })
     });
 
@@ -1420,7 +1584,8 @@ async function autoCreateFullVideo() {
         subtitleStyle,
         subtitlePosition,
         subtitlePacing,
-        includeBeat: true
+        includeBeat: true,
+        aiVoice: selectedAiVoice
       })
     });
 

@@ -66,10 +66,18 @@
         </button>
       </nav>
 
-      <!-- SYSTEM STATUS BADGE -->
-      <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        FFmpeg Engine Ready
+      <!-- GEMINI API KEY & SYSTEM STATUS -->
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="openApiKeyModal()" id="gemini-key-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-purple-500/40 bg-purple-500/10 hover:bg-purple-500/20 text-xs font-semibold text-purple-300 hover:text-white transition shadow-sm">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-purple-400"></i>
+          <span id="gemini-key-status-text">Gemini AI Key</span>
+          <span id="gemini-key-indicator" class="w-2 h-2 rounded-full bg-slate-500"></span>
+        </button>
+
+        <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          FFmpeg Engine Ready
+        </div>
       </div>
     </div>
   </header>
@@ -139,13 +147,13 @@
                   <option value="Call of Duty / Warzone Meta">🎮 Warzone Meta & Loadouts</option>
                   <option value="Warzone Movement & Rebirth">🏃 Warzone Movement & Tips</option>
                   <option value="Gaming Clutch & Rage Comms">🔥 1v4 Clutch & Rage Comms</option>
-                  <option value="Tech & AI">Tech & AI</option>
-                  <option value="Personal Finance">Personal Finance</option>
-                  <option value="Fitness & Health">Fitness & Health</option>
-                  <option value="E-Commerce / TikTok Shop">E-Commerce</option>
-                  <option value="Storytelling & Mystery">Storytelling</option>
-                  <option value="Self Improvement">Self Improvement</option>
-                  <option value="General Entertainment">Entertainment</option>
+                  <option value="Dark Mysteries & Conspiracies">👽 Dark Mysteries & Conspiracies (No Gameplay)</option>
+                  <option value="Viral Reddit Stories & Confessions">📖 Viral Reddit Stories & Drama (No Gameplay)</option>
+                  <option value="Mind-Blowing Science & History Facts">🧠 Mind-Blowing Facts (No Gameplay)</option>
+                  <option value="Tech & AI Life Hacks">🤖 Tech & AI Hacks (No Gameplay)</option>
+                  <option value="Personal Finance & Money Secrets">💰 Money & Wealth Hacks (No Gameplay)</option>
+                  <option value="Fitness & Health">💪 Fitness & Gym</option>
+                  <option value="General Entertainment">🚀 Custom / Any Topic</option>
                 </select>
               </div>
 
@@ -589,6 +597,31 @@
                 </button>
               </div>
               <p class="text-[10px] text-slate-400">💡 <em>Tip: Put each caption on a new line in the box above to control exactly what words appear in each frame!</em></p>
+            </div>
+
+            <!-- AI VOICEOVER NARRATOR SELECTOR -->
+            <div class="space-y-1.5 p-2.5 rounded-xl bg-brand-dark/70 border border-brand-border">
+              <div class="flex items-center justify-between">
+                <label class="block text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
+                  <i data-lucide="mic" class="w-3.5 h-3.5 text-purple-400"></i>
+                  <span>AI Voice Narrator (Reads Captions):</span>
+                </label>
+                <span class="text-[9px] text-purple-300 font-mono font-bold">100% Synced</span>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[10px]">
+                <button type="button" onclick="selectAiVoice('christopher')" id="voice-btn-christopher" class="voice-btn active px-2 py-1.5 rounded-lg border border-purple-500 bg-purple-500/20 text-white font-bold text-center transition">
+                  🗣️ Deep Hype (M)
+                </button>
+                <button type="button" onclick="selectAiVoice('guy')" id="voice-btn-guy" class="voice-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark text-slate-400 hover:text-white font-bold text-center transition">
+                  ⚡ Fast TikTok (M)
+                </button>
+                <button type="button" onclick="selectAiVoice('jenny')" id="voice-btn-jenny" class="voice-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark text-slate-400 hover:text-white font-bold text-center transition">
+                  🎙️ Storyteller (F)
+                </button>
+                <button type="button" onclick="selectAiVoice('ryan')" id="voice-btn-ryan" class="voice-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark text-slate-400 hover:text-white font-bold text-center transition">
+                  🇬🇧 Documentary
+                </button>
+              </div>
             </div>
 
             <!-- WIPE OLD CAPTIONS TOGGLE -->
@@ -1152,6 +1185,69 @@
         <button type="button" onclick="closeViralSoundsModal()" class="px-5 py-2 rounded-xl bg-brand-dark border border-brand-border text-xs font-bold text-slate-200 hover:text-white transition">
           Close Window
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: GOOGLE GEMINI PRO / FLASH API KEY SETTINGS        -->
+  <!-- ======================================================== -->
+  <div id="gemini-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden p-4">
+    <div class="bg-brand-card border border-purple-500/50 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-brand-border pb-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="sparkles" class="w-5 h-5 text-purple-400"></i>
+          <h3 class="text-base font-bold text-white">Google Gemini AI Settings</h3>
+        </div>
+        <button type="button" onclick="closeApiKeyModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-300">
+        <p>Bring your own free Google Gemini API key to unlock live AI scriptwriting, viral hooks, and non-gameplay faceless video generations.</p>
+        
+        <div class="p-3 rounded-xl bg-purple-500/10 border border-purple-500/30 text-[11px] text-purple-200 space-y-1">
+          <div class="font-bold flex items-center gap-1.5">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>100% Private Client-Side Storage</span>
+          </div>
+          <p>Your API key is saved solely inside your own web browser's storage (<code class="bg-black/40 px-1 py-0.5 rounded text-purple-300 font-mono">localStorage</code>). It is never shared with other visitors or stored in any database.</p>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-200 mb-1">Your Gemini API Key:</label>
+          <div class="relative">
+            <input type="password" id="gemini-key-input" placeholder="AIzaSy..." class="w-full bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2 text-xs font-mono text-white focus:outline-none focus:border-purple-500 pr-10">
+            <button type="button" onclick="toggleKeyVisibility()" class="absolute right-2.5 top-2 text-slate-400 hover:text-white">
+              <i data-lucide="eye" id="key-visibility-icon" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-200 mb-1">Select Gemini AI Model:</label>
+          <select id="gemini-model-select" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+            <option value="gemini-1.5-flash">⚡ Gemini 1.5 Flash (Recommended - Instant & Free)</option>
+            <option value="gemini-1.5-pro">🧠 Gemini 1.5 Pro (Deep Retention & Creative Storyteller)</option>
+          </select>
+        </div>
+
+        <div id="gemini-key-verify-result" class="hidden p-2.5 rounded-lg text-xs font-mono"></div>
+
+        <div class="flex items-center justify-between pt-2 border-t border-brand-border">
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-purple-400 hover:text-purple-300 underline flex items-center gap-1 font-semibold">
+            <span>Get Free Gemini Key ↗</span>
+          </a>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="clearGeminiKey()" class="px-3 py-1.5 rounded-xl border border-rose-500/40 text-rose-400 hover:bg-rose-500/10 text-xs font-bold transition">
+              Remove Key
+            </button>
+            <button type="button" onclick="saveAndVerifyGeminiKey()" id="save-gemini-key-btn" class="px-4 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-lg shadow-purple-500/20 transition flex items-center gap-1.5">
+              <span>Save & Verify Key</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

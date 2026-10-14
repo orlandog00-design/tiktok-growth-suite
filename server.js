@@ -44,11 +44,20 @@ function getYtDlpPath() {
   return 'yt-dlp';
 }
 
-async function generateVoiceoverAudio(text, outputPath) {
+async function generateVoiceoverAudio(text, outputPath, voice = 'christopher') {
+  const voiceMap = {
+    'christopher': 'en-US-ChristopherNeural',
+    'guy': 'en-US-GuyNeural',
+    'jenny': 'en-US-JennyNeural',
+    'ryan': 'en-GB-RyanNeural',
+    'aria': 'en-US-AriaNeural'
+  };
+  const edgeVoice = voiceMap[voice] || 'en-US-ChristopherNeural';
+
   // Option 1: Edge TTS (ultra-clean neural voices) if available
   try {
     const res = spawnSync('edge-tts', [
-      '--voice', 'en-US-ChristopherNeural',
+      '--voice', edgeVoice,
       '--text', text,
       '--write-media', outputPath
     ]);
@@ -60,11 +69,13 @@ async function generateVoiceoverAudio(text, outputPath) {
   // Option 2: Windows PowerShell fallback
   if (process.platform === 'win32') {
     const psScript = path.join(__dirname, 'generate_voice.ps1');
+    const gender = (voice === 'jenny' || voice === 'aria') ? 'Female' : 'Male';
     const res = spawnSync('powershell', [
       '-ExecutionPolicy', 'Bypass',
       '-File', psScript,
       '-text', text,
-      '-output', outputPath
+      '-output', outputPath,
+      '-gender', gender
     ]);
     if (res.status === 0 && fs.existsSync(outputPath)) {
       return;
@@ -282,19 +293,129 @@ app.get('/api/trends', (req, res) => {
 });
 
 // ==========================================
-// 2. VIRAL SCRIPT & HOOK GENERATOR ENGINE
+// 2. VIRAL SCRIPT & HOOK GENERATOR ENGINE (GEMINI PRO + NEURAL TEMPLATES)
 // ==========================================
+async function callGeminiApi({ apiKey, model = 'gemini-1.5-flash', systemPrompt, userPrompt }) {
+  const cleanModel = model.replace(/^models\//, '');
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent?key=${apiKey}`;
+
+  const payload = {
+    contents: [
+      {
+        role: 'user',
+        parts: [
+          { text: `${systemPrompt}\n\nUSER PROMPT:\n${userPrompt}` }
+        ]
+      }
+    ],
+    generationConfig: {
+      temperature: 0.8,
+      topP: 0.95,
+      responseMimeType: "application/json"
+    }
+  };
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.error?.message || `Gemini API returned status ${res.status}`);
+  }
+
+  const data = await res.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error('No content returned from Gemini API.');
+  return JSON.parse(text);
+}
+
+app.post('/api/gemini/verify-key', async (req, res) => {
+  try {
+    const { apiKey } = req.body;
+    if (!apiKey || apiKey.trim().length < 10) {
+      return res.status(400).json({ valid: false, error: 'Please enter a valid Gemini API key.' });
+    }
+
+    const testUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey.trim()}`;
+    const testRes = await fetch(testUrl);
+    if (testRes.ok) {
+      const data = await testRes.json();
+      const modelNames = (data.models || []).map(m => m.name.replace('models/', ''));
+      return res.json({ valid: true, models: modelNames });
+    } else {
+      const errData = await testRes.json().catch(() => ({}));
+      return res.status(401).json({ valid: false, error: errData.error?.message || 'Invalid Gemini API key.' });
+    }
+  } catch (e) {
+    return res.status(500).json({ valid: false, error: e.message });
+  }
+});
+
 app.post('/api/generate-script', async (req, res) => {
   try {
-    const { topic, niche = 'general', tone = 'energetic', duration = '30', goal = 'comments', apiKey } = req.body;
+    const { topic, niche = 'general', tone = 'energetic', duration = '30', goal = 'comments', apiKey, model = 'gemini-1.5-flash' } = req.body;
 
     if (!topic || topic.trim() === '') {
       return res.status(400).json({ error: 'Please enter a topic or concept.' });
     }
 
-    // If user provided a Gemini or OpenAI key, we can call it. Otherwise, use our neural copywriting generator:
+    // Live Google Gemini Pro/Flash API call if visitor provided their own key:
+    if (apiKey && apiKey.trim().length > 10) {
+      try {
+        console.log(`Generating script via Google Gemini (${model}) for topic: ${topic}`);
+        const systemPrompt = `You are an elite viral TikTok and YouTube Shorts retention strategist. 
+Your goal is to generate a high-performing 9:16 short-form video script that maximizes watch time, shares, and comments.
+Output MUST strictly follow this JSON schema:
+{
+  "title": "Catchy headline for the video",
+  "hooks": [
+    {
+      "type": "Hook archetype name (e.g. Pattern Interrupt, Contradiction, Secret Leak)",
+      "visual": "[VISUAL: Description of fast-paced visual action or text hook on screen]",
+      "spoken": "The exact spoken hook words (under 12 words, punchy)",
+      "score": "99% Retention Score"
+    }
+  ],
+  "segments": [
+    {
+      "timecode": "0:00 - 0:03",
+      "spoken": "Spoken sentence",
+      "visual": "[VISUAL: Fast-paced visual cue]"
+    }
+  ],
+  "endingCTA": "Punchy call to action (e.g. Save this video before your next match or comment your thoughts)",
+  "hashtags": ["#tag1", "#tag2", "#tag3", "#tag4", "#tag5"]
+}`;
+
+        const userPrompt = `Create a viral ${duration}-second TikTok script on the topic: "${topic}".
+Niche: ${niche}
+Tone: ${tone}
+Goal: ${goal}
+Provide 3 distinct viral hook options to choose from, followed by 3-5 punchy video segments, a high-converting ending CTA, and 5-8 trending hashtags.`;
+
+        const geminiResult = await callGeminiApi({ apiKey: apiKey.trim(), model, systemPrompt, userPrompt });
+        return res.json({
+          source: 'gemini',
+          model,
+          hooks: geminiResult.hooks || geminiResult.hookOptions || [],
+          segments: geminiResult.segments || [],
+          endingCTA: geminiResult.endingCTA || 'Save this video before your next match!',
+          hashtags: geminiResult.hashtags || ['#viral', '#trending', '#fyp']
+        });
+      } catch (geminiErr) {
+        console.error('Gemini API call failed:', geminiErr.message);
+        return res.status(500).json({
+          error: `Gemini API Error: ${geminiErr.message}. Check your key or quota in Settings.`
+        });
+      }
+    }
+
+    // Built-in neural generator if no API key is provided
     const result = generateViralScript({ topic, niche, tone, duration, goal });
-    res.json(result);
+    res.json({ source: 'builtin', ...result });
   } catch (err) {
     console.error('Error generating script:', err);
     res.status(500).json({ error: 'Failed to generate script.' });
@@ -1915,7 +2036,8 @@ app.post('/api/auto-create-video', async (req, res) => {
       backgroundType = 'gameplay',
       subtitleStyle = 'warzone',
       subtitlePosition = 'middle',
-      includeBeat = true
+      includeBeat = true,
+      aiVoice = 'christopher'
     } = req.body;
 
     const rawText = (scriptText || "Stop using your current class in Warzone right now! This broken SMG melts in 420 milliseconds with zero recoil. Save this video before your next match!").trim();
@@ -1926,7 +2048,7 @@ app.post('/api/auto-create-video', async (req, res) => {
     const outputPath = path.join(__dirname, 'output', outputFile);
 
     // 1. Generate Voiceover via Cross-Platform TTS (Edge TTS or PowerShell fallback)
-    await generateVoiceoverAudio(rawText, voiceWav);
+    await generateVoiceoverAudio(rawText, voiceWav, aiVoice);
 
     // 2. Measure Voiceover Duration
     const probeRes = spawnSync(getFfprobePath(), [
