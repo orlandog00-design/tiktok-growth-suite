@@ -497,30 +497,7 @@ function selectSubtitlePacing(pacing) {
   }
 }
 
-let endCardSlides = [
-  {
-    id: 'slide_1',
-    imagePath: 'uploads/upload_1792000702252-753856736.png',
-    imageUrl: '/uploads/upload_1792000702252-753856736.png',
-    filename: 'VOYAK_KT-3.png',
-    duration: 3.0,
-    zoom: 1.45,
-    focus: 'left',
-    title: 'PRIMARY: VOYAK KT-3 [LONG RANGE]',
-    subtitle: 'Screenshot & save for your next match'
-  },
-  {
-    id: 'slide_2',
-    imagePath: 'uploads/upload_1792000712867-136515822.png',
-    imageUrl: '/uploads/upload_1792000712867-136515822.png',
-    filename: 'VMP_SMG.png',
-    duration: 3.0,
-    zoom: 1.45,
-    focus: 'left',
-    title: 'SECONDARY: VMP [CLOSE RANGE]',
-    subtitle: 'Screenshot & save for your next match'
-  }
-];
+let endCardSlides = [];
 
 function selectPictureMode(mode) {
   pictureMode = mode;
@@ -967,30 +944,41 @@ let bgMusicTrack = 'phonk_drift';
 let origAudioMode = 'mute'; // 'mute', 'low', 'full'
 
 // MULTI-AUDIO TRACKS PLAYLIST (supports multiple short MP3s with custom order)
-let customAudioTracks = [
-  {
-    id: 'track_1',
-    filename: 'clip_intro_sound.mp3',
-    audioUrl: '/uploads/upload_1792002059776-908939562.mp3',
-    audioPath: 'uploads/upload_1792002059776-908939562.mp3',
-    duration: 4.1
-  },
-  {
-    id: 'track_2',
-    filename: 'phonk_beat_drop.mp3',
-    audioUrl: '/uploads/upload_1792002109261-833730986.mp3',
-    audioPath: 'uploads/upload_1792002109261-833730986.mp3',
-    duration: 6.9
-  },
-  {
-    id: 'track_3',
-    filename: 'custom_audio_clip.mp3',
-    audioUrl: '/uploads/upload_1792002831507-543969206.mp3',
-    audioPath: 'uploads/upload_1792002831507-543969206.mp3',
-    duration: 4.1
-  }
-];
+let customAudioTracks = [];
 let currentPreviewIdx = null;
+
+function resetEditorState() {
+  endCardSlides = [];
+  customAudioTracks = [];
+  imageOverlays = [];
+  activeVideo = null;
+
+  const subtitlesInput = document.getElementById('subtitles-input');
+  if (subtitlesInput) subtitlesInput.value = '';
+  const hookInput = document.getElementById('hookcard-text-input');
+  if (hookInput) hookInput.value = '';
+  const bannerInput = document.getElementById('facecam-banner-text');
+  if (bannerInput) bannerInput.value = '';
+
+  renderEndCardState();
+  renderAudioPlaylist();
+
+  // Reset source video player back to clean placeholder
+  const videoPlayer = document.getElementById('source-video-player');
+  if (videoPlayer) {
+    videoPlayer.src = '';
+    videoPlayer.classList.add('hidden');
+  }
+  const videoPrompt = document.getElementById('video-prompt-placeholder');
+  if (videoPrompt) videoPrompt.classList.remove('hidden');
+
+  // Reset rendered player container
+  document.getElementById('rendered-video-container')?.classList.add('hidden');
+  document.getElementById('render-empty')?.classList.remove('hidden');
+  document.getElementById('render-done-badge')?.classList.add('hidden');
+
+  showToast('Workspace reset! Ready for a fresh clip from scratch.', 'success');
+}
 
 function handleSelectBgMusic(track) {
   bgMusicTrack = track;

@@ -2,6 +2,12 @@ param(
     [string]$text = "Stop using your current class in Warzone right now. This broken SMG melts in 420 milliseconds.",
     [string]$output = "sample\test_voice.wav"
 )
+
+$outDir = Split-Path -Parent $output
+if ($outDir -and -not (Test-Path $outDir)) {
+    New-Item -ItemType Directory -Path $outDir -Force | Out-Null
+}
+
 Add-Type -AssemblyName System.Speech
 $synth = New-Object System.Speech.Synthesis.SpeechSynthesizer
 $synth.SelectVoiceByHints([System.Speech.Synthesis.VoiceGender]::Male)

@@ -60,19 +60,17 @@ async function generateVoiceoverAudio(text, outputPath) {
   // Option 2: Windows PowerShell fallback
   if (process.platform === 'win32') {
     const psScript = path.join(__dirname, 'generate_voice.ps1');
-    const ttsProc = spawn('powershell', [
+    const res = spawnSync('powershell', [
       '-ExecutionPolicy', 'Bypass',
       '-File', psScript,
-      '-Text', text,
-      '-OutputPath', outputPath
+      '-text', text,
+      '-output', outputPath
     ]);
-    await new Promise((resolve, reject) => {
-      ttsProc.on('close', code => {
-        if (code === 0 && fs.existsSync(outputPath)) resolve();
-        else reject(new Error('PowerShell Voiceover generation failed'));
-      });
-    });
-    return;
+    if (res.status === 0 && fs.existsSync(outputPath)) {
+      return;
+    }
+    console.error('PowerShell TTS failed:', res.stderr?.toString());
+    throw new Error('PowerShell Voiceover generation failed');
   }
 
   // Option 3: Fallback silent audio with ffmpeg if no TTS engine is present
