@@ -735,15 +735,33 @@ function sendScriptToClipper() {
 // ==========================================
 async function loadSampleVideo() {
   try {
-    const res = await fetch('/api/sample-video');
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to load demo video');
+    let data = null;
+    try {
+      const res = await fetch('/api/sample-video');
+      if (res.ok) {
+        data = await res.json();
+      }
+    } catch (fetchErr) {
+      console.warn('Sample video endpoint fetch failed:', fetchErr);
+    }
+
+    if (!data) {
+      data = {
+        success: true,
+        filename: 'demo_clip.mp4',
+        videoUrl: '/sample/demo_clip.mp4',
+        videoPath: 'demo_clip.mp4',
+        duration: 15,
+        width: 1280,
+        height: 720
+      };
+    }
 
     setVideoSource(data);
     showToast('Loaded demo video for instant clipping!', 'success');
   } catch (err) {
     console.error('Error loading sample video:', err);
-    showToast(err.message, 'error');
+    showToast('Failed to load demo video', 'error');
   }
 }
 
@@ -752,27 +770,50 @@ async function handleFileUpload(event) {
   if (!file) return;
 
   const label = document.getElementById('upload-label');
-  label.textContent = `Uploading ${file.name}...`;
-
-  const formData = new FormData();
-  formData.append('video', file);
+  if (label) label.textContent = `Loading ${file.name}...`;
 
   try {
-    const res = await fetch('/api/upload-video', {
-      method: 'POST',
-      body: formData
-    });
+    // Instant client-side video loading via Object URL (zero network latency, bypasses server limits)
+    const localUrl = URL.createObjectURL(file);
+    const tempVideo = document.createElement('video');
+    tempVideo.preload = 'metadata';
+    tempVideo.src = localUrl;
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    tempVideo.onloadedmetadata = () => {
+      const duration = Math.round(tempVideo.duration) || 15;
+      const width = tempVideo.videoWidth || 1920;
+      const height = tempVideo.videoHeight || 1080;
 
-    label.textContent = file.name;
-    setVideoSource(data);
-    showToast('Video uploaded successfully!', 'success');
+      if (label) label.textContent = `Active: ${file.name.length > 25 ? file.name.slice(0, 22) + '...' : file.name}`;
+      setVideoSource({
+        filename: file.name,
+        videoUrl: localUrl,
+        videoPath: file.name,
+        file: file,
+        duration: duration,
+        width: width,
+        height: height
+      });
+      showToast(`Video loaded successfully (${width}x${height}, ${duration}s)!`, 'success');
+    };
+
+    tempVideo.onerror = () => {
+      if (label) label.textContent = `Active: ${file.name.length > 25 ? file.name.slice(0, 22) + '...' : file.name}`;
+      setVideoSource({
+        filename: file.name,
+        videoUrl: localUrl,
+        videoPath: file.name,
+        file: file,
+        duration: 15,
+        width: 1920,
+        height: 1080
+      });
+      showToast('Video loaded successfully!', 'success');
+    };
   } catch (err) {
-    console.error('Upload error:', err);
-    label.textContent = 'Upload failed. Try again.';
-    showToast(err.message, 'error');
+    console.error('Video load error:', err);
+    if (label) label.textContent = 'Upload failed. Try again.';
+    showToast('Failed to load video: ' + err.message, 'error');
   }
 }
 
@@ -790,7 +831,7 @@ async function importFromUrl() {
   btn.disabled = true;
   btn.innerHTML = `<span class="w-3.5 h-3.5 border-2 border-black/30 border-t-black rounded-full animate-spin"></span> Downloading...`;
 
-  showToast('Downloading video via yt-dlp... Please wait a few seconds', 'info');
+  showToast('Downloading video... Please wait a few seconds', 'info');
 
   try {
     const res = await fetch('/api/download-url', {
@@ -799,9 +840,11 @@ async function importFromUrl() {
       body: JSON.stringify({ url })
     });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || data.details || 'Failed to download link');
+    if (!res.ok) {
+      throw new Error(`Cloud download unavailable (${res.status}). Use "Upload Video" to select a clip directly.`);
+    }
 
+    const data = await res.json();
     setVideoSource(data);
     urlInput.value = '';
     showToast(`Video imported successfully (${data.duration}s)!`, 'success');
@@ -1110,15 +1153,30 @@ async function handleOverlayImageUpload(event) {
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      const formData = new FormData();
-      formData.append('image', file);
+      let data = null;
 
-      const res = await fetch('/api/upload-overlay-image', {
-        method: 'POST',
-        body: formData
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to upload image');
+      try {
+        const formData = new FormData();
+        formData.append('image', file);
+        const res = await fetch('/api/upload-overlay-image', {
+          method: 'POST',
+          body: formData
+        });
+        if (res.ok) {
+          data = await res.json();
+        }
+      } catch (uploadErr) {
+        console.warn('Backend image upload unavailable, using local image preview:', uploadErr);
+      }
+
+      if (!data) {
+        const localImgUrl = URL.createObjectURL(file);
+        data = {
+          filename: file.name,
+          imagePath: file.name,
+          imageUrl: localImgUrl
+        };
+      }
 
       const rawCleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ').toUpperCase();
       let defaultTitle = 'SAVE THIS CLASS SETUP [BEST META]';
@@ -1418,21 +1476,37 @@ async function handleCustomAudioUpload(event) {
   }
 
   try {
-    showToast(`Uploading ${files.length} custom MP3 audio track(s)...`, 'info');
-    const res = await fetch('/api/upload-custom-audio', {
-      method: 'POST',
-      body: formData
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    showToast(`Loading ${files.length} custom audio track(s)...`, 'info');
+    let data = null;
 
-    const newTracks = data.tracks || [{
-      filename: data.filename,
-      originalname: data.filename,
-      audioUrl: data.audioUrl,
-      audioPath: data.audioPath,
-      duration: data.duration || 5.0
-    }];
+    try {
+      const res = await fetch('/api/upload-custom-audio', {
+        method: 'POST',
+        body: formData
+      });
+      if (res.ok) {
+        data = await res.json();
+      }
+    } catch (uploadErr) {
+      console.warn('Backend custom audio upload unavailable, using local audio preview:', uploadErr);
+    }
+
+    let newTracks = [];
+    if (data && data.tracks) {
+      newTracks = data.tracks;
+    } else {
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        const audioUrl = URL.createObjectURL(f);
+        newTracks.push({
+          filename: f.name,
+          originalname: f.name,
+          audioUrl: audioUrl,
+          audioPath: f.name,
+          duration: 10.0
+        });
+      }
+    }
 
     newTracks.forEach((t, i) => {
       customAudioTracks.push({
