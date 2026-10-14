@@ -1550,6 +1550,7 @@ function buildVideoFilter({
   facecamHeight = 33,
   maskOldCaptions = false,
   hookCardMode = 'none',
+  hookCardText = '',
   imageOverlays = [],
   relativeAss,
   outputLabel = '[vout]'
@@ -1602,28 +1603,31 @@ function buildVideoFilter({
     }
   }
 
-  // Hook card overlay / wipe at top
-  if (hookCardMode === 'viral_white') {
-    // Full-width viral white banner (100% wipe & zero text overflow)
-    baseFilter += ',drawbox=x=0:y=50:w=1080:h=240:c=black@0.9:t=fill' +
-                  ',drawbox=x=0:y=60:w=1080:h=220:c=white:t=fill' +
-                  ',drawbox=x=0:y=56:w=1080:h=4:c=0xFE2C55:t=fill' +
-                  ',drawbox=x=0:y=280:w=1080:h=4:c=0x25F4EE:t=fill';
-  } else if (hookCardMode === 'wide_card') {
-    // Wide floating card (1000px centered with clean trim & background wipe)
-    baseFilter += ',drawbox=x=0:y=50:w=1080:h=240:c=black@0.7:t=fill' +
-                  ',drawbox=x=40:y=65:w=1000:h=210:c=white:t=fill' +
-                  ',drawbox=x=40:y=65:w=1000:h=4:c=0xFE2C55:t=fill' +
-                  ',drawbox=x=40:y=271:w=1000:h=4:c=0x25F4EE:t=fill';
-  } else if (hookCardMode === 'cod_tactical') {
-    // Dark tactical carbon card with gold border
-    baseFilter += ',drawbox=x=0:y=50:w=1080:h=240:c=black@0.9:t=fill' +
-                  ',drawbox=x=0:y=60:w=1080:h=220:c=0x0B0C10@0.98:t=fill' +
-                  ',drawbox=x=0:y=56:w=1080:h=4:c=0xF59E0B:t=fill' +
-                  ',drawbox=x=0:y=280:w=1080:h=4:c=0xF59E0B:t=fill';
-  } else if (hookCardMode === 'wipe_only') {
+  // Hook card overlay / wipe at top: Only draw banner if text is provided or wipe_only requested
+  const hasHookText = typeof hookCardText === 'string' && hookCardText.trim().length > 0;
+  if (hookCardMode === 'wipe_only') {
     // Complete wipe of top banner zone
     baseFilter += ',drawbox=x=0:y=50:w=1080:h=240:c=black@0.9:t=fill';
+  } else if (hasHookText && hookCardMode !== 'none') {
+    if (hookCardMode === 'viral_white') {
+      // Full-width viral white banner
+      baseFilter += ',drawbox=x=0:y=50:w=1080:h=240:c=black@0.9:t=fill' +
+                    ',drawbox=x=0:y=60:w=1080:h=220:c=white:t=fill' +
+                    ',drawbox=x=0:y=56:w=1080:h=4:c=0xFE2C55:t=fill' +
+                    ',drawbox=x=0:y=280:w=1080:h=4:c=0x25F4EE:t=fill';
+    } else if (hookCardMode === 'wide_card') {
+      // Wide floating card
+      baseFilter += ',drawbox=x=0:y=50:w=1080:h=240:c=black@0.7:t=fill' +
+                    ',drawbox=x=40:y=65:w=1000:h=210:c=white:t=fill' +
+                    ',drawbox=x=40:y=65:w=1000:h=4:c=0xFE2C55:t=fill' +
+                    ',drawbox=x=40:y=271:w=1000:h=4:c=0x25F4EE:t=fill';
+    } else if (hookCardMode === 'cod_tactical') {
+      // Dark tactical carbon card with gold border
+      baseFilter += ',drawbox=x=0:y=50:w=1080:h=240:c=black@0.9:t=fill' +
+                    ',drawbox=x=0:y=60:w=1080:h=220:c=0x0B0C10@0.98:t=fill' +
+                    ',drawbox=x=0:y=56:w=1080:h=4:c=0xF59E0B:t=fill' +
+                    ',drawbox=x=0:y=280:w=1080:h=4:c=0xF59E0B:t=fill';
+    }
   }
 
   let currentV = '[v_pre_ov]';
@@ -2020,7 +2024,15 @@ app.post('/api/render-short', (req, res) => {
 
     let targetInput = videoPath;
     if (!targetInput || !fs.existsSync(targetInput)) {
-      // Fallback to sample video if path invalid
+      if (videoPath && videoPath !== 'demo_clip.mp4' && !videoPath.includes('demo_clip')) {
+        // User provided an uploaded video file that is on the client browser
+        return res.json({
+          success: true,
+          clientRender: true,
+          message: 'Client uploaded video: render directly in browser engine.'
+        });
+      }
+      // Fallback to sample video only when explicitly requested
       targetInput = path.join(__dirname, 'sample', 'demo_clip.mp4');
     }
 
@@ -2077,6 +2089,7 @@ app.post('/api/render-short', (req, res) => {
       facecamHeight,
       maskOldCaptions,
       hookCardMode,
+      hookCardText,
       imageOverlays: inVideoOverlays,
       relativeAss: null,
       outputLabel: '[v0_raw]'
@@ -2508,6 +2521,7 @@ app.post('/api/auto-create-video', async (req, res) => {
         facecamHeight,
         maskOldCaptions,
         hookCardMode,
+        hookCardText,
         imageOverlays: inVideoOverlays,
         relativeAss: null,
         outputLabel: '[v0_raw]'

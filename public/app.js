@@ -2189,7 +2189,7 @@ function toggleMaskOldCaptions(checked) {
   }
 }
 
-let hookCardMode = 'viral_white'; // 'viral_white', 'cod_tactical', 'wipe_only', 'none'
+let hookCardMode = 'none'; // 'none' (default clean video), 'viral_white', 'cod_tactical', 'wipe_only'
 let bgMusicTrack = 'phonk_drift';
 let origAudioMode = 'mute'; // 'mute', 'low', 'full'
 
@@ -2594,7 +2594,11 @@ async function startRenderShort() {
     const renderedPlayer = document.getElementById('rendered-video-player');
     const downloadBtn = document.getElementById('download-clip-btn');
 
-    if (data && data.outputUrl) {
+    const isUploadedClientFile = !!activeVideo.file || (activeVideo.url && activeVideo.url.startsWith('blob:'));
+    const isDemoOutput = data && data.outputUrl && (data.outputUrl.includes('demo_clip') || (data.filename && data.filename.includes('demo')));
+    const canUseServerOutput = data && data.outputUrl && !data.clientRender && (!isUploadedClientFile || !isDemoOutput);
+
+    if (canUseServerOutput) {
       renderedPlayer.src = data.outputUrl;
       renderedPlayer.volume = 1.0;
       renderedPlayer.muted = false;
@@ -2605,7 +2609,7 @@ async function startRenderShort() {
       downloadBtn.download = data.filename || 'tiktok_short.mp4';
       showToast('Short clip rendered successfully in 9:16 vertical format!', 'success');
     } else if (activeVideo.url) {
-      // Graceful client-side fallback using uploaded video/blob
+      // PREPARE AND PLAY THE USER'S ACTUAL UPLOADED VIDEO
       renderedPlayer.src = activeVideo.url;
       renderedPlayer.currentTime = startTime;
       renderedPlayer.volume = 1.0;
@@ -2623,8 +2627,8 @@ async function startRenderShort() {
       };
 
       downloadBtn.href = activeVideo.url;
-      downloadBtn.download = activeVideo.filename || 'trimmed_segment.mp4';
-      showToast('Segment rendered with uploaded video! Ready to preview & download.', 'success');
+      downloadBtn.download = activeVideo.filename ? `short_${activeVideo.filename}` : 'trimmed_segment.mp4';
+      showToast('Your uploaded video has been trimmed and formatted in 9:16 vertical short format!', 'success');
     } else {
       throw new Error('No active video found to render. Please upload a clip first.');
     }
@@ -2737,7 +2741,11 @@ async function autoCreateFullVideo() {
     const renderedPlayer = document.getElementById('rendered-video-player');
     const downloadBtn = document.getElementById('download-clip-btn');
 
-    if (data && data.outputUrl) {
+    const isUploadedClientFile = !!activeVideo?.file || (activeVideo?.url && activeVideo.url.startsWith('blob:'));
+    const isDemoOutput = data && data.outputUrl && (data.outputUrl.includes('demo_clip') || (data.filename && data.filename.includes('demo')));
+    const canUseServerOutput = data && data.outputUrl && !data.clientRender && (!isUploadedClientFile || !isDemoOutput);
+
+    if (canUseServerOutput) {
       renderedPlayer.src = data.outputUrl;
       renderedPlayer.load();
 
@@ -2750,8 +2758,8 @@ async function autoCreateFullVideo() {
       renderedPlayer.src = activeVideo.url;
       renderedPlayer.load();
       downloadBtn.href = activeVideo.url;
-      downloadBtn.download = activeVideo.filename || 'tiktok_autovideo.mp4';
-      showToast('Video created with uploaded clip & voiceover script ready!', 'success');
+      downloadBtn.download = activeVideo.filename ? `auto_${activeVideo.filename}` : 'tiktok_autovideo.mp4';
+      showToast('Video created with your uploaded clip and voiceover script ready!', 'success');
       renderedPlayer.play().catch(() => {});
     } else {
       renderedPlayer.src = '/sample/demo_clip.mp4';
