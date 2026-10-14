@@ -2631,20 +2631,26 @@ app.post('/api/auto-create-video', async (req, res) => {
   }
 });
 
-// Start Server with 0.0.0.0 binding (crucial for Docker / Cloud platforms like Render)
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`=======================================================`);
-  console.log(`🚀 TikTok Creator Suite running at: http://0.0.0.0:${PORT}`);
-  console.log(`=======================================================`);
-});
+// Export app for serverless platforms (Vercel)
+module.exports = app;
 
-// Render defaults to port 10000; ensure dual-listen if PORT is different so Render's proxy never hangs
-if (String(PORT) !== '10000') {
-  try {
-    app.listen(10000, '0.0.0.0', () => {
-      console.log(`🚀 Cloud dual-port listener ready on 0.0.0.0:10000`);
-    }).on('error', () => {
-      // Port 10000 already in use or unavailable; ignore safely
-    });
-  } catch (e) {}
+// Only start standalone listener when not running in Vercel serverless environment
+if (process.env.VERCEL !== '1') {
+  // Start Server with 0.0.0.0 binding (crucial for Docker / Cloud platforms like Render)
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`=======================================================`);
+    console.log(`🚀 TikTok Creator Suite running at: http://0.0.0.0:${PORT}`);
+    console.log(`=======================================================`);
+  });
+
+  // Render defaults to port 10000; ensure dual-listen if PORT is different so Render's proxy never hangs
+  if (String(PORT) !== '10000') {
+    try {
+      app.listen(10000, '0.0.0.0', () => {
+        console.log(`🚀 Cloud dual-port listener ready on 0.0.0.0:10000`);
+      }).on('error', () => {
+        // Port 10000 already in use or unavailable; ignore safely
+      });
+    } catch (e) {}
+  }
 }
