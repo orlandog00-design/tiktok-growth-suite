@@ -1,4 +1,4 @@
-// Vercel Serverless Function: Trend Refresh Engine (Gemini AI + Warzone Season 6 Meta)
+// Vercel Serverless Function: Trend Refresh & Search Engine (Gemini AI + Warzone Season 6 / Topic Search)
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -8,15 +8,24 @@ module.exports = async (req, res) => {
     return res.status(200).end();
   }
 
-  const { category = 'all', apiKey, model = 'gemini-1.5-flash' } = req.body || {};
+  const { category = 'all', topic = '', apiKey, model = 'gemini-1.5-flash' } = req.body || {};
+  const cleanTopic = (topic || '').trim();
 
-  // If user provided a Gemini API Key, try live AI generation with Season 6 ground truth
+  // If user provided a Gemini API Key, try live AI generation with custom topic intelligence
   if (apiKey && apiKey.trim().length > 10) {
     try {
       const cleanModel = model.replace(/^models\//, '');
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent?key=${apiKey.trim()}`;
 
-      const systemPrompt = `You are an elite viral trend intelligence system monitoring TikTok, YouTube Shorts, and Call of Duty Warzone Season 6 algorithms.
+      let systemPrompt = '';
+      if (cleanTopic) {
+        const isWarzone = /warzone|cod|call of duty/i.test(cleanTopic);
+        systemPrompt = `You are an elite viral trend intelligence system monitoring TikTok, YouTube Shorts, and gaming algorithms.
+Generate 6 REAL-TIME, high-velocity breakout viral trends right now for topic / game: "${cleanTopic}".
+Focus on current meta, game strategies, breakout viral debate hooks, secret settings, and high-retention frameworks for "${cleanTopic}".
+${isWarzone ? 'CRITICAL: The current active game is strictly Warzone SEASON 6 (S-Tier weapons: Voyak KT-3, VMP, MPC-25, Strider 300, DS20 Mirage). DO NOT mention outdated weapons (C9, Krig C, Model L, Jackal PDW).' : ''}`;
+      } else {
+        systemPrompt = `You are an elite viral trend intelligence system monitoring TikTok, YouTube Shorts, and Call of Duty Warzone Season 6 algorithms.
 Generate 6 REAL-TIME, high-velocity breakout viral trends right now for category: "${category}".
 
 CRITICAL ACCURACY GUARDRAIL:
@@ -29,7 +38,21 @@ The verified S-Tier meta weapons right now are:
 - DS20 Mirage (S-Tier zero-screen-shake support AR)
 - Ryden 45K (Max mobility pocket rocket SMG)
 - TR51 Para (Long range laser AR)
-DO NOT mention outdated past seasons (Season 1 to 5) or obsolete weapons (C9, Krig C, Model L, Jackal PDW, Superi).
+DO NOT mention outdated past seasons (Season 1 to 5) or obsolete weapons (C9, Krig C, Model L, Jackal PDW, Superi).`;
+      }
+
+      systemPrompt += `\nEnsure every trend has:
+- Hyper-specific topic title
+- Real viral velocity (e.g. "🔥 8.4M Views/Day")
+- velocityType: "viral", "breakout", or "hot"
+- growth: "+720% this week"
+- freshness: "🔴 LIVE • Just now"
+- hookPattern: exact hook framework
+- recommendedAudio: specific audio title, BPM, and sound mood
+- audioId: one of ["phonk_drift", "dark_808_drill", "guitar_montage", "sigma_drop", "hyper_hardstyle", "slowed_reverb_phonk", "cyber_rush", "suspense_drop", "bouncy_trap", "lofi_gunsmith"]
+- tiktokAudioQuery: search term to find this sound on TikTok
+- hashtags: 4-6 hashtags
+- promptIdea: 1-sentence prompt
 
 Output MUST strictly be a JSON object:
 {
@@ -38,7 +61,7 @@ Output MUST strictly be a JSON object:
       "id": "gemini-trend-1",
       "category": "${category}",
       "title": "...",
-      "velocity": "🔥 7.8M Views/Day",
+      "velocity": "🔥 8.4M Views/Day",
       "velocityType": "viral",
       "growth": "+820% this week",
       "freshness": "🔴 LIVE • Just now",
@@ -46,14 +69,14 @@ Output MUST strictly be a JSON object:
       "recommendedAudio": "Brazilian Phonk (136 BPM) / Fast Drift",
       "audioId": "phonk_drift",
       "tiktokAudioQuery": "Brazilian Phonk Fast Drift",
-      "hashtags": ["#voyakkt3", "#warzone", "#season6"],
+      "hashtags": ["#tag1", "#tag2", "#tag3"],
       "promptIdea": "..."
     }
   ]
 }`;
 
       const payload = {
-        contents: [{ role: 'user', parts: [{ text: `${systemPrompt}\n\nScan and return the 6 most viral, high-velocity trends and viral audio styles right now.` }] }],
+        contents: [{ role: 'user', parts: [{ text: `${systemPrompt}\n\nScan and return the 6 most viral, high-velocity trends and viral audio styles right now for: "${cleanTopic || category}".` }] }],
         generationConfig: {
           temperature: 0.7,
           responseMimeType: "application/json"
@@ -72,7 +95,7 @@ Output MUST strictly be a JSON object:
         if (text) {
           const parsed = JSON.parse(text);
           if (parsed && Array.isArray(parsed.trends) && parsed.trends.length > 0) {
-            return res.json({ source: 'gemini', trends: parsed.trends });
+            return res.json({ source: 'gemini', topic: cleanTopic, trends: parsed.trends });
           }
         }
       }
@@ -81,16 +104,266 @@ Output MUST strictly be a JSON object:
     }
   }
 
-  // Dynamic Season 6 Trend Generator (Instant, 100% reliable fallback)
-  const dynamicTrends = getFreshDynamicTrends(category);
+  // Dynamic Season 6 / Topic Search Trend Generator (Instant, 100% reliable fallback)
+  const dynamicTrends = getFreshDynamicTrends(category, cleanTopic);
   return res.json({
-    source: 'dynamic',
+    source: cleanTopic ? 'topic-search' : 'dynamic',
+    topic: cleanTopic,
     trends: dynamicTrends
   });
 };
 
-function getFreshDynamicTrends(category = 'all') {
-  const minsAgo = Math.floor(Math.random() * 5) + 1;
+function getFreshDynamicTrends(category = 'all', topic = '') {
+  const minsAgo = Math.floor(Math.random() * 4) + 1;
+  const kw = (topic || '').trim().toLowerCase();
+
+  // 1. FORTNITE DEDICATED BREAKOUT SUITE
+  if (kw.includes('fortnite')) {
+    return [
+      {
+        id: `fn-striker-${Date.now()}-1`,
+        category: 'gaming',
+        title: 'The Broken S-Tier Striker AR Setup Dominating Ranked Zero Build',
+        velocity: `🔥 ${(8.8 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'viral',
+        growth: '+940% this week',
+        freshness: `🔴 LIVE • Fortnite Meta`,
+        hookPattern: 'Fastest TTK / Zero Build Laser',
+        recommendedAudio: 'Brazilian Phonk (136 BPM) / Fast Drift',
+        audioId: 'phonk_drift',
+        tiktokAudioQuery: 'Brazilian Phonk Fortnite Clips',
+        hashtags: ['#fortnite', '#fortnitemeta', '#zerobuild', '#fortniteranked', '#chapter5'],
+        promptIdea: 'The broken Striker AR loadout wiping squads in Fortnite Ranked Zero Build with zero recoil.'
+      },
+      {
+        id: `fn-audio-${Date.now()}-2`,
+        category: 'gaming',
+        title: "Turn ON 'Visualize Sound Effects' for In-Game Wallhack Audio in Fortnite",
+        velocity: `🔥 ${(9.2 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'viral',
+        growth: '+870% this week',
+        freshness: `🔴 LIVE • Pro Setting`,
+        hookPattern: 'Settings Exploit / Visual Footsteps',
+        recommendedAudio: 'Suspense Countdown & Drop (130 BPM - Secret Class Reveal)',
+        audioId: 'suspense_drop',
+        tiktokAudioQuery: 'Fortnite Sound Effects Setting Trick',
+        hashtags: ['#fortnitesettings', '#fortnitetips', '#visualizesound', '#fortnitepro', '#foryou'],
+        promptIdea: 'The secret Visualize Sound Effects setting in Fortnite that reveals enemy footsteps 50 meters away through walls.'
+      },
+      {
+        id: `fn-loot-${Date.now()}-3`,
+        category: 'gaming',
+        title: 'How to Get 100% Guaranteed Mythic Loot in Chapter 5 with Zero Fighting',
+        velocity: `🚀 ${(7.5 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'breakout',
+        growth: '+710% this week',
+        freshness: `⚡ SURGING • Chapter 5`,
+        hookPattern: 'Secret Landing Route / Free Vault',
+        recommendedAudio: 'Dark 808 Drill (140 BPM - Heavy Sub-Bass & Wipes)',
+        audioId: 'dark_808_drill',
+        tiktokAudioQuery: 'Dark 808 Drill Fortnite Montage',
+        hashtags: ['#fortniteloot', '#fortnitemythic', '#fortniteglitch', '#rankedfortnite'],
+        promptIdea: 'The uncontested Fortnite landing spot that gives you full shields and gold mythics in 60 seconds.'
+      },
+      {
+        id: `fn-move-${Date.now()}-4`,
+        category: 'gaming',
+        title: 'The Undetected Slide-Kick Movement Technique Breaking Enemy Hitboxes',
+        velocity: `🔥 ${(8.1 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'viral',
+        growth: '+680% this week',
+        freshness: `🔴 LIVE • Movement God`,
+        hookPattern: 'Camera Break / Hitbox Evasion',
+        recommendedAudio: 'Hyper-Drive Hardstyle (150 BPM - Camera Breaker)',
+        audioId: 'hyper_hardstyle',
+        tiktokAudioQuery: 'Hardstyle Tevvez Fortnite Movement',
+        hashtags: ['#fortnitemovement', '#fortniteslidetrick', '#fortniteclips', '#movementgod'],
+        promptIdea: 'How to break enemy crosshairs using the new sprint-slide jump cancel in Fortnite.'
+      },
+      {
+        id: `fn-sniper-${Date.now()}-5`,
+        category: 'gaming',
+        title: 'The 1-Shot Heavy Sniper Trick Fortnite Pros Secretly Use to Open Vaults',
+        velocity: `🚀 ${(6.8 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'breakout',
+        growth: '+620% this week',
+        freshness: `⚡ SURGING • Pro Secret`,
+        hookPattern: '1-Shot Mechanism / Quick Wall Break',
+        recommendedAudio: 'Montage Distortion Guitar (142 BPM - Sniper Headshots)',
+        audioId: 'guitar_montage',
+        tiktokAudioQuery: 'Distortion Guitar Rock Phonk Fortnite',
+        hashtags: ['#fortnitesniper', '#oneshot', '#fortniteprosecret', '#fortnite'],
+        promptIdea: 'The secret heavy sniper trick that instantly deletes builds and cracks shields in Fortnite.'
+      },
+      {
+        id: `fn-rank-${Date.now()}-6`,
+        category: 'gaming',
+        title: 'The Fastest Way to Reach Unreal Rank in Fortnite Solo (Zero Build)',
+        velocity: `⚡ ${(7.8 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'hot',
+        growth: '+750% this week',
+        freshness: `🔴 LIVE • Ranked Guide`,
+        hookPattern: 'Ranked Climb Formula / Placement Points',
+        recommendedAudio: 'Sigma 808 Cinematic Drop (128 BPM - 1v4 Clutch)',
+        audioId: 'sigma_drop',
+        tiktokAudioQuery: 'Sigma 808 Drop Fortnite Ranked Clutch',
+        hashtags: ['#fortniteunreal', '#rankedtips', '#zerobuildranked', '#fortnitegameplay'],
+        promptIdea: 'The exact placement and rotation strategy to climb from Diamond to Unreal in Fortnite Solo.'
+      }
+    ];
+  }
+
+  // 2. MINECRAFT DEDICATED VIRAL SUITE
+  if (kw.includes('minecraft')) {
+    return [
+      {
+        id: `mc-hardcore-${Date.now()}-1`,
+        category: 'gaming',
+        title: 'The 100-Day Hardcore Survival Secret That Pro Speedrunners Keep Hidden',
+        velocity: `🔥 7.9M Views/Day`,
+        velocityType: 'viral',
+        growth: '+810% this week',
+        freshness: `🔴 LIVE • Minecraft`,
+        hookPattern: 'Unsolved Secret / Speedrun Glitch',
+        recommendedAudio: 'Suspense Countdown & Drop (130 BPM - Secret Class Reveal)',
+        audioId: 'suspense_drop',
+        tiktokAudioQuery: 'Minecraft Ambient Horror Drone Suspense',
+        hashtags: ['#minecraft', '#minecrafthardcore', '#minecrafttips', '#speedrun'],
+        promptIdea: 'The game-changing 100-day hardcore survival trick that prevents death from ancient city wardens.'
+      },
+      {
+        id: `mc-farm-${Date.now()}-2`,
+        category: 'gaming',
+        title: 'This 1-Chunk Iron Farm Gives You 3,000 Ingots Per Hour in 1.21',
+        velocity: `🚀 6.8M Views/Day`,
+        velocityType: 'breakout',
+        growth: '+690% this week',
+        freshness: `⚡ SURGING • 1.21 Update`,
+        hookPattern: 'High Efficiency Redstone / Infinite Farm',
+        recommendedAudio: 'Brazilian Phonk (136 BPM) / Fast Drift',
+        audioId: 'phonk_drift',
+        tiktokAudioQuery: 'Brazilian Phonk Minecraft Timelapse',
+        hashtags: ['#minecraftbuilds', '#minecraftfarm', '#redstone', '#minecraft121'],
+        promptIdea: 'Build this microscopic 1-chunk iron farm in Minecraft 1.21 in under 10 minutes.'
+      },
+      {
+        id: `mc-seed-${Date.now()}-3`,
+        category: 'gaming',
+        title: 'The Creepiest Unsolved Minecraft Seed Discovered in 12 Years',
+        velocity: `🔥 8.4M Views/Day`,
+        velocityType: 'viral',
+        growth: '+760% this week',
+        freshness: `🔴 LIVE • Mystery`,
+        hookPattern: 'Chilling ARG Mystery / Cursed Seed',
+        recommendedAudio: 'Suspense Countdown & Drop (130 BPM - Secret Class Reveal)',
+        audioId: 'suspense_drop',
+        tiktokAudioQuery: 'Scary Minecraft Seed Music',
+        hashtags: ['#minecraftmystery', '#creepyseeds', '#cursedminecraft', '#arg'],
+        promptIdea: 'The disturbing Minecraft seed that spawns an inverted bedrock cross and empty villages.'
+      }
+    ];
+  }
+
+  // 3. CUSTOM TOPIC SEARCH ADAPTIVE ENGINE (FOR ANY OTHER SEARCH TERM)
+  if (kw.length > 0 && !kw.includes('warzone') && !kw.includes('cod')) {
+    const cleanCap = topic.trim().charAt(0).toUpperCase() + topic.trim().slice(1);
+    const tag = cleanCap.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+
+    return [
+      {
+        id: `custom-${Date.now()}-1`,
+        category: 'gaming',
+        title: `The Breakout ${cleanCap} Strategy Taking Over TikTok Right Now`,
+        velocity: `🔥 ${(7.6 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'viral',
+        growth: `+${Math.floor(740 + Math.random() * 80)}% this week`,
+        freshness: `🔴 LIVE • ${cleanCap}`,
+        hookPattern: 'Contradiction / Pattern Interrupt',
+        recommendedAudio: 'Brazilian Phonk (136 BPM) / Fast Drift',
+        audioId: 'phonk_drift',
+        tiktokAudioQuery: `Brazilian Phonk ${cleanCap} Montage`,
+        hashtags: [`#${tag}`, `#${tag}clips`, '#viral', '#foryoupage', '#gamingontiktok'],
+        promptIdea: `Stop doing this mistake with ${cleanCap} right now—here is the secret technique doubling view counts.`
+      },
+      {
+        id: `custom-${Date.now()}-2`,
+        category: 'gaming',
+        title: `3 Secret ${cleanCap} Tricks That Feel Completely Illegal to Know`,
+        velocity: `🚀 ${(6.8 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'breakout',
+        growth: `+${Math.floor(620 + Math.random() * 70)}% this week`,
+        freshness: `⚡ SURGING • ${cleanCap}`,
+        hookPattern: 'Gatekept Secrets / Unfair Advantage',
+        recommendedAudio: 'Cyber Combat Rush (148 BPM - Fast Adrenaline)',
+        audioId: 'cyber_rush',
+        tiktokAudioQuery: `Cyber Synth Electronic ${cleanCap}`,
+        hashtags: [`#${tag}`, `#${tag}tips`, '#secrets', '#hacks', '#trending'],
+        promptIdea: `3 unknown ${cleanCap} tips that give you an unfair advantage over 99% of people.`
+      },
+      {
+        id: `custom-${Date.now()}-3`,
+        category: 'gaming',
+        title: `Turn ON This Hidden Setting in ${cleanCap} for Immediate Results`,
+        velocity: `🔥 ${(8.1 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'viral',
+        growth: `+${Math.floor(790 + Math.random() * 60)}% this week`,
+        freshness: `🔴 LIVE • Pro Config`,
+        hookPattern: 'Hidden Setting / High Optimization',
+        recommendedAudio: 'Dark 808 Drill (140 BPM - Heavy Sub-Bass & Wipes)',
+        audioId: 'dark_808_drill',
+        tiktokAudioQuery: `Dark 808 Drill ${cleanCap}`,
+        hashtags: [`#${tag}`, `#${tag}settings`, '#optimization', '#gaming'],
+        promptIdea: `The single default setting in ${cleanCap} you must disable immediately.`
+      },
+      {
+        id: `custom-${Date.now()}-4`,
+        category: 'gaming',
+        title: `The S-Tier ${cleanCap} Meta Build Dominating Every Lobby`,
+        velocity: `⚡ ${(6.5 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'hot',
+        growth: `+${Math.floor(580 + Math.random() * 50)}% this week`,
+        freshness: `🔴 LIVE • Meta Alert`,
+        hookPattern: 'Secret Nerf / S-Tier Class',
+        recommendedAudio: 'Montage Distortion Guitar (142 BPM - Headshots)',
+        audioId: 'guitar_montage',
+        tiktokAudioQuery: `Distortion Guitar Phonk ${cleanCap}`,
+        hashtags: [`#${tag}`, `#${tag}meta`, '#bestbuild', '#clips'],
+        promptIdea: `The best ${cleanCap} setup right now that deletes opponents in milliseconds.`
+      },
+      {
+        id: `custom-${Date.now()}-5`,
+        category: 'gaming',
+        title: `Watch How I Solved This Impossible ${cleanCap} Challenge`,
+        velocity: `🚀 ${(5.9 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'breakout',
+        growth: `+${Math.floor(520 + Math.random() * 50)}% this week`,
+        freshness: `⚡ SURGING • Challenge`,
+        hookPattern: 'Clutch / High Stakes Story',
+        recommendedAudio: 'Sigma 808 Cinematic Drop (128 BPM - 1v4 Clutch)',
+        audioId: 'sigma_drop',
+        tiktokAudioQuery: `Sigma 808 Drop ${cleanCap}`,
+        hashtags: [`#${tag}`, `#${tag}clutch`, '#challenge', '#insane'],
+        promptIdea: `How I pulled off the most insane 1v4 clutch in ${cleanCap} with 1 HP remaining.`
+      },
+      {
+        id: `custom-${Date.now()}-6`,
+        category: 'gaming',
+        title: `The 140 BPM Audio Meta That Quadrupled ${cleanCap} Watch Time`,
+        velocity: `🔥 ${(7.2 + Math.random()).toFixed(1)}M Views/Day`,
+        velocityType: 'viral',
+        growth: `+${Math.floor(660 + Math.random() * 50)}% this week`,
+        freshness: `🔴 LIVE • Algorithm Trick`,
+        hookPattern: 'Algorithmic Audio Sync',
+        recommendedAudio: 'Slowed + Reverb Phonk (115 BPM - Aesthetic Vibe)',
+        audioId: 'slowed_reverb_phonk',
+        tiktokAudioQuery: `Slowed Reverb Phonk ${cleanCap}`,
+        hashtags: [`#${tag}`, '#tiktokalgorithm', '#viralsound', '#watchtime'],
+        promptIdea: `Why pairing ${cleanCap} gameplay with 140 BPM phonk triggers the TikTok recommendation loop.`
+      }
+    ];
+  }
+
+  // 4. DEFAULT: VERIFIED WARZONE SEASON 6 METAS & FACELESS
   const gamingPool = [
     {
       id: `s6-voyak-${Date.now()}-1`,

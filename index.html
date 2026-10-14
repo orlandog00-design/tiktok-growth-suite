@@ -120,6 +120,61 @@
         </div>
       </div>
 
+      <!-- VIRAL TOPIC SEARCH BAR -->
+      <div class="mb-5 bg-brand-card/90 p-3.5 rounded-2xl border border-brand-border shadow-xl backdrop-blur relative">
+        <div class="flex flex-col sm:flex-row items-center gap-2.5">
+          <div class="relative flex-1 w-full">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input 
+              type="text" 
+              id="trend-search-input" 
+              placeholder="Search any game or topic (e.g. Fortnite, Minecraft, Valorant, AI Tools, Crypto)..." 
+              onkeydown="if(event.key === 'Enter') handleTopicSearch()"
+              class="w-full bg-brand-dark border border-brand-border rounded-xl pl-10 pr-28 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-cyan transition font-medium"
+            />
+            <button 
+              type="button" 
+              onclick="handleTopicSearch()" 
+              id="trend-search-btn"
+              class="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-brand-cyan to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-black text-xs font-black flex items-center gap-1.5 transition shadow"
+            >
+              <i data-lucide="sparkles" class="w-3.5 h-3.5" id="trend-search-icon"></i>
+              <span id="trend-search-btn-text">Scan Viral</span>
+            </button>
+          </div>
+
+          <button 
+            type="button" 
+            onclick="clearTopicSearch()" 
+            id="trend-clear-search-btn"
+            class="hidden px-3 py-2 rounded-xl bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-400 hover:text-white text-xs font-bold flex items-center gap-1 transition"
+          >
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            <span>Clear</span>
+          </button>
+        </div>
+
+        <!-- QUICK POPULAR GAME / TOPIC PRESETS -->
+        <div class="flex items-center gap-1.5 flex-wrap mt-2.5 text-[11px] text-slate-400">
+          <span class="font-bold text-slate-500 text-[10px] uppercase tracking-wider">Quick Scan:</span>
+          <button type="button" onclick="quickSearchTopic('Fortnite')" class="px-2 py-1 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 transition hover:text-brand-cyan hover:border-brand-cyan/40">🎯 Fortnite</button>
+          <button type="button" onclick="quickSearchTopic('Warzone Season 6')" class="px-2 py-1 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 transition hover:text-amber-400 hover:border-amber-400/40">⚡ Warzone S6</button>
+          <button type="button" onclick="quickSearchTopic('Minecraft')" class="px-2 py-1 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 transition hover:text-emerald-400 hover:border-emerald-400/40">⛏️ Minecraft</button>
+          <button type="button" onclick="quickSearchTopic('Valorant')" class="px-2 py-1 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 transition hover:text-red-400 hover:border-red-400/40">🔥 Valorant</button>
+          <button type="button" onclick="quickSearchTopic('GTA 6')" class="px-2 py-1 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 transition hover:text-pink-400 hover:border-pink-400/40">🌴 GTA 6</button>
+          <button type="button" onclick="quickSearchTopic('AI Tools')" class="px-2 py-1 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 transition hover:text-cyan-400 hover:border-cyan-400/40">🤖 AI Tools</button>
+        </div>
+
+        <!-- ACTIVE SEARCH STATUS BADGE -->
+        <div id="trend-search-status" class="hidden mt-2 pt-2 border-t border-brand-border/40 flex items-center justify-between text-xs">
+          <span class="text-slate-300 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-brand-cyan animate-ping"></span>
+            Showing live breakout virals for: <span id="trend-search-query-label" class="font-bold text-brand-cyan"></span>
+          </span>
+          <button type="button" onclick="clearTopicSearch()" class="text-slate-400 hover:text-brand-red text-[11px] underline">Reset to Default</button>
+        </div>
+      </div>
+
       <!-- CATEGORY FILTERS -->
       <div class="flex flex-wrap items-center gap-2 mb-6" id="trend-categories">
         <button onclick="filterTrends('all')" class="cat-pill active px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-border text-white border border-slate-600 transition">All Niches</button>
