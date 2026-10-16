@@ -960,14 +960,176 @@ function renderScriptOutput(data) {
   }).join('');
 
   // Metrics
+  const words = data.wordCount || 55;
+  const estSec = data.estimatedSeconds || 25;
   document.getElementById('script-metrics').innerHTML = `
-    <span>${data.wordCount} Words</span>
+    <span>${words} Words</span>
     <span>•</span>
-    <span>~${data.estimatedSeconds}s Runtime</span>
+    <span>~${estSec}s Runtime</span>
   `;
 
   // SEO Preview
-  document.getElementById('seo-preview').textContent = `SEO Caption: ${data.seo.caption}`;
+  const caption = data.seo?.caption || data.title || 'Viral Script';
+  document.getElementById('seo-preview').textContent = `SEO Caption: ${caption}`;
+
+  // Auto-sync recommended audio if provided
+  if (data.recommendedAudio && data.recommendedAudio.audioId) {
+    bgMusicTrack = data.recommendedAudio.audioId;
+    const musicSelect = document.getElementById('bg-music-select');
+    if (musicSelect) musicSelect.value = bgMusicTrack;
+  }
+}
+
+// ==========================================
+// VIRAL IDEA STUDIO & CO-PILOT ACTIONS
+// ==========================================
+function launchCustomIdeaFromRadar() {
+  const input = document.getElementById('trend-custom-idea-input');
+  const idea = input ? input.value.trim() : '';
+  if (!idea) {
+    showToast('Please type an idea first, or click one of the quick idea buttons!', 'info');
+    input?.focus();
+    return;
+  }
+  generateScriptWithIdea(idea);
+}
+
+function setQuickIdea(idea) {
+  const input = document.getElementById('trend-custom-idea-input');
+  if (input) input.value = idea;
+  generateScriptWithIdea(idea);
+}
+
+function generateScriptWithIdea(idea) {
+  switchTab('script');
+  const topicInput = document.getElementById('script-topic');
+  if (topicInput) topicInput.value = idea;
+
+  // Auto-tune niche and tone based on idea
+  const nicheSelect = document.getElementById('script-niche');
+  const lower = idea.toLowerCase();
+  if (nicheSelect) {
+    if (lower.includes('nuke') || lower.includes('clutch') || lower.includes('comm') || lower.includes('1v4') || lower.includes('rebirth')) {
+      nicheSelect.value = 'Gaming Clutch & Rage Comms';
+    } else if (lower.includes('loadout') || lower.includes('class') || lower.includes('build') || lower.includes('warzone')) {
+      nicheSelect.value = 'Call of Duty / Warzone Meta';
+    } else if (lower.includes('roblox') || lower.includes('fortnite') || lower.includes('minecraft')) {
+      nicheSelect.value = 'General Entertainment';
+    }
+  }
+
+  showToast(`⚡ Brainstorming viral hooks & script for: "${idea.slice(0, 32)}..."`, 'info');
+  document.getElementById('script-form')?.requestSubmit();
+}
+
+function setScriptIdeaPreset(type) {
+  const topicInput = document.getElementById('script-topic');
+  const nicheSelect = document.getElementById('script-niche');
+  const toneSelect = document.getElementById('script-tone');
+
+  if (type === 'nuke') {
+    if (topicInput) topicInput.value = 'Got another nuke with the boys in Rebirth Season 6';
+    if (nicheSelect) nicheSelect.value = 'Gaming Clutch & Rage Comms';
+    if (toneSelect) toneSelect.value = 'High Energy & Urgent';
+  } else if (type === 'clutch') {
+    if (topicInput) topicInput.value = '1v4 clutch with 1 HP when teammates choked in final circle';
+    if (nicheSelect) nicheSelect.value = 'Gaming Clutch & Rage Comms';
+    if (toneSelect) toneSelect.value = 'High Energy & Urgent';
+  } else if (type === 'comms') {
+    if (topicInput) topicInput.value = 'Funniest toxic proximity death comms in Search & Destroy';
+    if (nicheSelect) nicheSelect.value = 'Gaming Clutch & Rage Comms';
+    if (toneSelect) toneSelect.value = 'Sarcastic & Relatable';
+  } else if (type === 'loadout') {
+    if (topicInput) topicInput.value = 'Broken Season 6 Voyak KT-3 loadout with zero recoil and 400ms TTK';
+    if (nicheSelect) nicheSelect.value = 'Call of Duty / Warzone Meta';
+    if (toneSelect) toneSelect.value = 'Secretive & Whispered';
+  } else if (type === 'roblox') {
+    if (topicInput) topicInput.value = 'The secret Dress to Impress speed glitch winning every master server';
+    if (nicheSelect) nicheSelect.value = 'General Entertainment';
+    if (toneSelect) toneSelect.value = 'High Energy & Urgent';
+  }
+
+  document.getElementById('script-form')?.requestSubmit();
+}
+
+async function sendCoPilotRefinement(directive) {
+  const input = document.getElementById('copilot-refine-input');
+  if (input) input.value = directive;
+  await handleCoPilotSubmit();
+}
+
+async function handleCoPilotSubmit() {
+  const input = document.getElementById('copilot-refine-input');
+  const refinement = input ? input.value.trim() : '';
+
+  if (!refinement) {
+    showToast('Please type a direction or click a quick suggestion pill!', 'info');
+    input?.focus();
+    return;
+  }
+
+  const topicInput = document.getElementById('script-topic');
+  const topic = topicInput?.value.trim() || currentScript?.topic || 'Got another nuke with the boys';
+  const niche = document.getElementById('script-niche')?.value || 'Gaming Clutch & Rage Comms';
+  const tone = document.getElementById('script-tone')?.value || 'High Energy & Urgent';
+  const duration = document.getElementById('script-duration')?.value || '30';
+  const goal = document.getElementById('script-goal')?.value || 'comments';
+
+  const btn = document.getElementById('copilot-submit-btn');
+  const originalHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<span class="w-3.5 h-3.5 border-2 border-black/30 border-t-black rounded-full animate-spin"></span> Refining...`;
+  }
+
+  const badge = document.getElementById('copilot-status-badge');
+  const badgeText = document.getElementById('copilot-status-text');
+  if (badge && badgeText) {
+    badge.classList.remove('hidden');
+    badgeText.textContent = `Applying direction: "${refinement}"...`;
+  }
+
+  const apiKey = getGeminiKey();
+  const model = getGeminiModel();
+
+  try {
+    const res = await fetch('/api/generate-script', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic,
+        niche,
+        tone,
+        duration,
+        goal,
+        apiKey,
+        model,
+        refinement,
+        previousScript: currentScript
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to refine script');
+
+    currentScript = data;
+    selectedHookIndex = 0;
+    renderScriptOutput(data);
+
+    if (input) input.value = '';
+    if (badgeText) badgeText.textContent = `Active Direction: "${refinement.length > 40 ? refinement.slice(0, 37) + '...' : refinement}"`;
+    showToast('Co-Pilot updated your viral script based on your direction!', 'success');
+  } catch (err) {
+    console.error('Co-Pilot refinement error:', err);
+    showToast(err.message, 'error');
+    if (badgeText) badgeText.textContent = `Refinement failed: ${err.message}`;
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
+    lucide.createIcons();
+  }
 }
 
 function selectHook(idx) {

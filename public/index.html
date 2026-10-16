@@ -175,6 +175,48 @@
           </span>
           <button type="button" onclick="clearTopicSearch()" class="text-slate-400 hover:text-brand-red text-[11px] underline">Reset to Default</button>
         </div>
+      <!-- VIRAL IDEA STUDIO: HERO PROMPT FOR CUSTOM CONCEPTS -->
+      <div class="mb-6 p-5 rounded-2xl bg-gradient-to-r from-brand-card via-slate-900 to-brand-card border-2 border-brand-cyan/40 shadow-2xl shadow-brand-cyan/10">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/30">
+                <i data-lucide="sparkles" class="w-3 h-3"></i> AI VIRAL IDEA STUDIO
+              </span>
+              <span class="text-xs text-amber-400 font-semibold">✨ Turn ANY idea or clip into a viral video</span>
+            </div>
+            <h3 class="text-base sm:text-lg font-black text-white mt-1">Have an idea or gameplay highlight? Type it below to viralize it:</h3>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-2">
+          <div class="relative flex-1">
+            <input 
+              type="text" 
+              id="trend-custom-idea-input" 
+              placeholder="e.g. “Got another nuke with the boys”, “1v4 clutch with 1 HP”, “Funniest death comms”..." 
+              onkeydown="if(event.key === 'Enter') launchCustomIdeaFromRadar()"
+              class="w-full bg-brand-dark/90 border border-brand-cyan/50 focus:border-brand-cyan rounded-xl px-4 py-3 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-cyan/30 transition shadow-inner font-medium"
+            />
+          </div>
+          <button 
+            type="button" 
+            onclick="launchCustomIdeaFromRadar()" 
+            class="bg-gradient-to-r from-brand-cyan to-teal-400 hover:from-cyan-400 hover:to-teal-300 text-black font-black px-6 py-3 rounded-xl shadow-lg shadow-brand-cyan/20 flex items-center justify-center gap-2 text-xs sm:text-sm transition transform active:scale-95 whitespace-nowrap"
+          >
+            <i data-lucide="wand-2" class="w-4 h-4"></i>
+            <span>Viralize My Idea ➔</span>
+          </button>
+        </div>
+
+        <!-- QUICK IDEA CHIPS -->
+        <div class="flex items-center gap-1.5 flex-wrap mt-3 text-xs text-slate-300">
+          <span class="text-slate-400 text-[11px] font-bold">Try an idea:</span>
+          <button type="button" onclick="setQuickIdea('Got another nuke with the boys in Rebirth')" class="px-2.5 py-1 rounded-lg bg-brand-dark/80 hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-brand-cyan transition text-[11px]">💣 "Got another nuke with the boys"</button>
+          <button type="button" onclick="setQuickIdea('1v4 clutch with 1 HP when teammates choked')" class="px-2.5 py-1 rounded-lg bg-brand-dark/80 hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-amber-400 transition text-[11px]">🔥 "1v4 clutch with 1 HP"</button>
+          <button type="button" onclick="setQuickIdea('Funniest toxic death comms in Search and Destroy')" class="px-2.5 py-1 rounded-lg bg-brand-dark/80 hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-pink-400 transition text-[11px]">💀 "Funniest death comms"</button>
+          <button type="button" onclick="setQuickIdea('The secret Roblox glitch winning every server')" class="px-2.5 py-1 rounded-lg bg-brand-dark/80 hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-emerald-400 transition text-[11px]">🧱 "Roblox glitch secret"</button>
+        </div>
       </div>
 
       <!-- CATEGORY FILTERS -->
@@ -211,10 +253,21 @@
           </div>
 
           <form id="script-form" class="flex flex-col gap-4">
-            <!-- TOPIC INPUT -->
+            <!-- IDEA ARCHETYPE PRESETS -->
             <div>
-              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Video Topic / Concept</label>
-              <textarea id="script-topic" rows="3" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-brand-cyan text-slate-100 placeholder-slate-500 resize-none transition" placeholder="e.g. 3 AI websites that feel illegal to know for college students..."></textarea>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Your Custom Idea / Clip Concept</label>
+                <span class="text-[10px] text-brand-cyan font-bold">✨ Any Concept Supported</span>
+              </div>
+              <div class="flex items-center gap-1.5 flex-wrap mb-2">
+                <span class="text-[10px] text-slate-500 font-bold uppercase">Quick Themes:</span>
+                <button type="button" onclick="setScriptIdeaPreset('nuke')" class="px-2 py-0.5 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-brand-cyan text-[11px] transition">💣 Nuke & Streak</button>
+                <button type="button" onclick="setScriptIdeaPreset('clutch')" class="px-2 py-0.5 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-amber-400 text-[11px] transition">🔥 1v4 Clutch</button>
+                <button type="button" onclick="setScriptIdeaPreset('comms')" class="px-2 py-0.5 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-pink-400 text-[11px] transition">💀 Funny Comms</button>
+                <button type="button" onclick="setScriptIdeaPreset('loadout')" class="px-2 py-0.5 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-orange-400 text-[11px] transition">👑 Meta Class</button>
+                <button type="button" onclick="setScriptIdeaPreset('roblox')" class="px-2 py-0.5 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-emerald-400 text-[11px] transition">🧱 Roblox</button>
+              </div>
+              <textarea id="script-topic" rows="3" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-brand-cyan text-slate-100 placeholder-slate-500 resize-none transition" placeholder="e.g. “Got another nuke with the boys”, “1v4 clutch with 1 HP when teammates choked”, “Funniest death comms in Search & Destroy”..."></textarea>
             </div>
 
             <!-- NICHE & TONE ROW -->
@@ -338,6 +391,57 @@
                   <i data-lucide="zap" class="w-3.5 h-3.5 fill-current"></i> Auto-Create Video
                 </button>
               </div>
+            </div>
+          </div>
+
+          <!-- INTERACTIVE IDEA CO-PILOT & CHAT REFINEMENT CARD -->
+          <div class="bg-gradient-to-r from-brand-card via-slate-900 to-brand-card p-5 rounded-2xl border border-brand-cyan/40 shadow-xl flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-brand-cyan animate-pulse"></span>
+                <h3 class="text-sm font-extrabold uppercase tracking-wider text-white flex items-center gap-1.5">
+                  <i data-lucide="message-square" class="w-4 h-4 text-brand-cyan"></i>
+                  Communicate & Refine Your Idea (Idea Co-Pilot)
+                </h3>
+              </div>
+              <span class="text-[10px] font-mono text-brand-cyan font-bold bg-brand-cyan/10 border border-brand-cyan/30 px-2 py-0.5 rounded-full">Interactive AI</span>
+            </div>
+            <p class="text-xs text-slate-400">Communicate any adjustments to the AI—e.g. add screaming teammate comms, change the hook angle, focus on the ending nuke explosion, or shorten pacing.</p>
+
+            <!-- LIVE REFINEMENT STATUS BADGE -->
+            <div id="copilot-status-badge" class="hidden text-xs py-1.5 px-3 rounded-xl bg-brand-dark/80 border border-brand-border text-slate-300 flex items-center justify-between">
+              <span id="copilot-status-text" class="truncate font-mono text-[11px] text-amber-300"></span>
+              <span class="text-[10px] text-emerald-400 font-bold">✓ Script Synced</span>
+            </div>
+
+            <!-- ONE-CLICK QUICK REFINEMENT PILLS -->
+            <div class="flex items-center gap-1.5 flex-wrap text-xs">
+              <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Quick Directives:</span>
+              <button type="button" onclick="sendCoPilotRefinement('Add funny comms of my teammate screaming on proximity chat')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-brand-cyan text-[11px] transition">🎙️ + Screaming Comms</button>
+              <button type="button" onclick="sendCoPilotRefinement('Make the hook more suspenseful and dramatic with a ticking countdown')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-amber-400 text-[11px] transition">💥 + Dramatic Suspense Hook</button>
+              <button type="button" onclick="sendCoPilotRefinement('Focus heavily on the final 10 seconds of holding the nuke bomb site')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-orange-400 text-[11px] transition">💣 + Focus Nuke Detonation</button>
+              <button type="button" onclick="sendCoPilotRefinement('Make it an intense 1v4 clutch with 1 HP survival')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-pink-400 text-[11px] transition">🔥 + 1v4 Clutch Angle</button>
+              <button type="button" onclick="sendCoPilotRefinement('Shorten the script to 15 seconds ultra-fast pacing')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-emerald-400 text-[11px] transition">⚡ + 15s Fast Pacing</button>
+            </div>
+
+            <!-- CHAT INPUT BAR -->
+            <div class="flex gap-2 pt-1">
+              <input 
+                type="text" 
+                id="copilot-refine-input" 
+                placeholder="Type your idea or adjustment (e.g. “Add my boy yelling in the mic”, “Make it toxic”, “Focus on Rebirth Island”)..." 
+                onkeydown="if(event.key === 'Enter') handleCoPilotSubmit()"
+                class="flex-1 bg-brand-dark border border-brand-border focus:border-brand-cyan rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none transition font-medium"
+              />
+              <button 
+                type="button" 
+                id="copilot-submit-btn" 
+                onclick="handleCoPilotSubmit()" 
+                class="px-4 py-2 rounded-xl bg-gradient-to-r from-brand-cyan to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-black text-xs font-black flex items-center gap-1.5 shadow-md shadow-brand-cyan/20 transition whitespace-nowrap active:scale-95"
+              >
+                <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                <span>Send Direction</span>
+              </button>
             </div>
           </div>
 
