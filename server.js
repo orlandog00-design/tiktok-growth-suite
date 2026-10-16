@@ -2066,7 +2066,7 @@ function extractActiveEndCards(endCards, endCard, imageOverlays) {
         duration: Math.max(1, Math.min(10, parseFloat(item.duration) || 3)),
         zoom: Math.max(1.0, Math.min(2.5, parseFloat(item.zoom) || 1.45)),
         focus: item.focus || 'left',
-        title: item.title || (list.length > 1 ? `LOADOUT SETUP [${idx + 1}/${list.length}]` : 'SAVE THIS CLASS SETUP [BEST META]'),
+        title: item.title || (item.filename ? item.filename.replace(/\.[^/.]+$/, '').toUpperCase() : (list.length > 1 ? `SLIDE [${idx + 1}/${list.length}]` : 'OUTRO SLIDE')),
         subtitle: item.subtitle || 'Screenshot & save for your next match'
       });
     }
@@ -2640,7 +2640,7 @@ function generateAssSubtitles({
       const endFmt = formatAssTime(curStart + dur);
       curStart += dur;
 
-      const rawTitle = sanitizeForAss(ec.title) || (slides.length > 1 ? `LOADOUT SETUP [${idx + 1}/${slides.length}]` : 'SAVE THIS CLASS SETUP');
+      const rawTitle = sanitizeForAss(ec.title) || (ec.filename ? ec.filename.replace(/\.[^/.]+$/, '').toUpperCase() : (slides.length > 1 ? `SLIDE [${idx + 1}/${slides.length}]` : 'OUTRO SLIDE'));
       const titleText = rawTitle.toUpperCase();
       const rawSub = sanitizeForAss(ec.subtitle) || 'Screenshot & save for your next match';
 

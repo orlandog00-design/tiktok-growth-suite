@@ -449,727 +449,780 @@
       </div>
     </section>
 
-    <!-- ======================================================== -->
+        <!-- ======================================================== -->
     <!-- TAB 3: SHORTS CLIPPER & SUBTITLE ENGINE                   -->
     <!-- ======================================================== -->
     <section id="tab-clipper" class="tab-content hidden">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div class="space-y-5">
 
-        <!-- LEFT COLUMN: CONTROLS & SUBTITLE BUILDER -->
-        <div class="lg:col-span-5 bg-brand-card p-6 rounded-2xl border border-brand-border flex flex-col gap-5 shadow-xl">
-          <div class="border-b border-brand-border pb-4 flex items-center justify-between">
-            <div>
-              <h2 class="text-xl font-bold flex items-center gap-2">
-                <i data-lucide="scissors" class="w-5 h-5 text-brand-red"></i>
-                9:16 Shorts Clipper
-              </h2>
-              <p class="text-xs text-slate-400">Reframe to vertical TikTok aspect ratio and burn kinetic captions.</p>
+        <!-- STUDIO HEADER & QUICK ACTION BAR -->
+        <div class="bg-brand-card p-4 md:p-5 rounded-2xl border border-brand-border flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="p-2 rounded-xl bg-brand-red/10 border border-brand-red/30 text-brand-red">
+                <i data-lucide="scissors" class="w-5 h-5"></i>
+              </span>
+              <div>
+                <h2 class="text-xl font-black text-white flex items-center gap-2">
+                  <span>Shorts Clipper & Captions Studio</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/40 font-mono font-bold">CapCut Pro</span>
+                </h2>
+                <p class="text-xs text-slate-400 mt-0.5">Reframe to 9:16 vertical TikTok format, assemble multi-clip sequence reels, and burn kinetic captions.</p>
+              </div>
             </div>
-            <button type="button" onclick="resetEditorState()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-brand-border flex items-center gap-1.5 transition" title="Clear all pictures, audio, and captions to start fresh from scratch">
+          </div>
+
+          <!-- TOP ACTION BUTTONS -->
+          <div class="flex items-center flex-wrap gap-2">
+            <button type="button" onclick="openFullscreenCropper()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs flex items-center gap-1.5 transition shadow-lg shadow-orange-500/20 active:scale-95">
+              <i data-lucide="maximize-2" class="w-4 h-4"></i>
+              <span>⛶ Fullscreen Cropper</span>
+            </button>
+
+            <button type="button" id="auto-create-btn" onclick="autoCreateFullVideo()" class="px-3.5 py-2 rounded-xl bg-brand-dark hover:bg-slate-800 border border-amber-500/40 text-amber-300 font-bold text-xs flex items-center gap-1.5 transition shadow-sm active:scale-95">
+              <i data-lucide="zap" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+              <span>⚡ 1-Click Auto-Create</span>
+            </button>
+
+            <button type="button" id="render-btn" onclick="startRenderShort()" class="px-3.5 py-2 rounded-xl bg-brand-cyan hover:bg-cyan-400 text-black font-black text-xs flex items-center gap-1.5 transition shadow-md shadow-brand-cyan/20 active:scale-95">
+              <i data-lucide="scissors" class="w-4 h-4"></i>
+              <span>Render Short</span>
+            </button>
+
+            <button type="button" onclick="resetEditorState()" class="px-3 py-2 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-brand-border flex items-center gap-1.5 transition" title="Clear all and start fresh">
               <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-              <span>Start Fresh</span>
+              <span>Reset</span>
             </button>
           </div>
-
-          <!-- VIDEO SOURCE SELECTOR -->
-          <div class="space-y-3 bg-brand-dark/40 p-4 rounded-xl border border-brand-border">
-            <div class="flex items-center justify-between">
-              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Video Source</label>
-              <span class="text-[10px] text-amber-400 font-bold">🎯 Tip: Record in Shooting Range for best original reach!</span>
-            </div>
-
-            <!-- UPLOAD OR SAMPLE ROW -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              <label class="cursor-pointer bg-brand-dark hover:bg-slate-800 border border-dashed border-slate-600 hover:border-brand-cyan rounded-xl p-3 text-center transition flex items-center justify-center gap-2">
-                <i data-lucide="target" class="w-4 h-4 text-amber-400"></i>
-                <span class="text-xs font-semibold text-slate-200" id="upload-label">Upload Shooting Range / Gun Clip</span>
-                <input type="file" id="video-file-input" accept="video/*" class="hidden" onchange="handleFileUpload(event)">
-              </label>
-
-              <button type="button" onclick="loadSampleVideo()" class="px-3.5 py-2.5 rounded-xl bg-brand-dark hover:bg-slate-800 border border-brand-border text-xs font-semibold text-slate-300 flex items-center justify-center gap-2 transition">
-                <i data-lucide="play-circle" class="w-4 h-4 text-brand-red"></i>
-                <span>Load Demo Gameplay</span>
-              </button>
-            </div>
-
-            <!-- IMPORT VIA URL (YT / TWITCH / TIKTOK) -->
-            <div class="pt-1 border-t border-brand-border/60">
-              <label class="block text-[11px] font-semibold text-slate-400 mb-1.5 flex items-center gap-1.5">
-                <i data-lucide="link" class="w-3.5 h-3.5 text-brand-cyan"></i>
-                Import Video from Link (YouTube / TikTok / Twitch):
-              </label>
-              <div class="flex items-center gap-2">
-                <input type="url" id="import-url-input" placeholder="Paste YouTube / Twitch / TikTok video URL here..." class="flex-1 bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-xs font-mono text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-cyan">
-                <button type="button" id="import-url-btn" onclick="importFromUrl()" class="px-3.5 py-2 rounded-xl bg-brand-cyan text-black text-xs font-bold hover:bg-cyan-400 flex items-center gap-1.5 transition shrink-0">
-                  <i data-lucide="download-cloud" class="w-3.5 h-3.5"></i>
-                  <span>Import</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- TIMELINE TRIMMER -->
-          <div class="space-y-2 bg-brand-dark/40 p-4 rounded-xl border border-brand-border">
-            <div class="flex items-center justify-between text-xs font-semibold">
-              <span class="text-slate-300">Trim Segment</span>
-              <span class="text-brand-cyan font-mono" id="trim-duration-badge">Clip Length: 10.0s</span>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3 pt-2">
-              <div>
-                <label class="block text-[11px] text-slate-400 mb-1">Start Time (sec)</label>
-                <input type="number" id="trim-start" min="0" step="0.5" value="0.0" class="w-full bg-brand-dark border border-brand-border rounded-lg px-3 py-1.5 text-xs text-slate-100 font-mono focus:border-brand-cyan" onchange="updateTrimTimes()">
-              </div>
-              <div>
-                <label class="block text-[11px] text-slate-400 mb-1">End Time (sec)</label>
-                <input type="number" id="trim-end" min="1" step="0.5" value="10.0" class="w-full bg-brand-dark border border-brand-border rounded-lg px-3 py-1.5 text-xs text-slate-100 font-mono focus:border-brand-cyan" onchange="updateTrimTimes()">
-              </div>
-            </div>
-          </div>
-
-          <!-- 9:16 LAYOUT SELECTION -->
-          <div class="space-y-2">
-            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Vertical 9:16 Reframe Mode</label>
-            <div class="grid grid-cols-3 gap-2">
-              <button type="button" onclick="selectLayout('blur_pad')" id="layout-blur_pad" class="layout-btn active p-2.5 rounded-xl border border-brand-cyan bg-brand-cyan/10 text-left transition">
-                <div class="text-xs font-bold text-white flex items-center gap-1.5 mb-0.5">
-                  <i data-lucide="layers" class="w-3.5 h-3.5 text-brand-cyan"></i>
-                  Blurred Mirror
-                </div>
-                <p class="text-[9px] text-slate-400">Preserves full 16:9 clip.</p>
-              </button>
-
-              <button type="button" onclick="selectLayout('center_crop')" id="layout-center_crop" class="layout-btn p-2.5 rounded-xl border border-brand-border bg-brand-dark text-left hover:border-slate-600 transition">
-                <div class="text-xs font-bold text-white flex items-center gap-1.5 mb-0.5">
-                  <i data-lucide="crop" class="w-3.5 h-3.5 text-brand-red"></i>
-                  Center Crop
-                </div>
-                <p class="text-[9px] text-slate-400">Auto zooms to fill 9:16.</p>
-              </button>
-
-              <button type="button" onclick="selectLayout('manual_crop')" id="layout-manual_crop" class="layout-btn p-2.5 rounded-xl border border-brand-border bg-brand-dark text-left hover:border-slate-600 transition">
-                <div class="text-xs font-bold text-white flex items-center gap-1.5 mb-0.5">
-                  <i data-lucide="sliders" class="w-3.5 h-3.5 text-amber-400"></i>
-                  Manual Crop
-                </div>
-                <p class="text-[9px] text-slate-400">Custom top/side cuts.</p>
-              </button>
-            </div>
-
-            <!-- MANUAL CROP SLIDERS PANEL -->
-            <div id="manual-crop-panel" class="hidden space-y-2.5 bg-brand-dark/60 p-3 rounded-xl border border-amber-500/40">
-              <div class="flex items-center justify-between text-xs">
-                <span class="font-bold text-amber-400 flex items-center gap-1">
-                  <i data-lucide="crop" class="w-3.5 h-3.5"></i>
-                  Manual Crop Boundaries
-                </span>
-                <span class="text-[10px] text-slate-400">Drag sliders to adjust</span>
-              </div>
-
-              <div class="grid grid-cols-2 gap-2 text-[11px]">
-                <div>
-                  <div class="flex justify-between text-slate-400 mb-0.5">
-                    <span>Cut Top:</span>
-                    <span id="crop-top-val" class="font-mono text-amber-400 font-bold">0%</span>
-                  </div>
-                  <input type="range" id="crop-top-slider" min="0" max="45" value="0" step="1" oninput="updateManualCrop('cropTop', this.value)" class="w-full accent-amber-400 cursor-pointer">
-                </div>
-                <div>
-                  <div class="flex justify-between text-slate-400 mb-0.5">
-                    <span>Cut Bottom:</span>
-                    <span id="crop-bottom-val" class="font-mono text-amber-400 font-bold">0%</span>
-                  </div>
-                  <input type="range" id="crop-bottom-slider" min="0" max="45" value="0" step="1" oninput="updateManualCrop('cropBottom', this.value)" class="w-full accent-amber-400 cursor-pointer">
-                </div>
-                <div>
-                  <div class="flex justify-between text-slate-400 mb-0.5">
-                    <span>Cut Left:</span>
-                    <span id="crop-left-val" class="font-mono text-amber-400 font-bold">0%</span>
-                  </div>
-                  <input type="range" id="crop-left-slider" min="0" max="45" value="0" step="1" oninput="updateManualCrop('cropLeft', this.value)" class="w-full accent-amber-400 cursor-pointer">
-                </div>
-                <div>
-                  <div class="flex justify-between text-slate-400 mb-0.5">
-                    <span>Cut Right:</span>
-                    <span id="crop-right-val" class="font-mono text-amber-400 font-bold">0%</span>
-                  </div>
-                  <input type="range" id="crop-right-slider" min="0" max="45" value="0" step="1" oninput="updateManualCrop('cropRight', this.value)" class="w-full accent-amber-400 cursor-pointer">
-                </div>
-              </div>
-
-              <!-- FIT MODE -->
-              <div class="flex items-center justify-between pt-1 border-t border-brand-border/60 text-[11px]">
-                <span class="text-slate-400">Cropped Framing:</span>
-                <div class="flex items-center gap-3">
-                  <label class="flex items-center gap-1 cursor-pointer text-slate-300">
-                    <input type="radio" name="manual-fit" value="fill" checked onchange="updateManualCrop('fitMode', 'fill')" class="accent-amber-400">
-                    <span>Fill 9:16 (Zoom)</span>
-                  </label>
-                  <label class="flex items-center gap-1 cursor-pointer text-slate-300">
-                    <input type="radio" name="manual-fit" value="blur_fit" onchange="updateManualCrop('fitMode', 'blur_fit')" class="accent-amber-400">
-                    <span>Blurred Mirror Fit</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- STREAMER FACECAM REMOVAL & MASKING -->
-          <div class="space-y-3 bg-brand-dark/40 p-4 rounded-xl border border-brand-border">
-            <div class="flex items-center justify-between">
-              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <i data-lucide="user-x" class="w-4 h-4 text-brand-red"></i>
-                Streamer Facecam Removal
-              </label>
-              <span class="text-[10px] text-amber-400 font-bold">🎯 Remove creator face from reposts</span>
-            </div>
-
-            <!-- PRESET BUTTONS -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <button type="button" onclick="selectFacecamMode('none')" id="facecam-none" class="facecam-btn active px-2.5 py-2 rounded-xl border border-brand-cyan bg-brand-cyan/10 text-xs font-bold text-white text-center transition">
-                None (Original)
-              </button>
-              <button type="button" onclick="selectFacecamMode('crop_gameplay')" id="facecam-crop_gameplay" class="facecam-btn px-2.5 py-2 rounded-xl border border-brand-border bg-brand-dark hover:border-slate-500 text-xs font-bold text-slate-300 text-center transition">
-                ✂️ Crop Facecam
-              </button>
-              <button type="button" onclick="selectFacecamMode('cover_banner')" id="facecam-cover_banner" class="facecam-btn px-2.5 py-2 rounded-xl border border-brand-border bg-brand-dark hover:border-slate-500 text-xs font-bold text-slate-300 text-center transition">
-                🛡️ Cover Banner
-              </button>
-              <button type="button" onclick="selectFacecamMode('blur_top')" id="facecam-blur_top" class="facecam-btn px-2.5 py-2 rounded-xl border border-brand-border bg-brand-dark hover:border-slate-500 text-xs font-bold text-slate-300 text-center transition">
-                🌫️ Blur Facecam
-              </button>
-            </div>
-
-            <!-- DYNAMIC CONTROLS (HEIGHT SLIDER & BANNER TITLE) -->
-            <div id="facecam-settings-panel" class="hidden space-y-3 pt-2 border-t border-brand-border/60">
-              <div class="flex items-center justify-between text-xs">
-                <label class="text-slate-400">Top Cutoff Height (Facecam Area):</label>
-                <span id="facecam-height-val" class="text-amber-400 font-mono font-bold">33% (Top 1/3)</span>
-              </div>
-              <input type="range" id="facecam-height-slider" min="18" max="45" value="33" step="1" oninput="updateFacecamHeight(this.value)" class="w-full accent-amber-400 cursor-pointer">
-
-              <div id="facecam-banner-input-box" class="hidden space-y-1">
-                <label class="block text-[11px] text-slate-400">Tactical Header Title (Over Facecam):</label>
-                <input type="text" id="facecam-banner-text" placeholder="e.g. VOYAK KT-3 LOADOUT (or leave empty for default)" class="w-full bg-brand-dark border border-brand-border rounded-lg px-3 py-1.5 text-xs text-slate-100 font-mono focus:border-brand-cyan">
-              </div>
-            </div>
-          </div>
-
-          <!-- TOP VIRAL HOOK TITLE CARD (REPLACE/COVER TITLE) -->
-          <div class="space-y-3 bg-brand-dark/40 p-4 rounded-xl border border-brand-border">
-            <div class="flex items-center justify-between">
-              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <i data-lucide="tag" class="w-4 h-4 text-brand-red"></i>
-                Top Hook Title Card
-              </label>
-              <span class="text-[10px] text-brand-cyan font-bold">🎯 100% Full-Width Wipe & Replace</span>
-            </div>
-            <p class="text-[10px] text-slate-400">Full-width 1080px header banner wipes 100% of any existing creator title and auto-wraps your title cleanly.</p>
-
-            <!-- HOOK CARD STYLE BUTTONS -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <button type="button" onclick="selectHookCardMode('none')" id="hookcard-none" class="hookcard-btn active px-2.5 py-2 rounded-xl border border-brand-cyan bg-brand-cyan/10 text-xs font-bold text-white text-center transition">
-                Off (Clean Video)
-              </button>
-              <button type="button" onclick="selectHookCardMode('viral_white')" id="hookcard-viral_white" class="hookcard-btn px-2.5 py-2 rounded-xl border border-brand-border bg-brand-dark hover:border-slate-500 text-xs font-bold text-slate-300 text-center transition">
-                🃏 Viral White
-              </button>
-              <button type="button" onclick="selectHookCardMode('cod_tactical')" id="hookcard-cod_tactical" class="hookcard-btn px-2.5 py-2 rounded-xl border border-brand-border bg-brand-dark hover:border-slate-500 text-xs font-bold text-slate-300 text-center transition">
-                🖤 Tactical Dark
-              </button>
-              <button type="button" onclick="selectHookCardMode('wipe_only')" id="hookcard-wipe_only" class="hookcard-btn px-2.5 py-2 rounded-xl border border-brand-border bg-brand-dark hover:border-slate-500 text-xs font-bold text-slate-300 text-center transition">
-                🧹 Wipe Only
-              </button>
-            </div>
-
-            <!-- HOOK CARD CUSTOM TEXT INPUT -->
-            <div id="hookcard-input-box" class="space-y-1 pt-1">
-              <label class="block text-[11px] text-slate-400">Your Custom Hook Title:</label>
-              <input type="text" id="hookcard-text-input" placeholder="e.g. “This SUPERI 46 Class Is Straight-Up Illegal”" class="w-full bg-brand-dark border border-brand-border rounded-lg px-3 py-1.5 text-xs text-slate-100 font-mono focus:border-brand-cyan">
-            </div>
-          </div>
-
-          <!-- WEAPON BUILD / LOADOUT END-CARD & PICTURE OVERLAYS -->
-          <div class="space-y-3 bg-brand-dark/40 p-4 rounded-xl border border-brand-border">
-            <div class="flex items-center justify-between">
-              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <i data-lucide="image" class="w-4 h-4 text-emerald-400"></i>
-                Weapon Build / Loadout Outro
-              </label>
-              <label class="cursor-pointer px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-[11px] flex items-center gap-1 transition shadow-sm">
-                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                <span>+ Add Weapon Build</span>
-                <input type="file" id="overlay-img-input" accept="image/*" multiple class="hidden" onchange="handleOverlayImageUpload(event)">
-              </label>
-            </div>
-            <p class="text-[10px] text-slate-400">Displays your loadout screenshot(s) full-screen after the clip. Add multiple pictures for videos showing 2+ weapon classes!</p>
-
-            <!-- MODE SELECTOR TABS -->
-            <div class="grid grid-cols-2 gap-2">
-              <button type="button" onclick="selectPictureMode('endcard')" id="picmode-endcard" class="picmode-btn active px-2.5 py-1.5 rounded-xl border border-emerald-400 bg-emerald-500/15 text-xs font-bold text-white text-center transition flex items-center justify-center gap-1.5">
-                <span>🎯 Full-Screen Outro (After Clip)</span>
-              </button>
-              <button type="button" onclick="selectPictureMode('invideo')" id="picmode-invideo" class="picmode-btn px-2.5 py-1.5 rounded-xl border border-brand-border bg-brand-dark hover:border-slate-500 text-xs font-bold text-slate-400 text-center transition flex items-center justify-center gap-1.5">
-                <span>📌 In-Video Floating Overlay</span>
-              </button>
-            </div>
-
-            <!-- END-CARD VIEW (SUPPORTS MULTIPLE SLIDES) -->
-            <div id="endcard-panel" class="space-y-3">
-              <div id="endcard-empty" class="hidden p-3.5 rounded-xl border border-dashed border-slate-700 bg-brand-dark/50 text-center">
-                <p class="text-xs text-slate-400">No weapon build slides loaded yet.</p>
-                <p class="text-[10px] text-slate-500 mt-0.5">Click <strong class="text-emerald-400">+ Add Weapon Build</strong> above to attach 1 or more class screenshots!</p>
-              </div>
-
-              <!-- DYNAMIC LIST OF SLIDES -->
-              <div id="endcard-slides-list" class="space-y-3">
-                <!-- Rendered dynamically by renderEndCardState() -->
-              </div>
-
-              <!-- BUTTON TO ADD MORE SLIDES -->
-              <div id="endcard-add-more-row" class="pt-1">
-                <label class="cursor-pointer w-full py-2 px-3 rounded-xl border border-dashed border-emerald-500/50 bg-emerald-500/5 hover:bg-emerald-500/15 text-emerald-400 font-bold text-xs flex items-center justify-center gap-1.5 transition">
-                  <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                  <span>+ Add Another Weapon Slide (e.g. Secondary Weapon Build)</span>
-                  <input type="file" accept="image/*" multiple class="hidden" onchange="handleOverlayImageUpload(event)">
-                </label>
-              </div>
-            </div>
-
-            <!-- IN-VIDEO FLOATING OVERLAYS VIEW (HIDDEN IN ENDCARD MODE) -->
-            <div id="invideo-panel" class="hidden space-y-3">
-              <div id="overlay-images-list" class="space-y-3">
-                <div id="overlay-empty-state" class="p-3.5 rounded-xl border border-dashed border-slate-700 bg-brand-dark/50 text-center">
-                  <p class="text-xs text-slate-400">No floating overlays added yet.</p>
-                  <p class="text-[10px] text-slate-500 mt-0.5">Click <strong class="text-emerald-400">+ Add Weapon Build</strong> above to place an image over gameplay.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- SUBTITLE TEXT INPUT -->
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Burned Kinetic Subtitles</label>
-              <button onclick="clearSubtitles()" class="text-[11px] text-slate-500 hover:text-slate-300">Clear</button>
-            </div>
-            <textarea id="subtitles-input" rows="3" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2 text-xs font-mono focus:outline-none focus:border-brand-cyan text-slate-100 placeholder-slate-500 resize-none" placeholder="Enter words or phrase to burn onto clip... (e.g. STOP SCROLLING! THIS HACK CHANGES EVERYTHING)"></textarea>
-
-            <!-- CAPTION SPEED / PACING CONTROLLER -->
-            <div class="space-y-1.5 p-2.5 rounded-xl bg-brand-dark/70 border border-brand-border">
-              <div class="flex items-center justify-between">
-                <label class="block text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
-                  <i data-lucide="gauge" class="w-3.5 h-3.5 text-brand-cyan"></i>
-                  Caption Pop Speed:
-                </label>
-                <span class="text-[9px] text-amber-400 font-mono font-bold">⚡ Timing Control</span>
-              </div>
-              <div class="grid grid-cols-4 gap-1 text-[10px]">
-                <button type="button" onclick="selectSubtitlePacing('hyper')" id="subpacing-hyper" class="subpacing-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark text-slate-400 hover:text-white font-bold text-center transition">
-                  ⚡ 0.8s Rapid
-                </button>
-                <button type="button" onclick="selectSubtitlePacing('fast')" id="subpacing-fast" class="subpacing-btn active px-2 py-1.5 rounded-lg border border-brand-cyan bg-brand-cyan/20 text-white font-bold text-center transition">
-                  🔥 1.2s TikTok
-                </button>
-                <button type="button" onclick="selectSubtitlePacing('normal')" id="subpacing-normal" class="subpacing-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark text-slate-400 hover:text-white font-bold text-center transition">
-                  🎯 1.8s Normal
-                </button>
-                <button type="button" onclick="selectSubtitlePacing('auto')" id="subpacing-auto" class="subpacing-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark text-slate-400 hover:text-white font-bold text-center transition">
-                  🔄 Auto-Fit
-                </button>
-              </div>
-              <p class="text-[10px] text-slate-400">💡 <em>Tip: Put each caption on a new line in the box above to control exactly what words appear in each frame!</em></p>
-            </div>
-
-            <!-- AI VOICEOVER NARRATOR SELECTOR -->
-            <div class="space-y-1.5 p-2.5 rounded-xl bg-brand-dark/70 border border-brand-border">
-              <div class="flex items-center justify-between">
-                <label class="block text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
-                  <i data-lucide="mic" class="w-3.5 h-3.5 text-purple-400"></i>
-                  <span>AI Voice Narrator (Reads Captions):</span>
-                </label>
-                <span class="text-[9px] text-purple-300 font-mono font-bold">100% Synced</span>
-              </div>
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[10px]">
-                <button type="button" onclick="selectAiVoice('christopher')" id="voice-btn-christopher" class="voice-btn active px-2 py-1.5 rounded-lg border border-purple-500 bg-purple-500/20 text-white font-bold text-center transition">
-                  🗣️ Deep Hype (M)
-                </button>
-                <button type="button" onclick="selectAiVoice('guy')" id="voice-btn-guy" class="voice-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark text-slate-400 hover:text-white font-bold text-center transition">
-                  ⚡ Fast TikTok (M)
-                </button>
-                <button type="button" onclick="selectAiVoice('jenny')" id="voice-btn-jenny" class="voice-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark text-slate-400 hover:text-white font-bold text-center transition">
-                  🎙️ Storyteller (F)
-                </button>
-                <button type="button" onclick="selectAiVoice('ryan')" id="voice-btn-ryan" class="voice-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark text-slate-400 hover:text-white font-bold text-center transition">
-                  🇬🇧 Documentary
-                </button>
-              </div>
-            </div>
-
-            <!-- WIPE OLD CAPTIONS TOGGLE -->
-            <div class="flex items-center justify-between p-2.5 rounded-xl bg-brand-dark/60 border border-brand-border">
-              <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-200">
-                <input type="checkbox" id="mask-old-captions-toggle" onchange="toggleMaskOldCaptions(this.checked)" class="accent-brand-cyan w-4 h-4 rounded">
-                <span class="font-bold text-amber-300 flex items-center gap-1.5">
-                  <i data-lucide="eraser" class="w-3.5 h-3.5"></i>
-                  🧹 Wipe Old Burned Captions
-                </span>
-              </label>
-              <span class="text-[10px] text-slate-400">Smooths over text on pre-made clips</span>
-            </div>
-          </div>
-
-          <!-- WARZONE VIRAL AUDIO SELECTOR -->
-          <div class="space-y-3 bg-brand-dark/40 p-3.5 rounded-xl border border-brand-border">
-            <div class="flex items-center justify-between">
-              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <i data-lucide="music" class="w-4 h-4 text-brand-cyan"></i>
-                Warzone Viral Audio / Music
-              </label>
-              <span class="text-[10px] text-amber-400 font-bold">🎵 Trending COD TikTok Beats</span>
-            </div>
-            <select id="bg-music-select" onchange="handleSelectBgMusic(this.value)" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-xs font-bold text-slate-100 focus:outline-none focus:border-brand-cyan">
-              <option value="phonk_drift">🔥 Brazilian Phonk Drift (136 BPM - Movement/Kills)</option>
-              <option value="dark_808_drill">💀 Dark 808 Drill (140 BPM - Heavy Sub-Bass & Wipes)</option>
-              <option value="guitar_montage">🎸 Montage Distortion Guitar (142 BPM - Sniper Headshots)</option>
-              <option value="sigma_drop">🗿 Sigma 808 Cinematic Drop (128 BPM - 1v4 Clutch)</option>
-              <option value="hyper_hardstyle">🚀 Hyper-Drive Hardstyle (150 BPM - Camera Breaker)</option>
-              <option value="slowed_reverb_phonk">🌌 Slowed + Reverb Phonk (115 BPM - Aesthetic Vibe)</option>
-              <option value="cyber_rush">⚡ Cyber Combat Rush (148 BPM - Fast Adrenaline)</option>
-              <option value="suspense_drop">⏱️ Suspense Countdown & Drop (130 BPM - Secret Class Reveal)</option>
-              <option value="bouncy_trap">🎯 Bouncy 808 Trap (132 BPM - Meta Recoil & Commentary)</option>
-              <option value="lofi_gunsmith">☕ Chill Lofi Gunsmith (90 BPM - Attachment Breakdown)</option>
-              <option value="none">🔇 No Music (Voiceover / Clean SFX Only)</option>
-            </select>
-
-            <!-- CUSTOM AUDIO UPLOAD & FREE VIRAL MP3 SITES -->
-            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-              <label class="cursor-pointer px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold text-[11px] flex items-center gap-1.5 transition shadow-sm">
-                <i data-lucide="plus-circle" class="w-3.5 h-3.5 text-emerald-400"></i>
-                <span>+ Upload MP3s (Select Multiple)</span>
-                <input type="file" id="custom-audio-input" accept="audio/*" multiple class="hidden" onchange="handleCustomAudioUpload(event)">
-              </label>
-
-              <button type="button" onclick="openViralSoundsModal()" class="px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-brand-red to-pink-600 hover:opacity-90 text-white font-bold text-[11px] flex items-center gap-1.5 transition shadow-sm">
-                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                <span>🔥 Free Viral TikTok MP3 Hub ↗</span>
-              </button>
-            </div>
-
-            <!-- MULTI-AUDIO TRACKS PLAYLIST & SEQUENCER -->
-            <div id="custom-audio-playlist-container" class="space-y-2 p-3 rounded-xl bg-black/50 border border-brand-border">
-              <div class="flex items-center justify-between">
-                <span class="text-[11px] font-bold text-amber-400 flex items-center gap-1.5">
-                  <i data-lucide="list-music" class="w-3.5 h-3.5 text-amber-400"></i>
-                  <span id="audio-playlist-header">Custom Audio Sequencer</span>
-                </span>
-                <div class="flex items-center gap-2">
-                  <span class="text-[10px] text-emerald-400 font-mono font-bold" id="audio-total-duration">0.0s total</span>
-                  <button type="button" onclick="clearAllAudioTracks()" class="text-[10px] text-rose-400 hover:text-white hover:underline transition" title="Clear all tracks">Clear All</button>
-                </div>
-              </div>
-
-              <!-- EMPTY STATE -->
-              <div id="audio-playlist-empty" class="text-center py-2 px-3 border border-dashed border-slate-700/80 rounded-lg text-slate-400 text-[11px]">
-                No custom MP3s loaded yet. Upload multiple short MP3s or extract sound links below!
-              </div>
-
-              <!-- TRACKS LIST CONTAINER -->
-              <div id="custom-audio-playlist-items" class="space-y-1.5"></div>
-
-              <div class="text-[10px] text-slate-400 flex items-center justify-between pt-1 border-t border-brand-border/40">
-                <span>💡 Click <strong>▲ / ▼</strong> to set the exact playing order.</span>
-                <span class="text-emerald-400 font-mono">Sequenced & Looped</span>
-              </div>
-            </div>
-
-            <!-- AUDIO PREVIEW PLAYER (HIDDEN) -->
-            <audio id="audio-preview-player" class="hidden" onended="onAudioPreviewEnded()"></audio>
-
-            <!-- INSTANT URL TO MP3 EXTRACTOR -->
-            <div class="mt-1.5 p-2.5 bg-black/40 rounded-xl border border-brand-border/70 space-y-2">
-              <div class="flex items-center justify-between">
-                <span class="text-[11px] font-bold text-brand-cyan flex items-center gap-1">
-                  <i data-lucide="link" class="w-3.5 h-3.5"></i>
-                  Paste TikTok / YouTube Link → 1-Click MP3
-                </span>
-                <span class="text-[9px] text-slate-400 font-mono">yt-dlp auto extractor</span>
-              </div>
-              <div class="flex gap-1.5">
-                <input type="text" id="audio-url-input" placeholder="Paste link (TikTok, YouTube Shorts, Sound URL)..." class="flex-1 bg-brand-dark border border-brand-border rounded-lg px-2.5 py-1.5 text-xs text-slate-100 font-mono focus:border-brand-cyan">
-                <button type="button" id="extract-audio-url-btn" onclick="handleExtractAudioFromUrl()" class="px-3 py-1.5 bg-brand-cyan hover:bg-cyan-400 text-black font-bold text-xs rounded-lg transition shrink-0 flex items-center gap-1">
-                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                  <span>Extract MP3</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- ORIGINAL CLIP AUDIO BEHAVIOR -->
-            <div class="pt-2 border-t border-brand-border/60">
-              <div class="flex items-center justify-between mb-1.5">
-                <label class="block text-[11px] font-semibold text-slate-300 flex items-center gap-1">
-                  <i data-lucide="volume-x" class="w-3.5 h-3.5 text-amber-400"></i>
-                  Original Video Audio:
-                </label>
-                <span class="text-[10px] text-emerald-400 font-bold">🎯 Removes old streamer voice</span>
-              </div>
-              <div class="grid grid-cols-3 gap-1.5">
-                <button type="button" onclick="selectOrigAudioMode('mute')" id="origaudio-mute" class="origaudio-btn active px-2 py-1.5 rounded-lg border border-brand-cyan bg-brand-cyan/10 text-[11px] font-bold text-white text-center transition">
-                  🔇 Mute Old Audio
-                </button>
-                <button type="button" onclick="selectOrigAudioMode('low')" id="origaudio-low" class="origaudio-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark hover:border-slate-500 text-[11px] font-bold text-slate-300 text-center transition">
-                  🔉 Low Game SFX
-                </button>
-                <button type="button" onclick="selectOrigAudioMode('full')" id="origaudio-full" class="origaudio-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark hover:border-slate-500 text-[11px] font-bold text-slate-300 text-center transition">
-                  🔊 Keep 100%
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- SUBTITLE STYLE PRESETS -->
-          <div class="space-y-2">
-            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Caption Style & Position</label>
-            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
-              <button type="button" onclick="selectSubStyle('warzone')" id="substyle-warzone" class="substyle-btn px-2 py-2 rounded-lg border border-amber-500 bg-amber-500/10 text-xs font-bold text-amber-300 text-center">
-                COD Gold
-              </button>
-              <button type="button" onclick="selectSubStyle('hormozi')" id="substyle-hormozi" class="substyle-btn active px-2 py-2 rounded-lg border border-yellow-400 bg-yellow-400/10 text-xs font-bold text-yellow-300 text-center">
-                Hormozi
-              </button>
-              <button type="button" onclick="selectSubStyle('beast')" id="substyle-beast" class="substyle-btn px-2.5 py-2 rounded-lg border border-brand-border bg-brand-dark text-xs font-bold text-white text-center hover:border-slate-500">
-                Beast
-              </button>
-              <button type="button" onclick="selectSubStyle('cyber')" id="substyle-cyber" class="substyle-btn px-2.5 py-2 rounded-lg border border-brand-border bg-brand-dark text-xs font-bold text-brand-cyan text-center hover:border-slate-500">
-                Cyber
-              </button>
-              <button type="button" onclick="selectSubStyle('minimal')" id="substyle-minimal" class="substyle-btn px-2.5 py-2 rounded-lg border border-brand-border bg-brand-dark text-xs font-bold text-slate-300 text-center hover:border-slate-500">
-                Minimal
-              </button>
-            </div>
-
-            <div class="flex items-center gap-3 pt-1 text-xs">
-              <span class="text-slate-400">Vertical Position:</span>
-              <label class="flex items-center gap-1.5 cursor-pointer text-slate-300">
-                <input type="radio" name="sub-pos" value="middle" checked onchange="subtitlePosition = 'middle'" class="accent-brand-cyan">
-                Center Eye-Level
-              </label>
-              <label class="flex items-center gap-1.5 cursor-pointer text-slate-300">
-                <input type="radio" name="sub-pos" value="lower" onchange="subtitlePosition = 'lower'" class="accent-brand-cyan">
-                Lower-Third
-              </label>
-            <div class="space-y-1.5 bg-brand-dark/40 p-3 rounded-xl border border-brand-border">
-              <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Auto Video Background</label>
-              <div class="grid grid-cols-2 gap-2 text-xs">
-                <label class="flex items-center gap-2 p-2 rounded-lg bg-brand-dark border border-brand-border cursor-pointer hover:border-slate-500">
-                  <input type="radio" name="auto-bg-type" value="gameplay" checked onchange="autoBgType = 'gameplay'" class="accent-brand-cyan">
-                  <span>🎮 Warzone Gameplay</span>
-                </label>
-                <label class="flex items-center gap-2 p-2 rounded-lg bg-brand-dark border border-brand-border cursor-pointer hover:border-slate-500">
-                  <input type="radio" name="auto-bg-type" value="cyber_hud" onchange="autoBgType = 'cyber_hud'" class="accent-brand-cyan">
-                  <span>🎯 Cyber Radar HUD</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <!-- 1-CLICK AUTO-CREATE BUTTON -->
-          <button type="button" id="auto-create-btn" onclick="autoCreateFullVideo()" class="w-full bg-gradient-to-r from-amber-400 via-orange-500 to-brand-red hover:from-amber-300 hover:to-orange-600 text-black font-black py-4 px-4 rounded-xl shadow-xl shadow-orange-500/20 flex items-center justify-center gap-2 transition-all transform active:scale-[0.98] text-sm">
-            <i data-lucide="zap" class="w-5 h-5 fill-black"></i>
-            ⚡ 1-Click Auto-Create Video (Voiceover + Subtitles)
-          </button>
-
-          <div class="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase justify-center tracking-widest my-0.5">
-            <span>── Or Manual Custom Clip ──</span>
-          </div>
-
-          <!-- MANUAL RENDER BUTTON -->
-          <button type="button" id="render-btn" onclick="startRenderShort()" class="w-full bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 text-xs transition">
-            <i data-lucide="scissors" class="w-4 h-4 text-brand-cyan"></i>
-            Render Manual Segment (With Uploaded Video)
-          </button>
         </div>
 
-        <!-- RIGHT COLUMN: VIDEO PLAYERS & FINAL DOWNLOAD -->
-        <div class="lg:col-span-7 flex flex-col gap-6">
-
-          <!-- SOURCE VIDEO PREVIEW PLAYER & MULTI-CLIP CAPCUT TIMELINE -->
-          <div class="bg-brand-card p-5 rounded-2xl border border-brand-border">
-            
-            <!-- 1. MULTI-CLIP SEQUENCE REEL (CAPCUT-STYLE) -->
-            <div class="mb-4 bg-brand-dark/90 p-3 rounded-xl border border-brand-border space-y-2 shadow-inner">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <span class="text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
-                    <i data-lucide="layers" class="w-3.5 h-3.5 text-brand-cyan"></i>
-                    <span>Multi-Clip Timeline Reel</span>
-                  </span>
-                  <span id="multi-clip-count-badge" class="px-2 py-0.5 rounded-full bg-brand-cyan/15 text-brand-cyan border border-brand-cyan/30 text-[10px] font-bold font-mono">0 Clips</span>
+        <!-- MULTI-VIDEO SOURCE & CAPCUT REEL HUB (FULL-WIDTH) -->
+        <div class="bg-brand-card p-4 md:p-5 rounded-2xl border border-brand-border space-y-3.5 shadow-lg">
+          <!-- ROW 1: UPLOAD & IMPORT CONTROLS -->
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+            <label class="md:col-span-5 cursor-pointer bg-brand-dark hover:bg-slate-800 border-2 border-dashed border-brand-cyan/40 hover:border-brand-cyan rounded-xl p-3 text-center transition flex items-center justify-center gap-2.5 group">
+              <i data-lucide="upload-cloud" class="w-5 h-5 text-brand-cyan group-hover:scale-110 transition"></i>
+              <div class="text-left">
+                <div class="text-xs font-bold text-slate-100 flex items-center gap-1.5">
+                  <span id="upload-label">Upload Videos (Select 1 or Multiple Clips)</span>
+                  <span class="text-[9px] bg-brand-cyan/20 text-brand-cyan px-1.5 py-0.5 rounded font-mono font-bold">Multi-File</span>
                 </div>
-                
-                <div class="flex items-center gap-2">
-                  <span id="reel-total-duration-badge" class="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">Reel: 0.0s</span>
-                  <label class="cursor-pointer px-2.5 py-1 rounded-lg bg-gradient-to-r from-brand-cyan to-blue-500 hover:opacity-90 text-black text-xs font-black flex items-center gap-1 transition shadow">
-                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                    <span>+ Add Clip</span>
-                    <input type="file" accept="video/*" class="hidden" onchange="handleAddAnotherClip(event)">
+                <div class="text-[10px] text-slate-400">Click or drag & drop MP4, MOV, or WEBM files directly</div>
+              </div>
+              <input type="file" id="video-file-input" accept="video/*" multiple class="hidden" onchange="handleFileUpload(event)">
+            </label>
+
+            <button type="button" onclick="loadSampleVideo()" class="md:col-span-3 px-3.5 py-2.5 rounded-xl bg-brand-dark hover:bg-slate-800 border border-brand-border text-xs font-bold text-slate-300 flex items-center justify-center gap-2 transition hover:border-slate-500">
+              <i data-lucide="play-circle" class="w-4 h-4 text-brand-red"></i>
+              <span>Load Demo Gameplay</span>
+            </button>
+
+            <div class="md:col-span-4 flex items-center gap-1.5">
+              <input type="url" id="import-url-input" placeholder="Paste YouTube / TikTok / Twitch URL..." class="flex-1 bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-xs font-mono text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-cyan">
+              <button type="button" id="import-url-btn" onclick="importFromUrl()" class="px-3.5 py-2 rounded-xl bg-brand-cyan text-black text-xs font-bold hover:bg-cyan-400 flex items-center gap-1 transition shrink-0">
+                <i data-lucide="download-cloud" class="w-3.5 h-3.5"></i>
+                <span>Import</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- ROW 2: CAPCUT-STYLE MULTI-CLIP SEQUENCE TIMELINE REEL -->
+          <div class="bg-black/60 p-3 rounded-xl border border-brand-border/80 space-y-2">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
+                  <i data-lucide="film" class="w-4 h-4 text-brand-cyan"></i>
+                  <span>Sequence Timeline Reel</span>
+                </span>
+                <span id="multi-clip-count-badge" class="px-2 py-0.5 rounded-full bg-brand-cyan/15 text-brand-cyan border border-brand-cyan/30 text-[10px] font-bold font-mono">0 Clips</span>
+                <span id="reel-total-duration-badge" class="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">Reel: 0.0s</span>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button type="button" id="play-full-reel-btn" onclick="togglePlayReelSequence()" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-amber-500/40 text-amber-300 text-xs font-bold flex items-center gap-1.5 transition">
+                  <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+                  <span>Play Full Reel Sequence</span>
+                </button>
+
+                <label class="cursor-pointer px-2.5 py-1 rounded-lg bg-gradient-to-r from-brand-cyan to-blue-500 hover:opacity-90 text-black text-xs font-black flex items-center gap-1 transition shadow">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                  <span>+ Add Clip</span>
+                  <input type="file" accept="video/*" multiple class="hidden" onchange="handleAddAnotherClip(event)">
+                </label>
+              </div>
+            </div>
+
+            <!-- HORIZONTAL SCROLLING REEL OF CLIPS -->
+            <div id="multi-clip-reel-container" class="flex items-center gap-2 overflow-x-auto pb-1 pt-1 min-h-[46px]">
+              <div class="text-[11px] text-slate-500 italic py-1">Upload 1 or more videos or click "Load Demo Gameplay" to build your multi-clip sequence reel.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MAIN WORKSPACE: 2-COLUMN PRO STUDIO (PLAYER ON LEFT, MODULAR INSPECTOR ON RIGHT) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+          <!-- LEFT/MAIN COLUMN: LARGE MEDIA PLAYER & VISUAL FILMSTRIP TIMELINE -->
+          <div class="lg:col-span-7 xl:col-span-8 flex flex-col gap-4">
+
+            <!-- LARGE MEDIA PLAYER CARD -->
+            <div class="bg-brand-card p-4 md:p-5 rounded-2xl border border-brand-border space-y-3 shadow-xl">
+              <!-- TOP BAR FOR ACTIVE PREVIEW -->
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 overflow-hidden">
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5 truncate">
+                    <i data-lucide="play" class="w-3.5 h-3.5 text-brand-cyan"></i>
+                    <span id="source-preview-title">Source Video Preview</span>
+                  </h3>
+                  <span class="text-[11px] font-mono text-slate-400 shrink-0" id="source-meta-badge">No video loaded</span>
+                </div>
+
+                <div class="flex items-center gap-2 shrink-0">
+                  <button type="button" onclick="openFullscreenCropper()" class="px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-bold text-xs flex items-center gap-1.5 transition" title="Open large fullscreen cropping canvas">
+                    <i data-lucide="maximize" class="w-3.5 h-3.5"></i>
+                    <span>⛶ Expand Player / Crop</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- BIG PLAYER VIEWPORT (EXPANDED HEIGHT) -->
+              <div class="relative bg-black rounded-2xl overflow-hidden aspect-video min-h-[340px] md:min-h-[440px] flex items-center justify-center border border-brand-border shadow-2xl" id="source-player-container">
+                <video id="source-video-player" controls class="w-full h-full object-contain"></video>
+
+                <!-- LIVE CROP GUIDE OVERLAY -->
+                <div id="manual-crop-guide" class="absolute pointer-events-none border-2 border-dashed border-amber-400 bg-amber-400/15 hidden transition-all duration-75">
+                  <span class="absolute top-1.5 left-2 bg-black/80 text-[9px] text-amber-400 font-mono font-bold px-1.5 py-0.5 rounded border border-amber-500/40">Crop Keep Region</span>
+                </div>
+              </div>
+
+              <!-- CAPCUT-STYLE VISUAL TIMELINE & PRECISION TRIM TRACK -->
+              <div class="bg-brand-dark/95 p-3.5 rounded-xl border border-brand-border space-y-2.5 shadow-inner">
+                <div class="flex items-center justify-between text-xs">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                      <i data-lucide="scissors" class="w-3.5 h-3.5 text-amber-400"></i>
+                      <span>Visual Trim Range</span>
+                    </span>
+                    <span id="timeline-current-time" class="font-mono text-[11px] px-2 py-0.5 rounded bg-black/70 text-brand-cyan border border-brand-border">0:00 / 0:00</span>
+                  </div>
+
+                  <div class="flex items-center gap-2">
+                    <span class="text-[11px] font-mono text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20" id="visual-trim-length-badge">
+                      ✂️ Trimmed: 10.0s
+                    </span>
+                  </div>
+                </div>
+
+                <!-- INTERACTIVE SCRUBBER CONTAINER -->
+                <div id="visual-timeline-track" class="relative w-full h-14 bg-slate-950 rounded-lg overflow-hidden border border-slate-700 cursor-pointer select-none" onclick="handleTimelineTrackClick(event)">
+                  <!-- TIME TICKS BACKGROUND -->
+                  <div class="absolute inset-0 flex justify-between px-2.5 pointer-events-none opacity-25 text-[9px] font-mono text-slate-400 items-end pb-1" id="timeline-ticks-layer">
+                    <span>0s</span>
+                    <span>25%</span>
+                    <span>50%</span>
+                    <span>75%</span>
+                    <span id="timeline-max-label">max</span>
+                  </div>
+
+                  <!-- LEFT EXCLUDED SHADING -->
+                  <div id="timeline-dim-left" class="absolute top-0 bottom-0 left-0 bg-black/80 z-10 pointer-events-none"></div>
+
+                  <!-- ACTIVE TRIM REGION -->
+                  <div id="timeline-active-region" class="absolute top-0 bottom-0 bg-gradient-to-r from-cyan-500/25 to-blue-500/25 border-y-2 border-brand-cyan z-20">
+                    <!-- LEFT HANDLE -->
+                    <div id="timeline-handle-start" class="absolute top-0 bottom-0 -left-2 w-4 bg-brand-cyan hover:bg-white text-black cursor-ew-resize flex items-center justify-center rounded-l shadow-lg z-30 group" title="Drag to adjust start trim" onmousedown="startHandleDrag(event, 'start')">
+                      <span class="w-1 h-5 bg-black group-hover:bg-brand-red rounded-full"></span>
+                    </div>
+
+                    <!-- ACTIVE REGION LABEL -->
+                    <div class="w-full h-full flex items-center justify-center pointer-events-none">
+                      <span class="text-[10px] font-mono font-bold text-cyan-200 drop-shadow px-1.5 py-0.5 rounded bg-black/60 border border-brand-cyan/30" id="timeline-region-label">10.0s</span>
+                    </div>
+
+                    <!-- RIGHT HANDLE -->
+                    <div id="timeline-handle-end" class="absolute top-0 bottom-0 -right-2 w-4 bg-brand-cyan hover:bg-white text-black cursor-ew-resize flex items-center justify-center rounded-r shadow-lg z-30 group" title="Drag to adjust end trim" onmousedown="startHandleDrag(event, 'end')">
+                      <span class="w-1 h-5 bg-black group-hover:bg-brand-red rounded-full"></span>
+                    </div>
+                  </div>
+
+                  <!-- RIGHT EXCLUDED SHADING -->
+                  <div id="timeline-dim-right" class="absolute top-0 bottom-0 right-0 bg-black/80 z-10 pointer-events-none"></div>
+
+                  <!-- PLAYHEAD NEEDLE -->
+                  <div id="timeline-playhead" class="absolute top-0 bottom-0 w-0.5 bg-brand-red z-40 pointer-events-none shadow-[0_0_8px_rgba(255,0,80,0.9)]" style="left: 0%;">
+                    <div class="absolute -top-1 -left-1.5 w-3.5 h-2.5 bg-brand-red rounded-sm flex items-center justify-center">
+                      <span class="w-1 h-1 bg-white rounded-full"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- TIMELINE BUTTON CONTROLS & PRECISION NUDGE -->
+                <div class="flex items-center justify-between flex-wrap gap-2 pt-1">
+                  <div class="flex items-center gap-1.5">
+                    <button type="button" onclick="setTrimStartToCurrentTime()" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-brand-cyan text-[11px] font-bold flex items-center gap-1 transition" title="Set start trim to current video playhead">
+                      <span>[ Set Start</span>
+                    </button>
+                    <button type="button" onclick="setTrimEndToCurrentTime()" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-brand-cyan text-[11px] font-bold flex items-center gap-1 transition" title="Set end trim to current video playhead">
+                      <span>Set End ]</span>
+                    </button>
+                    <button type="button" onclick="resetFullClipTrim()" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-400 hover:text-white text-[11px] font-semibold flex items-center gap-1 transition">
+                      <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                      <span>Full Range</span>
+                    </button>
+                    <button type="button" onclick="nudgeTrim('start', -0.1)" class="px-2 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-400 hover:text-white text-[10px] font-mono font-bold" title="Nudge start back 0.1s">-0.1s</button>
+                    <button type="button" onclick="nudgeTrim('end', 0.1)" class="px-2 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-400 hover:text-white text-[10px] font-mono font-bold" title="Nudge end forward 0.1s">+0.1s</button>
+                  </div>
+
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="previewTrimmedOnly()" id="preview-trim-btn" class="px-3 py-1 rounded-lg bg-brand-cyan/20 hover:bg-brand-cyan/30 border border-brand-cyan text-brand-cyan text-[11px] font-bold flex items-center gap-1.5 transition">
+                      <i data-lucide="play" class="w-3 h-3 fill-current"></i>
+                      <span id="preview-trim-btn-text">Play Trim Only</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- DIRECT TIME INPUTS -->
+                <div class="grid grid-cols-2 gap-3 pt-2 border-t border-brand-border/40 text-xs">
+                  <div>
+                    <div class="flex items-center justify-between text-slate-400 mb-1 text-[11px]">
+                      <span>Start Time (sec):</span>
+                      <span class="text-brand-cyan font-mono" id="trim-duration-badge">Clip Length: 10.0s</span>
+                    </div>
+                    <input type="number" id="trim-start" min="0" step="0.5" value="0.0" class="w-full bg-brand-dark border border-brand-border rounded-lg px-3 py-1.5 text-xs text-slate-100 font-mono focus:border-brand-cyan" onchange="updateTrimTimes()">
+                  </div>
+                  <div>
+                    <div class="flex items-center justify-between text-slate-400 mb-1 text-[11px]">
+                      <span>End Time (sec):</span>
+                      <span class="text-slate-400 font-mono">Max bound</span>
+                    </div>
+                    <input type="number" id="trim-end" min="1" step="0.5" value="10.0" class="w-full bg-brand-dark border border-brand-border rounded-lg px-3 py-1.5 text-xs text-slate-100 font-mono focus:border-brand-cyan" onchange="updateTrimTimes()">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT COLUMN: MODULAR STUDIO INSPECTOR TABS -->
+          <div class="lg:col-span-5 xl:col-span-4 bg-brand-card p-4 md:p-5 rounded-2xl border border-brand-border flex flex-col gap-4 shadow-xl">
+
+            <!-- INSPECTOR TAB SWITCHER (CAPCUT STYLE) -->
+            <div class="grid grid-cols-5 gap-1 p-1 bg-black/60 rounded-xl border border-brand-border text-[11px]">
+              <button type="button" id="btn-inspector-canvas" onclick="selectInspectorTab('canvas')" class="tab-insp-btn py-2 px-1 rounded-lg font-bold flex flex-col items-center gap-1 border border-brand-cyan bg-brand-cyan/20 text-white shadow-md transition">
+                <i data-lucide="crop" class="w-3.5 h-3.5"></i>
+                <span>Crop</span>
+              </button>
+              <button type="button" id="btn-inspector-captions" onclick="selectInspectorTab('captions')" class="tab-insp-btn py-2 px-1 rounded-lg font-bold flex flex-col items-center gap-1 border border-brand-border bg-brand-dark text-slate-400 hover:text-white transition">
+                <i data-lucide="type" class="w-3.5 h-3.5"></i>
+                <span>Captions</span>
+              </button>
+              <button type="button" id="btn-inspector-pictures" onclick="selectInspectorTab('pictures')" class="tab-insp-btn py-2 px-1 rounded-lg font-bold flex flex-col items-center gap-1 border border-brand-border bg-brand-dark text-slate-400 hover:text-white transition">
+                <i data-lucide="image" class="w-3.5 h-3.5"></i>
+                <span>Pictures</span>
+              </button>
+              <button type="button" id="btn-inspector-audio" onclick="selectInspectorTab('audio')" class="tab-insp-btn py-2 px-1 rounded-lg font-bold flex flex-col items-center gap-1 border border-brand-border bg-brand-dark text-slate-400 hover:text-white transition">
+                <i data-lucide="music" class="w-3.5 h-3.5"></i>
+                <span>Audio</span>
+              </button>
+              <button type="button" id="btn-inspector-export" onclick="selectInspectorTab('export')" class="tab-insp-btn py-2 px-1 rounded-lg font-bold flex flex-col items-center gap-1 border border-brand-border bg-brand-dark text-slate-400 hover:text-white transition">
+                <i data-lucide="share" class="w-3.5 h-3.5"></i>
+                <span>Export</span>
+              </button>
+            </div>
+
+            <!-- PANEL 1: CANVAS & 9:16 CROP -->
+            <div id="inspector-panel-canvas" class="space-y-4">
+              <!-- 9:16 LAYOUT SELECTION -->
+              <div class="space-y-2">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Vertical 9:16 Reframe Mode</label>
+                <div class="grid grid-cols-3 gap-2">
+                  <button type="button" onclick="selectLayout('blur_pad')" id="layout-blur_pad" class="layout-btn active p-2.5 rounded-xl border border-brand-cyan bg-brand-cyan/10 text-left transition">
+                    <div class="text-xs font-bold text-white flex items-center gap-1.5 mb-0.5">
+                      <i data-lucide="layers" class="w-3.5 h-3.5 text-brand-cyan"></i>
+                      <span>Blurred</span>
+                    </div>
+                    <p class="text-[9px] text-slate-400">Preserves full 16:9.</p>
+                  </button>
+
+                  <button type="button" onclick="selectLayout('center_crop')" id="layout-center_crop" class="layout-btn p-2.5 rounded-xl border border-brand-border bg-brand-dark text-left hover:border-slate-600 transition">
+                    <div class="text-xs font-bold text-white flex items-center gap-1.5 mb-0.5">
+                      <i data-lucide="crop" class="w-3.5 h-3.5 text-brand-red"></i>
+                      <span>Center</span>
+                    </div>
+                    <p class="text-[9px] text-slate-400">Auto zooms 9:16.</p>
+                  </button>
+
+                  <button type="button" onclick="selectLayout('manual_crop')" id="layout-manual_crop" class="layout-btn p-2.5 rounded-xl border border-brand-border bg-brand-dark text-left hover:border-slate-600 transition">
+                    <div class="text-xs font-bold text-white flex items-center gap-1.5 mb-0.5">
+                      <i data-lucide="sliders" class="w-3.5 h-3.5 text-amber-400"></i>
+                      <span>Manual</span>
+                    </div>
+                    <p class="text-[9px] text-slate-400">Custom top/side cuts.</p>
+                  </button>
+                </div>
+
+                <!-- MANUAL CROP SLIDERS PANEL -->
+                <div id="manual-crop-panel" class="hidden space-y-2.5 bg-brand-dark/60 p-3 rounded-xl border border-amber-500/40">
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="font-bold text-amber-400 flex items-center gap-1">
+                      <i data-lucide="crop" class="w-3.5 h-3.5"></i>
+                      Manual Crop Boundaries
+                    </span>
+                    <button type="button" onclick="openFullscreenCropper()" class="text-[10px] text-amber-300 underline font-bold">Open Fullscreen ↗</button>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-2 text-[11px]">
+                    <div>
+                      <div class="flex justify-between text-slate-400 mb-0.5">
+                        <span>Cut Top:</span>
+                        <span id="crop-top-val" class="font-mono text-amber-400 font-bold">0%</span>
+                      </div>
+                      <input type="range" id="crop-top-slider" min="0" max="45" value="0" step="1" oninput="updateManualCrop('cropTop', this.value)" class="w-full accent-amber-400 cursor-pointer">
+                    </div>
+                    <div>
+                      <div class="flex justify-between text-slate-400 mb-0.5">
+                        <span>Cut Bottom:</span>
+                        <span id="crop-bottom-val" class="font-mono text-amber-400 font-bold">0%</span>
+                      </div>
+                      <input type="range" id="crop-bottom-slider" min="0" max="45" value="0" step="1" oninput="updateManualCrop('cropBottom', this.value)" class="w-full accent-amber-400 cursor-pointer">
+                    </div>
+                    <div>
+                      <div class="flex justify-between text-slate-400 mb-0.5">
+                        <span>Cut Left:</span>
+                        <span id="crop-left-val" class="font-mono text-amber-400 font-bold">0%</span>
+                      </div>
+                      <input type="range" id="crop-left-slider" min="0" max="45" value="0" step="1" oninput="updateManualCrop('cropLeft', this.value)" class="w-full accent-amber-400 cursor-pointer">
+                    </div>
+                    <div>
+                      <div class="flex justify-between text-slate-400 mb-0.5">
+                        <span>Cut Right:</span>
+                        <span id="crop-right-val" class="font-mono text-amber-400 font-bold">0%</span>
+                      </div>
+                      <input type="range" id="crop-right-slider" min="0" max="45" value="0" step="1" oninput="updateManualCrop('cropRight', this.value)" class="w-full accent-amber-400 cursor-pointer">
+                    </div>
+                  </div>
+
+                  <!-- FIT MODE -->
+                  <div class="flex items-center justify-between pt-1 border-t border-brand-border/60 text-[11px]">
+                    <span class="text-slate-400">Cropped Framing:</span>
+                    <div class="flex items-center gap-3">
+                      <label class="flex items-center gap-1 cursor-pointer text-slate-300">
+                        <input type="radio" name="manual-fit" value="fill" checked onchange="updateManualCrop('fitMode', 'fill')" class="accent-amber-400">
+                        <span>Fill 9:16 (Zoom)</span>
+                      </label>
+                      <label class="flex items-center gap-1 cursor-pointer text-slate-300">
+                        <input type="radio" name="manual-fit" value="blur_fit" onchange="updateManualCrop('fitMode', 'blur_fit')" class="accent-amber-400">
+                        <span>Blurred Fit</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- STREAMER FACECAM REMOVAL -->
+              <div class="space-y-2.5 bg-brand-dark/40 p-3.5 rounded-xl border border-brand-border">
+                <div class="flex items-center justify-between">
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                    <i data-lucide="user-x" class="w-4 h-4 text-brand-red"></i>
+                    <span>Streamer Facecam Removal</span>
+                  </label>
+                  <span class="text-[10px] text-amber-400 font-bold">Reposter Tool</span>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                  <button type="button" onclick="selectFacecamMode('none')" id="facecam-none" class="facecam-btn active px-2 py-1.5 rounded-lg border border-brand-cyan bg-brand-cyan/10 text-[11px] font-bold text-white text-center transition">
+                    Original
+                  </button>
+                  <button type="button" onclick="selectFacecamMode('crop_gameplay')" id="facecam-crop_gameplay" class="facecam-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark hover:border-slate-500 text-[11px] font-bold text-slate-300 text-center transition">
+                    ✂️ Crop
+                  </button>
+                  <button type="button" onclick="selectFacecamMode('cover_banner')" id="facecam-cover_banner" class="facecam-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark hover:border-slate-500 text-[11px] font-bold text-slate-300 text-center transition">
+                    🛡️ Banner
+                  </button>
+                  <button type="button" onclick="selectFacecamMode('blur_top')" id="facecam-blur_top" class="facecam-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark hover:border-slate-500 text-[11px] font-bold text-slate-300 text-center transition">
+                    🌫️ Blur
+                  </button>
+                </div>
+
+                <div id="facecam-settings-panel" class="hidden space-y-2.5 pt-2 border-t border-brand-border/60">
+                  <div class="flex items-center justify-between text-xs">
+                    <label class="text-slate-400">Top Cutoff Height:</label>
+                    <span id="facecam-height-val" class="text-amber-400 font-mono font-bold">33% (Top portion)</span>
+                  </div>
+                  <input type="range" id="facecam-height-slider" min="18" max="45" value="33" step="1" oninput="updateFacecamHeight(this.value)" class="w-full accent-amber-400 cursor-pointer">
+
+                  <div id="facecam-banner-input-box" class="hidden space-y-1">
+                    <label class="block text-[11px] text-slate-400">Header Title (Over Facecam):</label>
+                    <input type="text" id="facecam-banner-text" placeholder="e.g. INSANE GAMEPLAY / META LOADOUT" class="w-full bg-brand-dark border border-brand-border rounded-lg px-3 py-1.5 text-xs text-slate-100 font-mono focus:border-brand-cyan">
+                  </div>
+                </div>
+              </div>
+
+              <!-- TOP HOOK TITLE CARD -->
+              <div class="space-y-2.5 bg-brand-dark/40 p-3.5 rounded-xl border border-brand-border">
+                <div class="flex items-center justify-between">
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                    <i data-lucide="tag" class="w-4 h-4 text-brand-red"></i>
+                    <span>Top Hook Title Card</span>
+                  </label>
+                  <span class="text-[10px] text-brand-cyan font-bold">Wipe & Replace</span>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                  <button type="button" onclick="selectHookCardMode('none')" id="hookcard-none" class="hookcard-btn active px-2 py-1.5 rounded-lg border border-brand-cyan bg-brand-cyan/10 text-[11px] font-bold text-white text-center transition">
+                    Off (Clean)
+                  </button>
+                  <button type="button" onclick="selectHookCardMode('viral_white')" id="hookcard-viral_white" class="hookcard-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark hover:border-slate-500 text-[11px] font-bold text-slate-300 text-center transition">
+                    🃏 Viral White
+                  </button>
+                  <button type="button" onclick="selectHookCardMode('cod_tactical')" id="hookcard-cod_tactical" class="hookcard-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark hover:border-slate-500 text-[11px] font-bold text-slate-300 text-center transition">
+                    🖤 Tactical
+                  </button>
+                  <button type="button" onclick="selectHookCardMode('wipe_only')" id="hookcard-wipe_only" class="hookcard-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark hover:border-slate-500 text-[11px] font-bold text-slate-300 text-center transition">
+                    🧹 Wipe Only
+                  </button>
+                </div>
+
+                <div id="hookcard-input-box" class="space-y-1 pt-1">
+                  <label class="block text-[11px] text-slate-400">Custom Hook Title:</label>
+                  <input type="text" id="hookcard-text-input" placeholder="e.g. “This Gun Is Straight-Up Illegal”" class="w-full bg-brand-dark border border-brand-border rounded-lg px-3 py-1.5 text-xs text-slate-100 font-mono focus:border-brand-cyan">
+                </div>
+              </div>
+            </div>
+
+            <!-- PANEL 2: KINETIC CAPTIONS & SUBTITLES -->
+            <div id="inspector-panel-captions" class="hidden space-y-4">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                    <i data-lucide="type" class="w-4 h-4 text-brand-cyan"></i>
+                    <span>Burned Kinetic Subtitles</span>
+                  </label>
+                  <button onclick="clearSubtitles()" class="text-[11px] text-slate-500 hover:text-slate-300">Clear</button>
+                </div>
+                <textarea id="subtitles-input" rows="3" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2 text-xs font-mono focus:outline-none focus:border-brand-cyan text-slate-100 placeholder-slate-500 resize-none" placeholder="Enter words or phrases to burn onto clip... (e.g. STOP SCROLLING! THIS HACK CHANGES EVERYTHING)"></textarea>
+                <p class="text-[10px] text-slate-400">💡 <em>Tip: Put each caption on a new line to control exactly what words pop up in each scene!</em></p>
+              </div>
+
+              <!-- CAPTION POP SPEED -->
+              <div class="space-y-1.5 p-2.5 rounded-xl bg-brand-dark/70 border border-brand-border">
+                <div class="flex items-center justify-between">
+                  <label class="block text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
+                    <i data-lucide="gauge" class="w-3.5 h-3.5 text-brand-cyan"></i>
+                    <span>Caption Pop Speed:</span>
+                  </label>
+                  <span class="text-[9px] text-amber-400 font-mono font-bold">⚡ Timing Control</span>
+                </div>
+                <div class="grid grid-cols-4 gap-1 text-[10px]">
+                  <button type="button" onclick="selectSubtitlePacing('hyper')" id="subpacing-hyper" class="subpacing-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark text-slate-400 hover:text-white font-bold text-center transition">
+                    ⚡ 0.8s Hyper
+                  </button>
+                  <button type="button" onclick="selectSubtitlePacing('fast')" id="subpacing-fast" class="subpacing-btn active px-2 py-1.5 rounded-lg border border-brand-cyan bg-brand-cyan/20 text-white font-bold text-center transition">
+                    🔥 1.2s TikTok
+                  </button>
+                  <button type="button" onclick="selectSubtitlePacing('normal')" id="subpacing-normal" class="subpacing-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark text-slate-400 hover:text-white font-bold text-center transition">
+                    🎯 1.8s Normal
+                  </button>
+                  <button type="button" onclick="selectSubtitlePacing('auto')" id="subpacing-auto" class="subpacing-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark text-slate-400 hover:text-white font-bold text-center transition">
+                    🔄 Auto-Fit
+                  </button>
+                </div>
+              </div>
+
+              <!-- AI VOICEOVER NARRATOR SELECTOR -->
+              <div class="space-y-1.5 p-2.5 rounded-xl bg-brand-dark/70 border border-brand-border">
+                <div class="flex items-center justify-between">
+                  <label class="block text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
+                    <i data-lucide="mic" class="w-3.5 h-3.5 text-purple-400"></i>
+                    <span>AI Voice Narrator (Reads Captions):</span>
+                  </label>
+                  <span class="text-[9px] text-purple-300 font-mono font-bold">100% Synced</span>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[10px]">
+                  <button type="button" onclick="selectAiVoice('christopher')" id="voice-btn-christopher" class="voice-btn active px-2 py-1.5 rounded-lg border border-purple-500 bg-purple-500/20 text-white font-bold text-center transition">
+                    🗣️ Deep Hype (M)
+                  </button>
+                  <button type="button" onclick="selectAiVoice('guy')" id="voice-btn-guy" class="voice-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark text-slate-400 hover:text-white font-bold text-center transition">
+                    ⚡ Fast TikTok (M)
+                  </button>
+                  <button type="button" onclick="selectAiVoice('jenny')" id="voice-btn-jenny" class="voice-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark text-slate-400 hover:text-white font-bold text-center transition">
+                    🎙️ Storyteller (F)
+                  </button>
+                  <button type="button" onclick="selectAiVoice('ryan')" id="voice-btn-ryan" class="voice-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark text-slate-400 hover:text-white font-bold text-center transition">
+                    🇬🇧 Documentary
+                  </button>
+                </div>
+              </div>
+
+              <!-- CAPTION STYLE PRESETS -->
+              <div class="space-y-2">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Caption Style & Position</label>
+                <div class="grid grid-cols-3 sm:grid-cols-5 gap-1.5 text-xs">
+                  <button type="button" onclick="selectSubStyle('warzone')" id="substyle-warzone" class="substyle-btn px-2 py-1.5 rounded-lg border border-amber-500 bg-amber-500/10 font-bold text-amber-300 text-center">
+                    COD Gold
+                  </button>
+                  <button type="button" onclick="selectSubStyle('hormozi')" id="substyle-hormozi" class="substyle-btn active px-2 py-1.5 rounded-lg border border-yellow-400 bg-yellow-400/10 font-bold text-yellow-300 text-center">
+                    Hormozi
+                  </button>
+                  <button type="button" onclick="selectSubStyle('beast')" id="substyle-beast" class="substyle-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark font-bold text-white text-center hover:border-slate-500">
+                    Beast
+                  </button>
+                  <button type="button" onclick="selectSubStyle('cyber')" id="substyle-cyber" class="substyle-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark font-bold text-brand-cyan text-center hover:border-slate-500">
+                    Cyber
+                  </button>
+                  <button type="button" onclick="selectSubStyle('minimal')" id="substyle-minimal" class="substyle-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark font-bold text-slate-300 text-center hover:border-slate-500">
+                    Minimal
+                  </button>
+                </div>
+
+                <div class="flex items-center gap-3 pt-1 text-xs">
+                  <span class="text-slate-400">Vertical Position:</span>
+                  <label class="flex items-center gap-1.5 cursor-pointer text-slate-300">
+                    <input type="radio" name="sub-pos" value="middle" checked onchange="subtitlePosition = 'middle'" class="accent-brand-cyan">
+                    <span>Eye-Level Center</span>
+                  </label>
+                  <label class="flex items-center gap-1.5 cursor-pointer text-slate-300">
+                    <input type="radio" name="sub-pos" value="lower" onchange="subtitlePosition = 'lower'" class="accent-brand-cyan">
+                    <span>Lower-Third</span>
                   </label>
                 </div>
               </div>
 
-              <!-- HORIZONTAL SCROLLING REEL -->
-              <div id="multi-clip-reel-container" class="flex items-center gap-2 overflow-x-auto pb-1 pt-1 min-h-[46px]">
-                <div class="text-[11px] text-slate-500 italic py-1">Upload a video or click "Load Demo Gameplay" to start your sequence reel.</div>
-              </div>
-            </div>
-
-            <!-- HEADER FOR CURRENT PREVIEW -->
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <i data-lucide="play" class="w-3.5 h-3.5 text-brand-cyan"></i>
-                <span id="source-preview-title">Source Video Preview</span>
-              </h3>
-              <span class="text-xs font-mono text-slate-400" id="source-meta-badge">No video loaded</span>
-            </div>
-
-            <!-- VIDEO PLAYER VIEWPORT -->
-            <div class="relative bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center border border-brand-border" id="source-player-container">
-              <video id="source-video-player" controls class="w-full h-full object-contain"></video>
-              <!-- LIVE CROP GUIDE OVERLAY -->
-              <div id="manual-crop-guide" class="absolute pointer-events-none border-2 border-dashed border-amber-400 bg-amber-400/15 hidden transition-all duration-75">
-                <span class="absolute top-1 left-1.5 bg-black/80 text-[9px] text-amber-400 font-mono font-bold px-1.5 py-0.5 rounded border border-amber-500/40">Crop Keep Region</span>
-              </div>
-            </div>
-
-            <!-- 2. CAPCUT-STYLE VISUAL TIMELINE & TRIM TRACK -->
-            <div class="mt-3.5 bg-brand-dark/95 p-3.5 rounded-xl border border-brand-border space-y-2.5 shadow-inner">
-              <div class="flex items-center justify-between text-xs">
-                <div class="flex items-center gap-2">
-                  <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                    <i data-lucide="scissors" class="w-3.5 h-3.5 text-amber-400"></i>
-                    <span>Visual Trim Range</span>
+              <!-- WIPE OLD CAPTIONS -->
+              <div class="flex items-center justify-between p-2.5 rounded-xl bg-brand-dark/60 border border-brand-border">
+                <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-200">
+                  <input type="checkbox" id="mask-old-captions-toggle" onchange="toggleMaskOldCaptions(this.checked)" class="accent-brand-cyan w-4 h-4 rounded">
+                  <span class="font-bold text-amber-300 flex items-center gap-1.5">
+                    <i data-lucide="eraser" class="w-3.5 h-3.5"></i>
+                    <span>🧹 Wipe Old Burned Captions</span>
                   </span>
-                  <span id="timeline-current-time" class="font-mono text-[11px] px-2 py-0.5 rounded bg-black/70 text-brand-cyan border border-brand-border">0:00 / 0:00</span>
-                </div>
-
-                <div class="flex items-center gap-2">
-                  <span class="text-[11px] font-mono text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20" id="visual-trim-length-badge">
-                    ✂️ Trimmed: 10.0s
-                  </span>
-                </div>
+                </label>
+                <span class="text-[10px] text-slate-400">Smooths over text on pre-made clips</span>
               </div>
+            </div>
 
-              <!-- INTERACTIVE TIMELINE SCRUBBER CONTAINER -->
-              <div id="visual-timeline-track" class="relative w-full h-12 bg-slate-950 rounded-lg overflow-hidden border border-slate-700 cursor-pointer select-none" onclick="handleTimelineTrackClick(event)">
-                <!-- TIME TICKS BACKGROUND / FILMSTRIP STRIPES -->
-                <div class="absolute inset-0 flex justify-between px-2.5 pointer-events-none opacity-25 text-[9px] font-mono text-slate-400 items-end pb-1" id="timeline-ticks-layer">
-                  <span>0s</span>
-                  <span>25%</span>
-                  <span>50%</span>
-                  <span>75%</span>
-                  <span id="timeline-max-label">max</span>
-                </div>
-
-                <!-- LEFT EXCLUDED SHADING (Dimmed) -->
-                <div id="timeline-dim-left" class="absolute top-0 bottom-0 left-0 bg-black/80 z-10 pointer-events-none"></div>
-
-                <!-- ACTIVE TRIM REGION (Highlighted CapCut Box) -->
-                <div id="timeline-active-region" class="absolute top-0 bottom-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-y-2 border-brand-cyan z-20">
-                  <!-- LEFT HANDLE -->
-                  <div id="timeline-handle-start" class="absolute top-0 bottom-0 -left-2 w-4 bg-brand-cyan hover:bg-white text-black cursor-ew-resize flex items-center justify-center rounded-l shadow-lg z-30 group" title="Drag to adjust start trim" onmousedown="startHandleDrag(event, 'start')">
-                    <span class="w-1 h-4 bg-black group-hover:bg-brand-red rounded-full"></span>
-                  </div>
-
-                  <!-- ACTIVE REGION LABEL -->
-                  <div class="w-full h-full flex items-center justify-center pointer-events-none">
-                    <span class="text-[10px] font-mono font-bold text-cyan-200 drop-shadow px-1.5 py-0.5 rounded bg-black/60 border border-brand-cyan/30" id="timeline-region-label">10.0s</span>
-                  </div>
-
-                  <!-- RIGHT HANDLE -->
-                  <div id="timeline-handle-end" class="absolute top-0 bottom-0 -right-2 w-4 bg-brand-cyan hover:bg-white text-black cursor-ew-resize flex items-center justify-center rounded-r shadow-lg z-30 group" title="Drag to adjust end trim" onmousedown="startHandleDrag(event, 'end')">
-                    <span class="w-1 h-4 bg-black group-hover:bg-brand-red rounded-full"></span>
+            <!-- PANEL 3: PICTURE OVERLAYS & OUTRO SLIDES (ANY IMAGE) -->
+            <div id="inspector-panel-pictures" class="hidden space-y-4">
+              <div class="space-y-3 bg-brand-dark/40 p-4 rounded-xl border border-brand-border">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
+                      <i data-lucide="image" class="w-4 h-4 text-emerald-400"></i>
+                      <span>Picture Overlays & Outro Slides</span>
+                    </label>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Attach ANY picture: gameplay screenshots, memes, logos, or outro cards. Not restricted to weapon builds!</p>
                   </div>
                 </div>
 
-                <!-- RIGHT EXCLUDED SHADING (Dimmed) -->
-                <div id="timeline-dim-right" class="absolute top-0 bottom-0 right-0 bg-black/80 z-10 pointer-events-none"></div>
+                <label class="cursor-pointer w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black font-black text-xs flex items-center justify-center gap-2 transition shadow-md shadow-emerald-500/20">
+                  <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                  <span>+ Add Picture / Slide (Select 1 or More)</span>
+                  <input type="file" id="overlay-img-input" accept="image/*" multiple class="hidden" onchange="handleOverlayImageUpload(event)">
+                </label>
 
-                <!-- PLAYHEAD NEEDLE (Red Cursor) -->
-                <div id="timeline-playhead" class="absolute top-0 bottom-0 w-0.5 bg-brand-red z-40 pointer-events-none shadow-[0_0_8px_rgba(255,0,80,0.9)]" style="left: 0%;">
-                  <div class="absolute -top-1 -left-1.5 w-3.5 h-2.5 bg-brand-red rounded-sm flex items-center justify-center">
-                    <span class="w-1 h-1 bg-white rounded-full"></span>
+                <!-- MODE SELECTOR TABS -->
+                <div class="grid grid-cols-2 gap-2">
+                  <button type="button" onclick="selectPictureMode('endcard')" id="picmode-endcard" class="picmode-btn active px-2.5 py-1.5 rounded-xl border border-emerald-400 bg-emerald-500/15 text-xs font-bold text-white text-center transition flex items-center justify-center gap-1.5">
+                    <span>🎬 Outro Slide (After Clip)</span>
+                  </button>
+                  <button type="button" onclick="selectPictureMode('invideo')" id="picmode-invideo" class="picmode-btn px-2.5 py-1.5 rounded-xl border border-brand-border bg-brand-dark hover:border-slate-500 text-xs font-bold text-slate-400 text-center transition flex items-center justify-center gap-1.5">
+                    <span>📌 Floating In-Video PiP</span>
+                  </button>
+                </div>
+
+                <!-- END-CARD VIEW (SUPPORTS MULTIPLE SLIDES) -->
+                <div id="endcard-panel" class="space-y-3">
+                  <div id="endcard-empty" class="hidden p-3.5 rounded-xl border border-dashed border-slate-700 bg-brand-dark/50 text-center">
+                    <p class="text-xs text-slate-400">No picture slides loaded yet.</p>
+                    <p class="text-[10px] text-slate-500 mt-0.5">Click <strong class="text-emerald-400">+ Add Picture / Slide</strong> above to attach any screenshot, meme, logo, or outro slide!</p>
+                  </div>
+
+                  <!-- DYNAMIC LIST OF SLIDES -->
+                  <div id="endcard-slides-list" class="space-y-3">
+                    <!-- Rendered dynamically by renderEndCardState() -->
+                  </div>
+
+                  <!-- BUTTON TO ADD MORE SLIDES -->
+                  <div id="endcard-add-more-row" class="pt-1">
+                    <label class="cursor-pointer w-full py-2 px-3 rounded-xl border border-dashed border-emerald-500/50 bg-emerald-500/5 hover:bg-emerald-500/15 text-emerald-400 font-bold text-xs flex items-center justify-center gap-1.5 transition">
+                      <i data-lucide="plus" class="w-4 h-4"></i>
+                      <span>+ Add Another Picture / Slide (Meme, Logo, Screenshot)</span>
+                      <input type="file" accept="image/*" multiple class="hidden" onchange="handleOverlayImageUpload(event)">
+                    </label>
                   </div>
                 </div>
-              </div>
 
-              <!-- TIMELINE BUTTON CONTROLS -->
-              <div class="flex items-center justify-between flex-wrap gap-1.5 pt-1">
-                <div class="flex items-center gap-1.5">
-                  <button type="button" onclick="setTrimStartToCurrentTime()" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-brand-cyan text-[11px] font-bold flex items-center gap-1 transition" title="Set start trim to current video playhead">
-                    <span>[ Set Start</span>
-                  </button>
-                  <button type="button" onclick="setTrimEndToCurrentTime()" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-brand-cyan text-[11px] font-bold flex items-center gap-1 transition" title="Set end trim to current video playhead">
-                    <span>Set End ]</span>
-                  </button>
-                  <button type="button" onclick="resetFullClipTrim()" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-400 hover:text-white text-[11px] font-semibold flex items-center gap-1 transition">
-                    <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
-                    <span>Full Range</span>
-                  </button>
-                </div>
-
-                <div class="flex items-center gap-2">
-                  <button type="button" onclick="previewTrimmedOnly()" id="preview-trim-btn" class="px-3 py-1 rounded-lg bg-brand-cyan/20 hover:bg-brand-cyan/30 border border-brand-cyan text-brand-cyan text-[11px] font-bold flex items-center gap-1.5 transition">
-                    <i data-lucide="play" class="w-3 h-3 fill-current"></i>
-                    <span id="preview-trim-btn-text">Play Trim Only</span>
-                  </button>
+                <!-- IN-VIDEO FLOATING OVERLAYS VIEW -->
+                <div id="invideo-panel" class="hidden space-y-3">
+                  <div id="overlay-images-list" class="space-y-3">
+                    <div id="overlay-empty-state" class="p-3.5 rounded-xl border border-dashed border-slate-700 bg-brand-dark/50 text-center">
+                      <p class="text-xs text-slate-400">No floating overlays added yet.</p>
+                      <p class="text-[10px] text-slate-500 mt-0.5">Click <strong class="text-emerald-400">+ Add Picture / Slide</strong> above to place an image over gameplay.</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- RENDERED OUTPUT PREVIEW & DOWNLOAD -->
-          <div class="bg-brand-card p-5 rounded-2xl border border-brand-border flex-1 flex flex-col">
-            <div class="flex items-center justify-between mb-3 border-b border-brand-border pb-3">
-              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <i data-lucide="check-circle" class="w-4 h-4 text-brand-red"></i>
-                Exported Vertical 9:16 Short (1080x1920)
-              </h3>
-              <span class="text-xs font-mono text-emerald-400 hidden" id="render-done-badge">Ready for TikTok</span>
+            <!-- PANEL 4: AUDIO & MUSIC STUDIO -->
+            <div id="inspector-panel-audio" class="hidden space-y-4">
+              <div class="space-y-3 bg-brand-dark/40 p-3.5 rounded-xl border border-brand-border">
+                <div class="flex items-center justify-between">
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                    <i data-lucide="music" class="w-4 h-4 text-brand-cyan"></i>
+                    <span>Warzone Viral Audio / Music</span>
+                  </label>
+                  <span class="text-[10px] text-amber-400 font-bold">🎵 Trending COD Beats</span>
+                </div>
+
+                <select id="bg-music-select" onchange="handleSelectBgMusic(this.value)" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-xs font-bold text-slate-100 focus:outline-none focus:border-brand-cyan">
+                  <option value="phonk_drift">🔥 Brazilian Phonk Drift (136 BPM - Movement/Kills)</option>
+                  <option value="dark_808_drill">💀 Dark 808 Drill (140 BPM - Heavy Sub-Bass & Wipes)</option>
+                  <option value="guitar_montage">🎸 Montage Distortion Guitar (142 BPM - Sniper Headshots)</option>
+                  <option value="sigma_drop">🗿 Sigma 808 Cinematic Drop (128 BPM - 1v4 Clutch)</option>
+                  <option value="hyper_hardstyle">🚀 Hyper-Drive Hardstyle (150 BPM - Camera Breaker)</option>
+                  <option value="slowed_reverb_phonk">🌌 Slowed + Reverb Phonk (115 BPM - Aesthetic Vibe)</option>
+                  <option value="cyber_rush">⚡ Cyber Combat Rush (148 BPM - Fast Adrenaline)</option>
+                  <option value="suspense_drop">⏱️ Suspense Countdown & Drop (130 BPM - Secret Class Reveal)</option>
+                  <option value="bouncy_trap">🎯 Bouncy 808 Trap (132 BPM - Meta Recoil & Commentary)</option>
+                  <option value="lofi_gunsmith">☕ Chill Lofi Gunsmith (90 BPM - Attachment Breakdown)</option>
+                  <option value="none">🔇 No Music (Voiceover / Clean SFX Only)</option>
+                </select>
+
+                <!-- CUSTOM AUDIO UPLOAD & FREE VIRAL MP3 SITES -->
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                  <label class="cursor-pointer px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold text-[11px] flex items-center gap-1.5 transition shadow-sm">
+                    <i data-lucide="plus-circle" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    <span>+ Upload MP3s (Select Multiple)</span>
+                    <input type="file" id="custom-audio-input" accept="audio/*" multiple class="hidden" onchange="handleCustomAudioUpload(event)">
+                  </label>
+
+                  <button type="button" onclick="openViralSoundsModal()" class="px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-brand-red to-pink-600 hover:opacity-90 text-white font-bold text-[11px] flex items-center gap-1.5 transition shadow-sm">
+                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                    <span>🔥 Free Viral TikTok MP3 Hub ↗</span>
+                  </button>
+                </div>
+
+                <!-- MULTI-AUDIO TRACKS PLAYLIST & SEQUENCER -->
+                <div id="custom-audio-playlist-container" class="space-y-2 p-3 rounded-xl bg-black/50 border border-brand-border">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-bold text-amber-400 flex items-center gap-1.5">
+                      <i data-lucide="list-music" class="w-3.5 h-3.5 text-amber-400"></i>
+                      <span id="audio-playlist-header">Custom Audio Sequencer</span>
+                    </span>
+                    <div class="flex items-center gap-2">
+                      <span class="text-[10px] text-emerald-400 font-mono font-bold" id="audio-total-duration">0.0s total</span>
+                      <button type="button" onclick="clearAllAudioTracks()" class="text-[10px] text-rose-400 hover:text-white hover:underline transition" title="Clear all tracks">Clear All</button>
+                    </div>
+                  </div>
+
+                  <div id="audio-playlist-empty" class="text-center py-2 px-3 border border-dashed border-slate-700/80 rounded-lg text-slate-400 text-[11px]">
+                    No custom MP3s loaded yet. Upload multiple short MP3s or extract sound links below!
+                  </div>
+
+                  <div id="custom-audio-playlist-items" class="space-y-1.5"></div>
+                </div>
+
+                <audio id="audio-preview-player" class="hidden" onended="onAudioPreviewEnded()"></audio>
+
+                <!-- INSTANT URL TO MP3 EXTRACTOR -->
+                <div class="p-2.5 bg-black/40 rounded-xl border border-brand-border/70 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-bold text-brand-cyan flex items-center gap-1">
+                      <i data-lucide="link" class="w-3.5 h-3.5"></i>
+                      Paste Link → 1-Click MP3
+                    </span>
+                    <span class="text-[9px] text-slate-400 font-mono">yt-dlp auto extractor</span>
+                  </div>
+                  <div class="flex gap-1.5">
+                    <input type="text" id="audio-url-input" placeholder="Paste link (TikTok, YouTube Shorts, Sound URL)..." class="flex-1 bg-brand-dark border border-brand-border rounded-lg px-2.5 py-1.5 text-xs text-slate-100 font-mono focus:border-brand-cyan">
+                    <button type="button" id="extract-audio-url-btn" onclick="handleExtractAudioFromUrl()" class="px-3 py-1.5 bg-brand-cyan hover:bg-cyan-400 text-black font-bold text-xs rounded-lg transition shrink-0 flex items-center gap-1">
+                      <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                      <span>Extract</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- ORIGINAL CLIP AUDIO BEHAVIOR -->
+                <div class="pt-2 border-t border-brand-border/60">
+                  <div class="flex items-center justify-between mb-1.5">
+                    <label class="block text-[11px] font-semibold text-slate-300 flex items-center gap-1">
+                      <i data-lucide="volume-x" class="w-3.5 h-3.5 text-amber-400"></i>
+                      Original Video Audio:
+                    </label>
+                    <span class="text-[10px] text-emerald-400 font-bold">🎯 Repost Clean</span>
+                  </div>
+                  <div class="grid grid-cols-3 gap-1.5">
+                    <button type="button" onclick="selectOrigAudioMode('mute')" id="origaudio-mute" class="origaudio-btn active px-2 py-1.5 rounded-lg border border-brand-cyan bg-brand-cyan/10 text-[11px] font-bold text-white text-center transition">
+                      🔇 Mute
+                    </button>
+                    <button type="button" onclick="selectOrigAudioMode('low')" id="origaudio-low" class="origaudio-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark hover:border-slate-500 text-[11px] font-bold text-slate-300 text-center transition">
+                      🔉 Low FX
+                    </button>
+                    <button type="button" onclick="selectOrigAudioMode('full')" id="origaudio-full" class="origaudio-btn px-2 py-1.5 rounded-lg border border-brand-border bg-brand-dark hover:border-slate-500 text-[11px] font-bold text-slate-300 text-center transition">
+                      🔊 Keep 100%
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <!-- RENDER PLACEHOLDER / VIDEO CONTAINER -->
-            <div class="flex-1 flex flex-col items-center justify-center min-h-[300px]">
-              <!-- SPINNER -->
-              <div id="render-loading" class="hidden flex-col items-center justify-center gap-3 py-10">
-                <div class="w-12 h-12 border-4 border-brand-cyan/30 border-t-brand-cyan rounded-full animate-spin"></div>
-                <p class="text-sm font-semibold text-slate-300 animate-pulse">Rendering 9:16 clip & burning subtitles via FFmpeg...</p>
-                <p class="text-xs text-slate-500">This usually takes ~3 to 8 seconds.</p>
+            <!-- PANEL 5: EXPORT & RENDER OUTPUT -->
+            <div id="inspector-panel-export" class="hidden space-y-4">
+              <div class="flex items-center justify-between pb-2 border-b border-brand-border">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
+                  <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+                  <span>Exported Vertical 9:16 Short</span>
+                </h3>
+                <span class="text-xs font-mono text-emerald-400 hidden" id="render-done-badge">Ready for TikTok</span>
               </div>
 
-              <!-- EMPTY STATE -->
-              <div id="render-empty" class="text-center py-10 text-slate-500 flex flex-col items-center gap-2">
-                <div class="w-14 h-20 border-2 border-dashed border-slate-700 rounded-lg flex items-center justify-center">
-                  <i data-lucide="smartphone" class="w-6 h-6 text-slate-600"></i>
-                </div>
-                <p class="text-xs">Your rendered vertical short clip will appear here with burned captions.</p>
-              </div>
-
-              <!-- RENDERED VIDEO PLAYER -->
-              <div id="rendered-video-container" class="hidden flex flex-col items-center w-full max-w-xs">
-                <div class="w-full rounded-2xl overflow-hidden shadow-2xl border border-brand-cyan/40 bg-black aspect-[9/16]">
-                  <video id="rendered-video-player" controls class="w-full h-full object-cover"></video>
-                </div>
-
-                <a id="download-clip-btn" href="#" download="tiktok_short.mp4" class="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 text-center flex items-center justify-center gap-2 transition">
-                  <i data-lucide="download" class="w-4 h-4"></i>
-                  Download 1080x1920 MP4
-                </a>
-
-                <!-- SHORTCUT TO VIRAL HASHTAGS GENERATOR -->
-                <button type="button" onclick="sendToHashtagsGenerator()" class="w-full mt-2.5 bg-brand-dark hover:bg-slate-800 border border-emerald-500/40 text-emerald-300 font-bold py-2.5 px-4 rounded-xl text-center flex items-center justify-center gap-2 text-xs transition shadow-sm">
-                  <i data-lucide="hash" class="w-4 h-4 text-emerald-400"></i>
-                  <span>Find Viral Captions & Hashtags For This Clip ➔</span>
+              <!-- ACTION BUTTONS -->
+              <div class="space-y-2">
+                <button type="button" onclick="autoCreateFullVideo()" class="w-full bg-gradient-to-r from-amber-400 via-orange-500 to-brand-red hover:from-amber-300 hover:to-orange-600 text-black font-black py-3 px-4 rounded-xl shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 transition-all transform active:scale-95 text-xs">
+                  <i data-lucide="zap" class="w-4 h-4 fill-black"></i>
+                  <span>⚡ 1-Click Auto-Create (Voiceover + Subtitles)</span>
                 </button>
+
+                <button type="button" onclick="startRenderShort()" class="w-full bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 text-xs transition">
+                  <i data-lucide="scissors" class="w-4 h-4 text-brand-cyan"></i>
+                  <span>Render Manual Segment (With Uploaded Video)</span>
+                </button>
+              </div>
+
+              <!-- RENDER PLACEHOLDER / VIDEO CONTAINER -->
+              <div class="flex flex-col items-center justify-center min-h-[260px] p-2 bg-black/40 rounded-xl border border-brand-border">
+                <!-- SPINNER -->
+                <div id="render-loading" class="hidden flex-col items-center justify-center gap-3 py-8">
+                  <div class="w-10 h-10 border-4 border-brand-cyan/30 border-t-brand-cyan rounded-full animate-spin"></div>
+                  <p class="text-xs font-semibold text-slate-300 animate-pulse">Rendering 9:16 clip & burning subtitles...</p>
+                  <p class="text-[10px] text-slate-500">Takes ~3 to 8 seconds</p>
+                </div>
+
+                <!-- EMPTY STATE -->
+                <div id="render-empty" class="text-center py-8 text-slate-500 flex flex-col items-center gap-2">
+                  <div class="w-12 h-16 border-2 border-dashed border-slate-700 rounded-lg flex items-center justify-center">
+                    <i data-lucide="smartphone" class="w-5 h-5 text-slate-600"></i>
+                  </div>
+                  <p class="text-xs">Your rendered vertical 9:16 short will appear here.</p>
+                </div>
+
+                <!-- RENDERED VIDEO PLAYER -->
+                <div id="rendered-video-container" class="hidden flex flex-col items-center w-full max-w-[240px]">
+                  <div class="w-full rounded-2xl overflow-hidden shadow-2xl border border-brand-cyan/40 bg-black aspect-[9/16]">
+                    <video id="rendered-video-player" controls class="w-full h-full object-cover"></video>
+                  </div>
+
+                  <a id="download-clip-btn" href="#" download="tiktok_short.mp4" class="w-full mt-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg shadow-emerald-500/20 text-center flex items-center justify-center gap-2 text-xs transition">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span>Download 1080x1920 MP4</span>
+                  </a>
+
+                  <button type="button" onclick="sendToHashtagsGenerator()" class="w-full mt-2 bg-brand-dark hover:bg-slate-800 border border-emerald-500/40 text-emerald-300 font-bold py-2 px-3 rounded-xl text-center flex items-center justify-center gap-1.5 text-xs transition">
+                    <i data-lucide="hash" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    <span>Find Viral Captions & Tags ➔</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -1553,5 +1606,146 @@
   </div>
 
   <script src="app.js"></script>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: FULLSCREEN PRECISION CROPPER & FRAMING STUDIO     -->
+  <!-- ======================================================== -->
+  <div id="fullscreen-cropper-modal" class="fixed inset-0 z-50 hidden bg-black/95 backdrop-blur-md flex flex-col p-4 md:p-6 overflow-hidden">
+    <!-- TOP TOOLBAR -->
+    <div class="flex items-center justify-between pb-3 border-b border-brand-border shrink-0">
+      <div class="flex items-center gap-3">
+        <span class="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
+          <i data-lucide="crop" class="w-5 h-5"></i>
+        </span>
+        <div>
+          <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <span>Fullscreen 9:16 Precision Cropper</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono font-bold" id="fullscreen-clip-name-badge">Clip 1</span>
+          </h3>
+          <p class="text-xs text-slate-400">Adjust framing boundaries with live visual feedback. Perfectly center your action or gameplay for TikTok.</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="closeFullscreenCropper()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-black text-xs flex items-center gap-1.5 transition shadow-lg shadow-orange-500/20">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>Save & Done</span>
+        </button>
+        <button type="button" onclick="closeFullscreenCropper()" class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-white/10 transition" title="Close (ESC)">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN STAGE: VIDEO CANVAS & CONTROLS -->
+    <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 py-3 min-h-0 overflow-hidden">
+      <!-- CENTER: MASSIVE VIDEO PLAYER CONTAINER -->
+      <div class="lg:col-span-8 flex flex-col items-center justify-center bg-black/80 rounded-2xl border border-brand-border/60 p-2 relative overflow-hidden">
+        <div class="relative w-full h-full max-h-[72vh] flex items-center justify-center overflow-hidden rounded-xl bg-black" id="fullscreen-player-container">
+          <video id="fullscreen-video-player" controls class="max-w-full max-h-full object-contain"></video>
+
+          <!-- 9:16 LIVE CROP GUIDE OVERLAY -->
+          <div id="fullscreen-crop-guide" class="absolute pointer-events-none border-2 border-dashed border-amber-400 bg-amber-400/15 transition-all duration-75">
+            <span class="absolute top-2 left-2 bg-black/80 text-[10px] text-amber-400 font-mono font-bold px-2 py-0.5 rounded border border-amber-500/40">9:16 Keep Region</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: PRECISION CROP SLIDERS & PRESET CONTROLS -->
+      <div class="lg:col-span-4 bg-brand-dark/95 border border-brand-border rounded-2xl p-4 flex flex-col gap-4 overflow-y-auto">
+        <div class="flex items-center justify-between border-b border-brand-border/60 pb-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+            <i data-lucide="sliders" class="w-4 h-4"></i>
+            <span>Crop Boundaries</span>
+          </span>
+          <button type="button" onclick="resetCropSliders()" class="text-[10px] text-slate-400 hover:text-white underline">Reset to Default</button>
+        </div>
+
+        <!-- QUICK PRESETS -->
+        <div class="space-y-1.5">
+          <label class="block text-[11px] font-semibold text-slate-300">Quick Framing Presets:</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" onclick="applyCropPreset('center_zoom')" class="px-3 py-2 rounded-xl bg-brand-card hover:bg-slate-800 border border-brand-border text-xs font-bold text-white text-left transition flex items-center gap-1.5">
+              <i data-lucide="focus" class="w-3.5 h-3.5 text-brand-cyan"></i>
+              <span>Center Zoom (9:16)</span>
+            </button>
+            <button type="button" onclick="applyCropPreset('blurred_fit')" class="px-3 py-2 rounded-xl bg-brand-card hover:bg-slate-800 border border-brand-border text-xs font-bold text-white text-left transition flex items-center gap-1.5">
+              <i data-lucide="layers" class="w-3.5 h-3.5 text-brand-cyan"></i>
+              <span>Blurred Mirror</span>
+            </button>
+            <button type="button" onclick="applyCropPreset('left_focus')" class="px-3 py-2 rounded-xl bg-brand-card hover:bg-slate-800 border border-brand-border text-xs font-bold text-white text-left transition flex items-center gap-1.5">
+              <i data-lucide="arrow-left" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>Left-Side Focus</span>
+            </button>
+            <button type="button" onclick="applyCropPreset('right_focus')" class="px-3 py-2 rounded-xl bg-brand-card hover:bg-slate-800 border border-brand-border text-xs font-bold text-white text-left transition flex items-center gap-1.5">
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>Right-Side Focus</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 BOUNDARY SLIDERS -->
+        <div class="space-y-3 bg-black/40 p-3.5 rounded-xl border border-brand-border">
+          <div>
+            <div class="flex justify-between text-xs text-slate-300 mb-1">
+              <span class="font-semibold">✂️ Cut Top:</span>
+              <span id="fs-crop-top-val" class="font-mono text-amber-400 font-bold">0%</span>
+            </div>
+            <input type="range" id="fs-crop-top-slider" min="0" max="45" value="0" step="1" oninput="updateManualCropFromFullscreen('cropTop', this.value)" class="w-full accent-amber-400 cursor-pointer">
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs text-slate-300 mb-1">
+              <span class="font-semibold">✂️ Cut Bottom:</span>
+              <span id="fs-crop-bottom-val" class="font-mono text-amber-400 font-bold">0%</span>
+            </div>
+            <input type="range" id="fs-crop-bottom-slider" min="0" max="45" value="0" step="1" oninput="updateManualCropFromFullscreen('cropBottom', this.value)" class="w-full accent-amber-400 cursor-pointer">
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs text-slate-300 mb-1">
+              <span class="font-semibold">✂️ Cut Left:</span>
+              <span id="fs-crop-left-val" class="font-mono text-amber-400 font-bold">0%</span>
+            </div>
+            <input type="range" id="fs-crop-left-slider" min="0" max="45" value="0" step="1" oninput="updateManualCropFromFullscreen('cropLeft', this.value)" class="w-full accent-amber-400 cursor-pointer">
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs text-slate-300 mb-1">
+              <span class="font-semibold">✂️ Cut Right:</span>
+              <span id="fs-crop-right-val" class="font-mono text-amber-400 font-bold">0%</span>
+            </div>
+            <input type="range" id="fs-crop-right-slider" min="0" max="45" value="0" step="1" oninput="updateManualCropFromFullscreen('cropRight', this.value)" class="w-full accent-amber-400 cursor-pointer">
+          </div>
+        </div>
+
+        <!-- FIT MODE -->
+        <div class="p-3 rounded-xl bg-black/40 border border-brand-border space-y-2">
+          <span class="block text-xs font-semibold text-slate-300">Cropped Canvas Presentation:</span>
+          <div class="space-y-1.5 text-xs">
+            <label class="flex items-center gap-2 cursor-pointer text-slate-200">
+              <input type="radio" name="fs-manual-fit" value="fill" checked onchange="updateManualCrop('fitMode', 'fill')" class="accent-amber-400">
+              <div>
+                <div class="font-bold">Fill 9:16 (Zoom to Edge)</div>
+                <div class="text-[10px] text-slate-400">Stretches/zooms your cropped frame to fill the full TikTok screen</div>
+              </div>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer text-slate-200 pt-1 border-t border-brand-border/40">
+              <input type="radio" name="fs-manual-fit" value="blur_fit" onchange="updateManualCrop('fitMode', 'blur_fit')" class="accent-amber-400">
+              <div>
+                <div class="font-bold">Blurred Mirror Fit</div>
+                <div class="text-[10px] text-slate-400">Keeps cropped region centered with nice blurred background behind it</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- SHORTCUTS / HELPER -->
+        <div class="mt-auto p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-200">
+          💡 <strong>Tip:</strong> The amber dashed box inside the player shows what viewers will see in vertical 9:16 format on TikTok!
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

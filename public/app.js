@@ -1228,234 +1228,65 @@ async function loadSampleVideo() {
 }
 
 async function handleFileUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+  const files = event.target?.files || (event.dataTransfer && event.dataTransfer.files);
+  if (!files || files.length === 0) return;
 
   const label = document.getElementById('upload-label');
-  if (label) label.textContent = `Loading ${file.name}...`;
+  if (label) label.textContent = `Loading ${files.length} video clip(s)...`;
 
   try {
-    // Instant client-side video loading via Object URL (zero network latency, bypasses server limits)
-    const localUrl = URL.createObjectURL(file);
-    const tempVideo = document.createElement('video');
-    tempVideo.preload = 'metadata';
-    tempVideo.src = localUrl;
+    const isFirstBatch = videoClips.length === 0;
+    let addedCount = 0;
 
-    tempVideo.onloadedmetadata = () => {
-      const duration = Math.round(tempVideo.duration) || 15;
-      const width = tempVideo.videoWidth || 1920;
-      const height = tempVideo.videoHeight || 1080;
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const localUrl = URL.createObjectURL(file);
 
-      if (label) label.textContent = `Active: ${file.name.length > 25 ? file.name.slice(0, 22) + '...' : file.name}`;
-      setVideoSource({
+      const meta = await new Promise((resolve) => {
+        const tempVideo = document.createElement('video');
+        tempVideo.preload = 'metadata';
+        tempVideo.src = localUrl;
+        tempVideo.onloadedmetadata = () => {
+          resolve({
+            duration: Math.round(tempVideo.duration) || 15,
+            width: tempVideo.videoWidth || 1920,
+            height: tempVideo.videoHeight || 1080
+          });
+        };
+        tempVideo.onerror = () => {
+          resolve({ duration: 15, width: 1920, height: 1080 });
+        };
+      });
+
+      const defaultTrimEnd = Math.min(10, meta.duration);
+      videoClips.push({
+        id: 'clip_' + Date.now() + '_' + i,
         filename: file.name,
         videoUrl: localUrl,
         videoPath: file.name,
         file: file,
-        duration: duration,
-        width: width,
-        height: height
+        duration: meta.duration,
+        startTime: 0,
+        endTime: defaultTrimEnd,
+        width: meta.width,
+        height: meta.height
       });
-      showToast(`Video loaded successfully (${width}x${height}, ${duration}s)!`, 'success');
-    };
+      addedCount++;
+    }
 
-    tempVideo.onerror = () => {
-      if (label) label.textContent = `Active: ${file.name.length > 25 ? file.name.slice(0, 22) + '...' : file.name}`;
-      setVideoSource({
-        filename: file.name,
-        videoUrl: localUrl,
-        videoPath: file.name,
-        file: file,
-        duration: 15,
-        width: 1920,
-        height: 1080
-      });
-      showToast('Video loaded successfully!', 'success');
-    };
+    if (isFirstBatch || activeClipIndex < 0 || activeClipIndex >= videoClips.length) {
+      activeClipIndex = 0;
+    }
+
+    selectActiveClip(activeClipIndex);
+    renderClipSequenceReel();
+    showToast(`Loaded ${addedCount} video clip(s) into timeline sequence! (${videoClips.length} total)`, 'success');
   } catch (err) {
     console.error('Video load error:', err);
     if (label) label.textContent = 'Upload failed. Try again.';
     showToast('Failed to load video: ' + err.message, 'error');
-  }
-}
-
-async function importFromUrl() {
-  const urlInput = document.getElementById('import-url-input');
-  const url = urlInput.value.trim();
-
-  if (!url || !url.startsWith('http')) {
-    showToast('Please enter a valid video link (YouTube, Twitch, TikTok, etc.)', 'error');
-    return;
-  }
-
-  const btn = document.getElementById('import-url-btn');
-  const originalHtml = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = `<span class="w-3.5 h-3.5 border-2 border-black/30 border-t-black rounded-full animate-spin"></span> Downloading...`;
-
-  showToast('Downloading video... Please wait a few seconds', 'info');
-
-  try {
-    const res = await fetch('/api/download-url', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url })
-    });
-
-    if (!res.ok) {
-      throw new Error(`Cloud download unavailable (${res.status}). Use "Upload Video" to select a clip directly.`);
-    }
-
-    const data = await res.json();
-    setVideoSource(data);
-    urlInput.value = '';
-    showToast(`Video imported successfully (${data.duration}s)!`, 'success');
-  } catch (err) {
-    console.error('Import error:', err);
-    showToast(err.message, 'error');
   } finally {
-    btn.disabled = false;
-    btn.innerHTML = originalHtml;
-    lucide.createIcons();
-  }
-}
-
-function setVideoSource(data) {
-  activeVideo = {
-    path: data.videoPath,
-    url: data.videoUrl,
-    duration: data.duration,
-    width: data.width,
-    height: data.height,
-    file: data.file || null
-  };
-
-  // Manage videoClips sequence array
-  const defaultTrimEnd = Math.min(10, data.duration);
-  if (videoClips.length === 0) {
-    videoClips.push({
-      id: 'clip_' + Date.now(),
-      filename: data.filename || 'Clip 1',
-      videoUrl: data.videoUrl,
-      videoPath: data.videoPath,
-      file: data.file || null,
-      duration: data.duration,
-      startTime: 0,
-      endTime: defaultTrimEnd,
-      width: data.width,
-      height: data.height
-    });
-    activeClipIndex = 0;
-  } else if (activeClipIndex >= 0 && activeClipIndex < videoClips.length) {
-    videoClips[activeClipIndex] = {
-      ...videoClips[activeClipIndex],
-      filename: data.filename || videoClips[activeClipIndex].filename,
-      videoUrl: data.videoUrl,
-      videoPath: data.videoPath,
-      file: data.file || null,
-      duration: data.duration,
-      width: data.width,
-      height: data.height,
-      startTime: 0,
-      endTime: defaultTrimEnd
-    };
-  }
-
-  const player = document.getElementById('source-video-player');
-  if (player) {
-    player.src = data.videoUrl;
-    player.load();
-  }
-
-  const label = document.getElementById('upload-label');
-  if (label && data.filename) {
-    label.textContent = `Active: ${data.filename.length > 25 ? data.filename.slice(0, 22) + '...' : data.filename}`;
-  }
-
-  const titleEl = document.getElementById('source-preview-title');
-  if (titleEl && data.filename) {
-    titleEl.textContent = `Clip ${activeClipIndex + 1}: ${data.filename.length > 25 ? data.filename.slice(0, 22) + '...' : data.filename}`;
-  }
-
-  const badgeEl = document.getElementById('source-meta-badge');
-  if (badgeEl) {
-    badgeEl.textContent = `${data.filename ? data.filename + ' • ' : ''}${data.width}x${data.height} • ${data.duration}s`;
-  }
-
-  // Set trimmer default bounds
-  const startInput = document.getElementById('trim-start');
-  const endInput = document.getElementById('trim-end');
-
-  if (startInput) {
-    startInput.max = data.duration;
-    startInput.value = '0.0';
-  }
-  if (endInput) {
-    endInput.max = data.duration;
-    endInput.value = defaultTrimEnd.toFixed(1);
-  }
-
-  renderClipSequenceReel();
-  updateTrimTimes();
-  setupPlayerTimelineEvents();
-}
-
-// MULTI-CLIP SEQUENCE REEL MANAGEMENT (CAPCUT-STYLE)
-async function handleAddAnotherClip(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  try {
-    const localUrl = URL.createObjectURL(file);
-    const tempVideo = document.createElement('video');
-    tempVideo.preload = 'metadata';
-    tempVideo.src = localUrl;
-
-    tempVideo.onloadedmetadata = () => {
-      const duration = Math.round(tempVideo.duration) || 15;
-      const width = tempVideo.videoWidth || 1920;
-      const height = tempVideo.videoHeight || 1080;
-
-      const newClip = {
-        id: 'clip_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-        filename: file.name,
-        videoUrl: localUrl,
-        videoPath: file.name,
-        file: file,
-        duration: duration,
-        startTime: 0,
-        endTime: Math.min(10, duration),
-        width: width,
-        height: height
-      };
-
-      videoClips.push(newClip);
-      activeClipIndex = videoClips.length - 1;
-      selectActiveClip(activeClipIndex);
-      showToast(`Added "${file.name}" to sequence reel! (${videoClips.length} total clips)`, 'success');
-    };
-
-    tempVideo.onerror = () => {
-      const newClip = {
-        id: 'clip_' + Date.now(),
-        filename: file.name,
-        videoUrl: localUrl,
-        videoPath: file.name,
-        file: file,
-        duration: 15,
-        startTime: 0,
-        endTime: 10,
-        width: 1920,
-        height: 1080
-      };
-      videoClips.push(newClip);
-      activeClipIndex = videoClips.length - 1;
-      selectActiveClip(activeClipIndex);
-      showToast(`Added "${file.name}" to sequence reel!`, 'success');
-    };
-  } catch (err) {
-    console.error('Error adding clip:', err);
-    showToast('Failed to add clip: ' + err.message, 'error');
+    if (event.target) event.target.value = '';
   }
 }
 
@@ -1965,7 +1796,7 @@ function moveEndCardSlide(idx, dir) {
 function removeEndCardSlide(idx) {
   endCardSlides.splice(idx, 1);
   renderEndCardState();
-  showToast('Weapon slide removed', 'info');
+  showToast('Picture slide removed', 'info');
 }
 
 function renderEndCardState() {
@@ -1986,9 +1817,7 @@ function renderEndCardState() {
   addMoreEl?.classList.remove('hidden');
 
   listEl.innerHTML = endCardSlides.map((slide, idx) => {
-    const isPrimary = idx === 0 && endCardSlides.length > 1;
-    const isSecondary = idx === 1 && endCardSlides.length > 1;
-    const roleLabel = isPrimary ? 'Primary Weapon (1/2)' : (isSecondary ? 'Secondary Weapon (2/2)' : `Slide #${idx + 1}`);
+    const roleLabel = `Slide #${idx + 1}`;
     const currentZoom = slide.zoom || 1.45;
     const currentFocus = slide.focus || 'left';
 
@@ -2054,7 +1883,7 @@ function renderEndCardState() {
             </div>
           </div>
           <div>
-            <label class="block text-[10px] text-slate-400 mb-1">Slide Weapon Title</label>
+            <label class="block text-[10px] text-slate-400 mb-1">Slide Title / Caption</label>
             <input type="text" value="${slide.title}" oninput="updateSlideTitle(${idx}, this.value)" class="w-full bg-black/60 border border-brand-border rounded px-2 py-1 text-xs font-mono text-white focus:border-brand-cyan">
           </div>
         </div>
@@ -2079,7 +1908,7 @@ async function handleOverlayImageUpload(event) {
   if (!files || files.length === 0) return;
 
   try {
-    showToast(`Uploading ${files.length} weapon build image(s)...`, 'info');
+    showToast(`Uploading ${files.length} picture(s)...`, 'info');
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -2109,16 +1938,7 @@ async function handleOverlayImageUpload(event) {
       }
 
       const rawCleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ').toUpperCase();
-      let defaultTitle = 'SAVE THIS CLASS SETUP [BEST META]';
-      if (endCardSlides.length === 0 && files.length > 1) {
-        defaultTitle = `PRIMARY: ${rawCleanName} [LONG RANGE]`;
-      } else if (endCardSlides.length === 0 && files.length === 1) {
-        defaultTitle = `SAVE THIS CLASS SETUP: ${rawCleanName}`;
-      } else if (endCardSlides.length === 1) {
-        defaultTitle = `SECONDARY: ${rawCleanName} [CLOSE RANGE]`;
-      } else {
-        defaultTitle = `WEAPON #${endCardSlides.length + 1}: ${rawCleanName}`;
-      }
+      let defaultTitle = rawCleanName || `PICTURE #${endCardSlides.length + 1}`;
 
       endCardSlides.push({
         id: 'slide_' + Date.now() + '_' + i,
@@ -2127,7 +1947,7 @@ async function handleOverlayImageUpload(event) {
         imageUrl: data.imageUrl,
         duration: 3.0,
         title: defaultTitle,
-        subtitle: 'Screenshot & save for your next match'
+        subtitle: 'Follow for more!'
       });
 
       const start = parseFloat(document.getElementById('trim-start')?.value) || 0;
@@ -2155,7 +1975,7 @@ async function handleOverlayImageUpload(event) {
 
     renderEndCardState();
     renderOverlayImagesList();
-    showToast(`Added ${files.length} weapon build(s) to Outro Slides! Total: ${endCardSlides.length} slide(s).`, 'success');
+    showToast(`Added ${files.length} picture(s) to Outro Slides! Total: ${endCardSlides.length} slide(s).`, 'success');
   } catch (err) {
     console.error('Image overlay upload error:', err);
     showToast(err.message, 'error');
@@ -2172,7 +1992,7 @@ function renderOverlayImagesList() {
     container.innerHTML = `
       <div id="overlay-empty-state" class="p-3.5 rounded-xl border border-dashed border-slate-700 bg-brand-dark/50 text-center">
         <p class="text-xs text-slate-400">No picture overlays added yet.</p>
-        <p class="text-[10px] text-slate-500 mt-0.5">Click <strong class="text-emerald-400">+ Add Picture</strong> above to attach your weapon build or screenshot!</p>
+        <p class="text-[10px] text-slate-500 mt-0.5">Click <strong class="text-emerald-400">+ Add Picture / Slide</strong> above to attach any screenshot, meme, or logo!</p>
       </div>
     `;
     return;
@@ -2694,6 +2514,7 @@ function clearSubtitles() {
 }
 
 async function startRenderShort() {
+  if (typeof selectInspectorTab === 'function') selectInspectorTab('export');
   if (!activeVideo.path && !activeVideo.url) {
     showToast('Please upload a video or click "Use Demo Video" first.', 'error');
     return;
@@ -3249,3 +3070,297 @@ function copyCaptionText(text) {
     showToast('Caption hook copied to clipboard!', 'info');
   });
 }
+
+
+// ==========================================
+// CAPCUT-STYLE STUDIO INSPECTOR TABS
+// ==========================================
+let activeInspectorTab = 'canvas';
+
+function selectInspectorTab(tab) {
+  activeInspectorTab = tab;
+  const tabs = ['canvas', 'captions', 'pictures', 'audio', 'export'];
+
+  tabs.forEach(t => {
+    const btn = document.getElementById(`btn-inspector-${t}`);
+    const panel = document.getElementById(`inspector-panel-${t}`);
+
+    if (t === tab) {
+      if (btn) {
+        btn.classList.add('border-brand-cyan', 'bg-brand-cyan/20', 'text-white', 'shadow-md');
+        btn.classList.remove('border-brand-border', 'bg-brand-dark', 'text-slate-400');
+      }
+      if (panel) panel.classList.remove('hidden');
+    } else {
+      if (btn) {
+        btn.classList.remove('border-brand-cyan', 'bg-brand-cyan/20', 'text-white', 'shadow-md');
+        btn.classList.add('border-brand-border', 'bg-brand-dark', 'text-slate-400');
+      }
+      if (panel) panel.classList.add('hidden');
+    }
+  });
+
+  lucide.createIcons();
+}
+
+// ==========================================
+// FULLSCREEN 9:16 PRECISION CROPPER STUDIO
+// ==========================================
+function openFullscreenCropper() {
+  const modal = document.getElementById('fullscreen-cropper-modal');
+  const sourcePlayer = document.getElementById('source-video-player');
+  const fsPlayer = document.getElementById('fullscreen-video-player');
+  const badge = document.getElementById('fullscreen-clip-name-badge');
+
+  if (!activeVideo.url && (!videoClips.length || !videoClips[activeClipIndex])) {
+    showToast('Please upload or load a video first to crop!', 'info');
+    return;
+  }
+
+  if (modal) {
+    modal.classList.remove('hidden');
+    if (badge) {
+      const clip = videoClips[activeClipIndex];
+      badge.textContent = clip ? `Clip ${activeClipIndex + 1}: ${clip.filename}` : 'Active Video';
+    }
+
+    if (fsPlayer && sourcePlayer) {
+      fsPlayer.src = sourcePlayer.src || activeVideo.url;
+      fsPlayer.currentTime = sourcePlayer.currentTime || 0;
+      fsPlayer.load();
+    }
+
+    // Sync sliders
+    const topSlider = document.getElementById('fs-crop-top-slider');
+    const bottomSlider = document.getElementById('fs-crop-bottom-slider');
+    const leftSlider = document.getElementById('fs-crop-left-slider');
+    const rightSlider = document.getElementById('fs-crop-right-slider');
+
+    if (topSlider) topSlider.value = manualCrop.cropTop;
+    if (bottomSlider) bottomSlider.value = manualCrop.cropBottom;
+    if (leftSlider) leftSlider.value = manualCrop.cropLeft;
+    if (rightSlider) rightSlider.value = manualCrop.cropRight;
+
+    const tVal = document.getElementById('fs-crop-top-val');
+    const bVal = document.getElementById('fs-crop-bottom-val');
+    const lVal = document.getElementById('fs-crop-left-val');
+    const rVal = document.getElementById('fs-crop-right-val');
+    if (tVal) tVal.textContent = manualCrop.cropTop + '%';
+    if (bVal) bVal.textContent = manualCrop.cropBottom + '%';
+    if (lVal) lVal.textContent = manualCrop.cropLeft + '%';
+    if (rVal) rVal.textContent = manualCrop.cropRight + '%';
+
+    updateFullscreenCropGuide();
+    lucide.createIcons();
+  }
+}
+
+function closeFullscreenCropper() {
+  const modal = document.getElementById('fullscreen-cropper-modal');
+  const sourcePlayer = document.getElementById('source-video-player');
+  const fsPlayer = document.getElementById('fullscreen-video-player');
+
+  if (fsPlayer && !fsPlayer.paused) {
+    fsPlayer.pause();
+  }
+  if (sourcePlayer && fsPlayer) {
+    sourcePlayer.currentTime = fsPlayer.currentTime;
+  }
+
+  if (modal) {
+    modal.classList.add('hidden');
+  }
+}
+
+function updateManualCropFromFullscreen(key, val) {
+  manualCrop[key] = parseInt(val) || 0;
+
+  const keyLower = key.replace('crop', '').toLowerCase();
+  const valEl = document.getElementById(`fs-crop-${keyLower}-val`);
+  if (valEl) valEl.textContent = `${manualCrop[key]}%`;
+
+  const sideSlider = document.getElementById(`crop-${keyLower}-slider`);
+  if (sideSlider) sideSlider.value = manualCrop[key];
+  const sideValEl = document.getElementById(`crop-${keyLower}-val`);
+  if (sideValEl) sideValEl.textContent = `${manualCrop[key]}%`;
+
+  selectLayout('manual_crop');
+  updateFullscreenCropGuide();
+  updateManualCropGuide();
+}
+
+function updateFullscreenCropGuide() {
+  const guide = document.getElementById('fullscreen-crop-guide');
+  const player = document.getElementById('fullscreen-video-player');
+  if (!guide || !player) return;
+
+  if (layoutMode !== 'manual_crop') {
+    guide.classList.add('hidden');
+    return;
+  }
+
+  guide.classList.remove('hidden');
+  guide.style.top = `${manualCrop.cropTop}%`;
+  guide.style.bottom = `${manualCrop.cropBottom}%`;
+  guide.style.left = `${manualCrop.cropLeft}%`;
+  guide.style.right = `${manualCrop.cropRight}%`;
+}
+
+function applyCropPreset(preset) {
+  if (preset === 'center_zoom') {
+    manualCrop.cropTop = 0;
+    manualCrop.cropBottom = 0;
+    manualCrop.cropLeft = 21;
+    manualCrop.cropRight = 21;
+    manualCrop.fitMode = 'fill';
+    selectLayout('center_crop');
+  } else if (preset === 'blurred_fit') {
+    manualCrop.cropTop = 0;
+    manualCrop.cropBottom = 0;
+    manualCrop.cropLeft = 0;
+    manualCrop.cropRight = 0;
+    manualCrop.fitMode = 'blur_fit';
+    selectLayout('blur_pad');
+  } else if (preset === 'left_focus') {
+    manualCrop.cropTop = 0;
+    manualCrop.cropBottom = 0;
+    manualCrop.cropLeft = 0;
+    manualCrop.cropRight = 42;
+    manualCrop.fitMode = 'fill';
+    selectLayout('manual_crop');
+  } else if (preset === 'right_focus') {
+    manualCrop.cropTop = 0;
+    manualCrop.cropBottom = 0;
+    manualCrop.cropLeft = 42;
+    manualCrop.cropRight = 0;
+    manualCrop.fitMode = 'fill';
+    selectLayout('manual_crop');
+  }
+
+  ['top', 'bottom', 'left', 'right'].forEach(side => {
+    const key = 'crop' + side.charAt(0).toUpperCase() + side.slice(1);
+    const fsSlider = document.getElementById(`fs-crop-${side}-slider`);
+    const fsVal = document.getElementById(`fs-crop-${side}-val`);
+    const sideSlider = document.getElementById(`crop-${side}-slider`);
+    const sideVal = document.getElementById(`crop-${side}-val`);
+
+    if (fsSlider) fsSlider.value = manualCrop[key];
+    if (fsVal) fsVal.textContent = manualCrop[key] + '%';
+    if (sideSlider) sideSlider.value = manualCrop[key];
+    if (sideVal) sideVal.textContent = manualCrop[key] + '%';
+  });
+
+  updateFullscreenCropGuide();
+  updateManualCropGuide();
+  showToast(`Applied preset: ${preset.replace('_', ' ').toUpperCase()}`, 'info');
+}
+
+function resetCropSliders() {
+  applyCropPreset('blurred_fit');
+}
+
+// ==========================================
+// CAPCUT-STYLE MULTI-CLIP SEQUENTIAL PLAYBACK
+// ==========================================
+let isPlayingFullReel = false;
+let currentReelPlayIndex = 0;
+
+function togglePlayReelSequence() {
+  if (videoClips.length === 0) {
+    showToast('Add video clips first to play sequence reel!', 'info');
+    return;
+  }
+
+  const btn = document.getElementById('play-full-reel-btn');
+  const player = document.getElementById('source-video-player');
+  if (!player) return;
+
+  if (isPlayingFullReel) {
+    isPlayingFullReel = false;
+    player.pause();
+    if (btn) {
+      btn.innerHTML = `<i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i><span>Play Full Reel Sequence</span>`;
+      btn.classList.remove('bg-amber-500', 'text-black');
+      btn.classList.add('bg-brand-dark', 'text-amber-300');
+    }
+    showToast('Stopped sequence playback', 'info');
+    lucide.createIcons();
+    return;
+  }
+
+  isPlayingFullReel = true;
+  currentReelPlayIndex = 0;
+  if (btn) {
+    btn.innerHTML = `<i data-lucide="square" class="w-3.5 h-3.5 fill-current"></i><span>Stop Sequence Reel</span>`;
+    btn.classList.add('bg-amber-500', 'text-black');
+    btn.classList.remove('bg-brand-dark', 'text-amber-300');
+  }
+
+  playNextClipInReel();
+  showToast(`Playing full sequence reel (${videoClips.length} clips in order)...`, 'info');
+  lucide.createIcons();
+}
+
+function playNextClipInReel() {
+  if (!isPlayingFullReel) return;
+  if (currentReelPlayIndex >= videoClips.length) {
+    togglePlayReelSequence();
+    showToast('Sequence reel playback finished!', 'success');
+    return;
+  }
+
+  selectActiveClip(currentReelPlayIndex);
+  const player = document.getElementById('source-video-player');
+  const clip = videoClips[currentReelPlayIndex];
+  if (!player || !clip) return;
+
+  const start = parseFloat(clip.startTime) || 0;
+  const end = parseFloat(clip.endTime) || clip.duration;
+
+  player.currentTime = start;
+  player.play().catch(() => {});
+
+  const checkEnd = () => {
+    if (!isPlayingFullReel || activeClipIndex !== currentReelPlayIndex) {
+      player.removeEventListener('timeupdate', checkEnd);
+      return;
+    }
+    if (player.currentTime >= end) {
+      player.removeEventListener('timeupdate', checkEnd);
+      currentReelPlayIndex++;
+      playNextClipInReel();
+    }
+  };
+
+  player.addEventListener('timeupdate', checkEnd);
+}
+
+// Precision nudge for start and end trim
+function nudgeTrim(type, delta) {
+  const startInput = document.getElementById('trim-start');
+  const endInput = document.getElementById('trim-end');
+  const total = activeVideo?.duration || 15;
+
+  if (type === 'start') {
+    let cur = parseFloat(startInput.value) || 0;
+    let newStart = Math.max(0, Math.min(total - 0.5, cur + delta));
+    startInput.value = newStart.toFixed(1);
+    const player = document.getElementById('source-video-player');
+    if (player) player.currentTime = newStart;
+  } else {
+    let cur = parseFloat(endInput.value) || total;
+    let newEnd = Math.max(0.5, Math.min(total, cur + delta));
+    endInput.value = newEnd.toFixed(1);
+    const player = document.getElementById('source-video-player');
+    if (player) player.currentTime = newEnd;
+  }
+  updateTrimTimes();
+}
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeFullscreenCropper();
+    closeViralSoundsModal();
+    closeApiKeyModal();
+  }
+});
