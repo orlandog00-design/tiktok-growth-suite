@@ -2813,7 +2813,7 @@ function stopRenderedSequencePlayback() {
   if (slideStage) slideStage.classList.add('hidden');
 }
 
-function startRenderedSequencePlayback({ videoUrl, videoFilename, startTime, endTime, layoutMode, manualCrop, endCardSlides }) {
+function startRenderedSequencePlayback({ videoUrl, videoFilename, startTime, endTime, layoutMode, manualCrop, endCardSlides: paramSlides }) {
   stopRenderedSequencePlayback();
 
   const renderedPlayer = document.getElementById('rendered-video-player');
@@ -2821,7 +2821,9 @@ function startRenderedSequencePlayback({ videoUrl, videoFilename, startTime, end
   const timelineEl = document.getElementById('rendered-sequence-timeline');
   const downloadBtn = document.getElementById('download-clip-btn');
 
-  const slides = Array.isArray(endCardSlides) ? endCardSlides : [];
+  const slides = (Array.isArray(paramSlides) && paramSlides.length > 0)
+    ? paramSlides 
+    : (Array.isArray(endCardSlides) ? endCardSlides : []);
   const introSlides = slides.filter(s => s.position === 'intro');
   const outroSlides = slides.filter(s => s.position !== 'intro');
 
@@ -2936,6 +2938,7 @@ function playCurrentSequenceItem() {
   if (item.type === 'slide') {
     renderedPlayer.pause();
     renderedPlayer.ontimeupdate = null;
+    renderedPlayer.onended = null;
     slideStage?.classList.remove('hidden');
 
     const bgEl = document.getElementById('rendered-slide-bg');
@@ -2989,13 +2992,23 @@ function playCurrentSequenceItem() {
 
     applyCropToRenderedPlayer(renderedPlayer, currentSequenceState.layoutMode, currentSequenceState.manualCrop);
 
-    renderedPlayer.currentTime = item.start;
+    if (Math.abs(renderedPlayer.currentTime - item.start) > 0.5) {
+      renderedPlayer.currentTime = item.start;
+    }
     renderedPlayer.play().catch(() => {});
 
+    const onAdvance = () => {
+      renderedPlayer.ontimeupdate = null;
+      renderedPlayer.onended = null;
+      advanceSequenceNext();
+    };
+
+    renderedPlayer.onended = onAdvance;
     renderedPlayer.ontimeupdate = () => {
-      if (renderedPlayer.currentTime >= item.end) {
-        renderedPlayer.ontimeupdate = null;
-        advanceSequenceNext();
+      const isPastEnd = renderedPlayer.currentTime >= item.end;
+      const isAtVideoDuration = renderedPlayer.duration > 0 && renderedPlayer.currentTime >= (renderedPlayer.duration - 0.25);
+      if (isPastEnd || isAtVideoDuration) {
+        onAdvance();
       }
     };
   }
@@ -3035,9 +3048,24 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
   const totalDuration = playlist.reduce((acc, it) => acc + it.duration, 0);
 
   if (downloadBtn) {
-    downloadBtn.classList.add('opacity-75');
-    downloadBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-brand-cyan"></i><span>Assembling Full 9:16 Video (${Math.round(totalDuration)}s)...</span>`;
+    downloadBtn.dataset.stitching = 'true';
+    downloadBtn.dataset.progress = '5';
+    downloadBtn.dataset.remaining = Math.round(totalDuration);
+    downloadBtn.classList.add('opacity-80', 'cursor-wait');
+    downloadBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-amber-400"></i><span>Stitching Video + Pictures (5% - ${Math.round(totalDuration)}s left)...</span>`;
     if (window.lucide) lucide.createIcons();
+
+    downloadBtn.onclick = (e) => {
+      if (downloadBtn.dataset.stitching === 'true') {
+        e.preventDefault();
+        e.stopPropagation();
+        const pct = downloadBtn.dataset.progress || '5';
+        const rem = downloadBtn.dataset.remaining || '';
+        const remStr = rem ? ` (~${rem}s left)` : '';
+        showToast(`⏳ Please wait! Assembling full ${Math.round(totalDuration)}s vertical video + ${slides.length} picture slides (${pct}% done)${remStr}. Ready in just a moment!`, 'info');
+        return false;
+      }
+    };
   }
 
   if (currentExportController) {
@@ -3047,6 +3075,24 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
   currentExportController = ctrl;
 
   let audioCtx = null;
+
+  const updateExportProgress = (currentElapsed, stageText) => {
+    if (ctrl.aborted) return;
+    const pct = Math.min(98, Math.max(5, Math.round((currentElapsed / totalDuration) * 98)));
+    const remainingSecs = Math.max(1, Math.round(totalDuration - currentElapsed));
+
+    if (exportProgressBar) exportProgressBar.style.width = `${pct}%`;
+    if (exportStatusText) {
+      exportStatusText.textContent = `${stageText || 'Stitching 9:16 vertical short'} (${pct}% - ~${remainingSecs}s left)...`;
+      exportStatusText.classList.remove('text-emerald-400');
+      exportStatusText.classList.add('text-amber-400');
+    }
+    if (downloadBtn && downloadBtn.dataset.stitching === 'true') {
+      downloadBtn.dataset.progress = pct;
+      downloadBtn.dataset.remaining = remainingSecs;
+      downloadBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-amber-400"></i><span>Stitching Video + Pictures (${pct}% - ${remainingSecs}s left)...</span>`;
+    }
+  };
 
   try {
     if (exportStatus) exportStatus.classList.remove('hidden');
@@ -3084,7 +3130,7 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
 
     let stream = canvas.captureStream(30);
 
-    // Audio capture via Web Audio (safely wrapped)
+    // Audio capture: safely connect Web Audio so hiddenVideo sound is captured WITHOUT playing through user speakers
     try {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (AudioCtx) {
@@ -3092,16 +3138,20 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
         if (audioCtx.state === 'suspended') {
           await audioCtx.resume().catch(() => {});
         }
+        hiddenVideo.muted = false;
+        hiddenVideo.volume = 1.0;
         const source = audioCtx.createMediaElementSource(hiddenVideo);
         const dest = audioCtx.createMediaStreamDestination();
         source.connect(dest);
+        // Note: dest is NOT connected to audioCtx.destination, so hiddenVideo is completely silent to the user!
         const tracks = dest.stream.getAudioTracks();
         if (tracks.length > 0) {
           stream.addTrack(tracks[0]);
         }
       }
     } catch (audioErr) {
-      console.log('Audio routing note:', audioErr);
+      console.log('Audio routing note (recording video-only track):', audioErr);
+      hiddenVideo.muted = true;
     }
 
     const recordedChunks = [];
@@ -3110,10 +3160,11 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
 
     const getSupportedMimeType = () => {
       const candidates = [
-        'video/webm;codecs=vp8,opus',
+        'video/mp4;codecs=avc1,mp4a.40.2',
+        'video/mp4',
         'video/webm;codecs=vp9,opus',
-        'video/webm',
-        'video/mp4'
+        'video/webm;codecs=vp8,opus',
+        'video/webm'
       ];
       if (typeof MediaRecorder !== 'undefined') {
         for (const c of candidates) {
@@ -3130,13 +3181,15 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
         mimeType = chosenMime;
       } else {
         recorder = new MediaRecorder(stream);
+        mimeType = recorder.mimeType || 'video/webm';
       }
       recorder.ondataavailable = (e) => {
         if (e.data && e.data.size > 0) recordedChunks.push(e.data);
       };
+      recorder.onerror = (e) => console.warn('MediaRecorder warning event:', e);
       recorder.start(100);
     } catch (recErr1) {
-      console.warn('Initial MediaRecorder start note, attempting fallback stream without audio track:', recErr1);
+      console.warn('Initial MediaRecorder start note, using clean canvas stream:', recErr1);
       stream = canvas.captureStream(30);
       try {
         recorder = new MediaRecorder(stream);
@@ -3144,6 +3197,7 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
         recorder.ondataavailable = (e) => {
           if (e.data && e.data.size > 0) recordedChunks.push(e.data);
         };
+        recorder.onerror = (e) => console.warn('MediaRecorder fallback error:', e);
         recorder.start(100);
       } catch (recErr2) {
         console.error('Fatal MediaRecorder error:', recErr2);
@@ -3153,6 +3207,7 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
 
     let elapsed = 0;
 
+    // Preload slide images
     const slideImages = {};
     for (const item of playlist) {
       if (item.type === 'slide' && item.slide?.imageUrl && !slideImages[item.slide.imageUrl]) {
@@ -3170,111 +3225,128 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
       }
     }
 
+    // Pre-render slide backgrounds and layouts to dedicated offscreen canvases for blazing 30fps blitting
+    const slideCanvases = {};
+    for (let i = 0; i < playlist.length; i++) {
+      const item = playlist[i];
+      if (item.type === 'slide') {
+        const slideImg = slideImages[item.slide?.imageUrl];
+        const sc = document.createElement('canvas');
+        sc.width = cw;
+        sc.height = ch;
+        const sctx = sc.getContext('2d');
+
+        sctx.fillStyle = '#090d16';
+        sctx.fillRect(0, 0, cw, ch);
+
+        if (slideImg && slideImg.complete && slideImg.naturalWidth > 0) {
+          try {
+            sctx.save();
+            sctx.filter = 'blur(22px) brightness(0.55)';
+            sctx.drawImage(slideImg, -50, -50, cw + 100, ch + 100);
+            sctx.restore();
+
+            const fitMode = item.slide?.fitMode || 'fit';
+            if (fitMode === 'fill') {
+              const panPercent = typeof item.slide?.panX === 'number' ? item.slide.panX : 0;
+              const zoom = item.slide?.zoom || 1.0;
+              const imgW = slideImg.naturalWidth;
+              const imgH = slideImg.naturalHeight;
+              const targetAspect = cw / ch;
+              let cropW = (imgH * targetAspect) / zoom;
+              let cropH = imgH / zoom;
+              if (cropW > imgW) {
+                cropW = imgW;
+                cropH = imgW / targetAspect;
+              }
+              const maxPanX = Math.max(0, imgW - cropW);
+              const cropX = (panPercent / 100) * maxPanX;
+              const cropY = (imgH - cropH) / 2;
+              sctx.drawImage(slideImg, cropX, cropY, cropW, cropH, 30, 180, cw - 60, ch - 360);
+            } else {
+              const availW = cw - 60;
+              const availH = ch - 360;
+              const scale = Math.min(availW / slideImg.naturalWidth, availH / slideImg.naturalHeight);
+              const drawW = slideImg.naturalWidth * scale;
+              const drawH = slideImg.naturalHeight * scale;
+              const drawX = (cw - drawW) / 2;
+              const drawY = (ch - drawH) / 2;
+
+              sctx.fillStyle = 'rgba(0,0,0,0.5)';
+              sctx.fillRect(drawX - 4, drawY - 4, drawW + 8, drawH + 8);
+              sctx.drawImage(slideImg, drawX, drawY, drawW, drawH);
+              sctx.strokeStyle = '#f59e0b';
+              sctx.lineWidth = 3;
+              sctx.strokeRect(drawX, drawY, drawW, drawH);
+            }
+          } catch (e) {
+            console.warn('Pre-render slide canvas note:', e);
+          }
+        }
+
+        // Top Header Banner
+        sctx.fillStyle = 'rgba(0, 0, 0, 0.92)';
+        sctx.fillRect(0, 0, cw, 170);
+        sctx.fillStyle = '#f59e0b';
+        sctx.fillRect(0, 166, cw, 4);
+
+        // Top Role Badge
+        sctx.fillStyle = item.role === 'intro' ? '#a855f7' : '#10b981';
+        sctx.fillRect(30, 25, 175, 32);
+        sctx.fillStyle = '#ffffff';
+        sctx.font = 'bold 15px monospace';
+        sctx.fillText(item.role === 'intro' ? '⏮️ INTRO HOOK' : `⏭️ OUTRO (${item.roleIndex}/${item.totalRole})`, 40, 46);
+
+        // Top Title Text
+        sctx.fillStyle = '#fef08a';
+        sctx.font = '900 26px sans-serif';
+        const title = (item.slide?.title || 'SETTINGS OVERVIEW').toUpperCase();
+        sctx.fillText(title.length > 28 ? title.slice(0, 26) + '...' : title, 30, 105);
+
+        // Bottom Subtitle Banner
+        sctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+        sctx.fillRect(0, ch - 140, cw, 140);
+        sctx.fillStyle = '#f59e0b';
+        sctx.fillRect(0, ch - 140, cw, 3);
+
+        sctx.fillStyle = '#ffffff';
+        sctx.font = 'bold 20px sans-serif';
+        sctx.textAlign = 'center';
+        const sub = item.slide?.subtitle || 'Screenshot & save for your next match';
+        sctx.fillText(sub.length > 42 ? sub.slice(0, 40) + '...' : sub, cw / 2, ch - 65);
+        sctx.textAlign = 'left';
+
+        slideCanvases[i] = sc;
+      }
+    }
+
     if (ctrl.aborted) {
-      recorder.stop();
+      if (recorder && recorder.state !== 'inactive') {
+        try { recorder.stop(); } catch(e){}
+      }
       if (audioCtx) { try { audioCtx.close(); } catch(e){} }
       return;
     }
 
+    // Execute playback loop through each sequence item
     for (let pIdx = 0; pIdx < playlist.length; pIdx++) {
       if (ctrl.aborted) break;
       const item = playlist[pIdx];
 
       if (item.type === 'slide') {
-        const slideImg = slideImages[item.slide?.imageUrl];
+        const sc = slideCanvases[pIdx];
         const frames = Math.round(item.duration * 30);
         const frameInterval = 1000 / 30;
 
         for (let f = 0; f < frames; f++) {
           if (ctrl.aborted) break;
-
-          ctx.fillStyle = '#090d16';
-          ctx.fillRect(0, 0, cw, ch);
-
-          try {
-            if (slideImg && slideImg.complete && slideImg.naturalWidth > 0) {
-              ctx.save();
-              ctx.filter = 'blur(20px) brightness(0.6)';
-              ctx.drawImage(slideImg, -50, -50, cw + 100, ch + 100);
-              ctx.restore();
-
-              const fitMode = item.slide.fitMode || 'fit';
-              if (fitMode === 'fill') {
-                const panPercent = typeof item.slide.panX === 'number' ? item.slide.panX : 0;
-                const zoom = item.slide.zoom || 1.0;
-                const imgW = slideImg.naturalWidth;
-                const imgH = slideImg.naturalHeight;
-                
-                const targetAspect = cw / ch;
-                let cropW = (imgH * targetAspect) / zoom;
-                let cropH = imgH / zoom;
-                if (cropW > imgW) {
-                  cropW = imgW;
-                  cropH = imgW / targetAspect;
-                }
-                const maxPanX = Math.max(0, imgW - cropW);
-                const cropX = (panPercent / 100) * maxPanX;
-                const cropY = (imgH - cropH) / 2;
-
-                ctx.drawImage(slideImg, cropX, cropY, cropW, cropH, 30, 180, cw - 60, ch - 360);
-              } else {
-                const availW = cw - 60;
-                const availH = ch - 360;
-                const scale = Math.min(availW / slideImg.naturalWidth, availH / slideImg.naturalHeight);
-                const drawW = slideImg.naturalWidth * scale;
-                const drawH = slideImg.naturalHeight * scale;
-                const drawX = (cw - drawW) / 2;
-                const drawY = (ch - drawH) / 2;
-
-                ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                ctx.fillRect(drawX - 4, drawY - 4, drawW + 8, drawH + 8);
-                ctx.drawImage(slideImg, drawX, drawY, drawW, drawH);
-                ctx.strokeStyle = '#f59e0b';
-                ctx.lineWidth = 3;
-                ctx.strokeRect(drawX, drawY, drawW, drawH);
-              }
-            }
-          } catch (slideDrawErr) {
-            console.warn('Slide draw note:', slideDrawErr);
+          if (sc) {
+            ctx.drawImage(sc, 0, 0);
           }
-
-          // Top Header Banner
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.92)';
-          ctx.fillRect(0, 0, cw, 170);
-          ctx.fillStyle = '#f59e0b';
-          ctx.fillRect(0, 166, cw, 4);
-
-          // Top Role Badge
-          ctx.fillStyle = item.role === 'intro' ? '#a855f7' : '#10b981';
-          ctx.fillRect(30, 25, 170, 32);
-          ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 15px monospace';
-          ctx.fillText(item.role === 'intro' ? '⏮️ INTRO HOOK' : '⏭️ OUTRO SLIDE', 40, 46);
-
-          // Top Title Text
-          ctx.fillStyle = '#fef08a';
-          ctx.font = '900 26px sans-serif';
-          const title = (item.slide.title || 'SETTINGS SLIDE').toUpperCase();
-          ctx.fillText(title.length > 28 ? title.slice(0, 26) + '...' : title, 30, 105);
-
-          // Bottom Subtitle Banner
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
-          ctx.fillRect(0, ch - 140, cw, 140);
-          ctx.fillStyle = '#f59e0b';
-          ctx.fillRect(0, ch - 140, cw, 3);
-
-          ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 20px sans-serif';
-          ctx.textAlign = 'center';
-          const sub = item.slide.subtitle || 'Screenshot & save for your next match';
-          ctx.fillText(sub.length > 42 ? sub.slice(0, 40) + '...' : sub, cw / 2, ch - 65);
-          ctx.textAlign = 'left';
-
           elapsed += frameInterval / 1000;
-          if (exportProgressBar) {
-            exportProgressBar.style.width = `${Math.min(95, Math.round((elapsed / totalDuration) * 90) + 10)}%`;
+          if (f % 6 === 0) {
+            updateExportProgress(elapsed, `Stitching ${item.role === 'intro' ? 'Intro' : 'Outro'} #${item.roleIndex} picture slide`);
           }
-
           await new Promise(r => setTimeout(r, frameInterval));
         }
 
@@ -3293,14 +3365,15 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
 
         const stepTime = 1 / 30;
         let simTime = item.start;
-        const endTime = item.end;
+        const clipEnd = Math.min(item.end, (hiddenVideo.duration > 0 ? hiddenVideo.duration : item.end));
+        let frameCount = 0;
 
-        while (simTime < endTime && !ctrl.aborted) {
+        while (simTime < clipEnd && !hiddenVideo.ended && !ctrl.aborted) {
           if (!hiddenVideo.paused && !hiddenVideo.ended && hiddenVideo.currentTime > simTime) {
             simTime = hiddenVideo.currentTime;
           } else {
             simTime += stepTime;
-            hiddenVideo.currentTime = Math.min(endTime, simTime);
+            hiddenVideo.currentTime = Math.min(clipEnd, simTime);
           }
           const vw = hiddenVideo.videoWidth || 1920;
           const vh = hiddenVideo.videoHeight || 1080;
@@ -3337,8 +3410,9 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
           }
 
           elapsed += 1 / 30;
-          if (exportProgressBar) {
-            exportProgressBar.style.width = `${Math.min(95, Math.round((elapsed / totalDuration) * 90) + 10)}%`;
+          frameCount++;
+          if (frameCount % 6 === 0) {
+            updateExportProgress(elapsed, 'Stitching video clip segment in 9:16');
           }
 
           await new Promise(r => setTimeout(r, 1000 / 30));
@@ -3349,13 +3423,34 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
     }
 
     if (ctrl.aborted) {
-      recorder.stop();
+      if (recorder && recorder.state !== 'inactive') {
+        try { recorder.stop(); } catch(e){}
+      }
       if (audioCtx) { try { audioCtx.close(); } catch(e){} }
       return;
     }
 
-    recorder.stop();
-    await new Promise(r => { recorder.onstop = r; });
+    // Safely stop MediaRecorder with promise and safety timeout
+    if (recorder && recorder.state !== 'inactive') {
+      await new Promise(resolve => {
+        let done = false;
+        const finish = () => {
+          if (!done) {
+            done = true;
+            resolve();
+          }
+        };
+        recorder.onstop = finish;
+        try {
+          recorder.stop();
+        } catch (stopEx) {
+          console.warn('recorder.stop exception:', stopEx);
+          finish();
+        }
+        setTimeout(finish, 2000);
+      });
+    }
+
     if (audioCtx) {
       try { audioCtx.close(); } catch (e) {}
     }
@@ -3363,16 +3458,20 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
     const recordedMime = recorder.mimeType || mimeType || 'video/webm';
     const isMp4 = recordedMime.includes('mp4');
     const finalBlob = new Blob(recordedChunks, { type: recordedMime });
+    if (finalBlob.size === 0) {
+      throw new Error('Recorded video buffer is empty.');
+    }
+
     const blobUrl = URL.createObjectURL(finalBlob);
     const ext = isMp4 ? 'mp4' : 'webm';
-    const outName = videoFilename 
-      ? `short_9x16_${slides.length > 0 ? 'with_slides_' : ''}${videoFilename.replace(/\.[^/.]+$/, '')}.${ext}` 
-      : `tiktok_short_9x16.${ext}`;
+    const cleanName = (videoFilename || 'short_clip').replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const outName = `${cleanName}_9x16_${slides.length > 0 ? 'with_pictures_' : ''}${Math.round(totalDuration)}s.${ext}`;
 
     currentSequenceState.stitchedBlobUrl = blobUrl;
 
     if (downloadBtn) {
-      downloadBtn.classList.remove('opacity-75');
+      downloadBtn.dataset.stitching = 'false';
+      downloadBtn.classList.remove('opacity-80', 'opacity-75', 'cursor-wait');
       downloadBtn.href = blobUrl;
       downloadBtn.download = outName;
       downloadBtn.innerHTML = `<i data-lucide="download" class="w-4 h-4"></i><span>Download Full 9:16 Short (${Math.round(totalDuration)}s ${slides.length > 0 ? '+ Pictures' : ''})</span>`;
@@ -3389,7 +3488,7 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
     }
 
     if (renderedPlayer) {
-      const isPaused = renderedPlayer.paused;
+      const wasPlaying = !renderedPlayer.paused;
       renderedPlayer.src = blobUrl;
       renderedPlayer.style.position = 'relative';
       renderedPlayer.style.width = '100%';
@@ -3400,8 +3499,9 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
       renderedPlayer.style.maxHeight = '100%';
       renderedPlayer.style.objectFit = 'contain';
       renderedPlayer.ontimeupdate = null;
+      renderedPlayer.onended = null;
       renderedPlayer.currentTime = 0;
-      if (!isPaused) {
+      if (wasPlaying) {
         renderedPlayer.play().catch(() => {});
       }
     }
@@ -3409,15 +3509,23 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
     showToast(`✅ Full 9:16 vertical video ready to download! (${Math.round(finalBlob.size / 1024)} KB, ${Math.round(totalDuration)}s)`, 'success');
 
   } catch (exportErr) {
-    console.warn('Canvas export notice:', exportErr);
+    console.error('Canvas export error:', exportErr);
     if (audioCtx) { try { audioCtx.close(); } catch (e) {} }
-    if (exportStatus) exportStatus.classList.add('hidden');
+    if (exportProgressBar) exportProgressBar.style.width = '0%';
     if (downloadBtn) {
-      downloadBtn.classList.remove('opacity-75');
-      downloadBtn.href = videoUrl;
-      downloadBtn.download = videoFilename ? `short_${videoFilename}` : 'tiktok_short.mp4';
-      downloadBtn.innerHTML = `<i data-lucide="download" class="w-4 h-4"></i><span>Download Short Clip</span>`;
+      downloadBtn.dataset.stitching = 'false';
+      downloadBtn.classList.remove('opacity-80', 'opacity-75', 'cursor-wait');
+      if (videoUrl) {
+        downloadBtn.href = videoUrl;
+        downloadBtn.download = videoFilename ? `clip_${videoFilename}` : 'tiktok_clip.mp4';
+        downloadBtn.innerHTML = `<i data-lucide="download" class="w-4 h-4"></i><span>Download Clip (${Math.round(playlist.find(p=>p.type==='video')?.duration || 10)}s)</span>`;
+      }
       if (window.lucide) lucide.createIcons();
+    }
+    if (exportStatusText) {
+      exportStatusText.textContent = `Interactive sequence active. (Note: ${exportErr.message || 'preview mode'})`;
+      exportStatusText.classList.remove('text-emerald-400');
+      exportStatusText.classList.add('text-amber-400');
     }
   }
 }
