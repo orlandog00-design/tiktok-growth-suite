@@ -3032,10 +3032,11 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
   const downloadBtn = document.getElementById('download-clip-btn');
 
   const slides = playlist.filter(p => p.type === 'slide');
+  const totalDuration = playlist.reduce((acc, it) => acc + it.duration, 0);
 
   if (downloadBtn) {
     downloadBtn.classList.add('opacity-75');
-    downloadBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-brand-cyan"></i><span>Rendering 9:16 Short...</span>`;
+    downloadBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-brand-cyan"></i><span>Assembling Full 9:16 Video (${Math.round(totalDuration)}s)...</span>`;
     if (window.lucide) lucide.createIcons();
   }
 
@@ -3051,12 +3052,12 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
     if (exportStatus) exportStatus.classList.remove('hidden');
     if (exportStatusText) {
       exportStatusText.textContent = slides.length > 0
-        ? `Assembling 9:16 vertical video with ${slides.length} picture slide(s)...`
+        ? `Assembling full 9:16 vertical video (${Math.round(totalDuration)}s) with ${slides.length} picture slide(s)...`
         : `Rendering 9:16 vertical short with precision crop...`;
       exportStatusText.classList.remove('text-emerald-400');
       exportStatusText.classList.add('text-amber-400');
     }
-    if (exportProgressBar) exportProgressBar.style.width = '10%';
+    if (exportProgressBar) exportProgressBar.style.width = '5%';
 
     const cw = 720;
     const ch = 1280;
@@ -3076,17 +3077,21 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
     await new Promise((res) => {
       hiddenVideo.onloadedmetadata = () => res();
       hiddenVideo.onerror = () => res();
-      setTimeout(res, 2000);
+      setTimeout(res, 1500);
     });
 
     if (ctrl.aborted) return;
 
-    const stream = canvas.captureStream(30);
+    let stream = canvas.captureStream(30);
 
+    // Audio capture via Web Audio (safely wrapped)
     try {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (AudioCtx) {
         audioCtx = new AudioCtx();
+        if (audioCtx.state === 'suspended') {
+          await audioCtx.resume().catch(() => {});
+        }
         const source = audioCtx.createMediaElementSource(hiddenVideo);
         const dest = audioCtx.createMediaStreamDestination();
         source.connect(dest);
@@ -3099,32 +3104,68 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
       console.log('Audio routing note:', audioErr);
     }
 
-    let mimeType = 'video/webm';
-    if (typeof MediaRecorder !== 'undefined') {
-      if (MediaRecorder.isTypeSupported('video/mp4;codecs=avc1')) mimeType = 'video/mp4;codecs=avc1';
-      else if (MediaRecorder.isTypeSupported('video/mp4')) mimeType = 'video/mp4';
-      else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) mimeType = 'video/webm;codecs=vp9';
-      else if (MediaRecorder.isTypeSupported('video/webm')) mimeType = 'video/webm';
-    }
-
     const recordedChunks = [];
-    const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 4000000 });
-    recorder.ondataavailable = (e) => {
-      if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+    let recorder = null;
+    let mimeType = 'video/webm';
+
+    const getSupportedMimeType = () => {
+      const candidates = [
+        'video/webm;codecs=vp8,opus',
+        'video/webm;codecs=vp9,opus',
+        'video/webm',
+        'video/mp4'
+      ];
+      if (typeof MediaRecorder !== 'undefined') {
+        for (const c of candidates) {
+          if (MediaRecorder.isTypeSupported(c)) return c;
+        }
+      }
+      return '';
     };
 
-    recorder.start(100);
+    const chosenMime = getSupportedMimeType();
+    try {
+      if (chosenMime) {
+        recorder = new MediaRecorder(stream, { mimeType: chosenMime, videoBitsPerSecond: 4000000 });
+        mimeType = chosenMime;
+      } else {
+        recorder = new MediaRecorder(stream);
+      }
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+      };
+      recorder.start(100);
+    } catch (recErr1) {
+      console.warn('Initial MediaRecorder start note, attempting fallback stream without audio track:', recErr1);
+      stream = canvas.captureStream(30);
+      try {
+        recorder = new MediaRecorder(stream);
+        mimeType = recorder.mimeType || 'video/webm';
+        recorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+        };
+        recorder.start(100);
+      } catch (recErr2) {
+        console.error('Fatal MediaRecorder error:', recErr2);
+        throw recErr2;
+      }
+    }
 
-    const totalDuration = playlist.reduce((acc, it) => acc + it.duration, 0);
     let elapsed = 0;
 
     const slideImages = {};
     for (const item of playlist) {
       if (item.type === 'slide' && item.slide?.imageUrl && !slideImages[item.slide.imageUrl]) {
         const img = new Image();
-        img.crossOrigin = 'anonymous';
+        if (typeof item.slide.imageUrl === 'string' && item.slide.imageUrl.startsWith('http')) {
+          img.crossOrigin = 'anonymous';
+        }
         img.src = item.slide.imageUrl;
-        await new Promise(r => { img.onload = r; img.onerror = r; setTimeout(r, 1500); });
+        await new Promise(r => {
+          img.onload = () => r();
+          img.onerror = () => r();
+          setTimeout(r, 1000);
+        });
         slideImages[item.slide.imageUrl] = img;
       }
     }
@@ -3150,47 +3191,51 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
           ctx.fillStyle = '#090d16';
           ctx.fillRect(0, 0, cw, ch);
 
-          if (slideImg && slideImg.complete && slideImg.naturalWidth > 0) {
-            ctx.save();
-            ctx.filter = 'blur(20px) brightness(0.6)';
-            ctx.drawImage(slideImg, -50, -50, cw + 100, ch + 100);
-            ctx.restore();
+          try {
+            if (slideImg && slideImg.complete && slideImg.naturalWidth > 0) {
+              ctx.save();
+              ctx.filter = 'blur(20px) brightness(0.6)';
+              ctx.drawImage(slideImg, -50, -50, cw + 100, ch + 100);
+              ctx.restore();
 
-            const fitMode = item.slide.fitMode || 'fit';
-            if (fitMode === 'fill') {
-              const panPercent = typeof item.slide.panX === 'number' ? item.slide.panX : 0;
-              const zoom = item.slide.zoom || 1.0;
-              const imgW = slideImg.naturalWidth;
-              const imgH = slideImg.naturalHeight;
-              
-              const targetAspect = cw / ch;
-              let cropW = (imgH * targetAspect) / zoom;
-              let cropH = imgH / zoom;
-              if (cropW > imgW) {
-                cropW = imgW;
-                cropH = imgW / targetAspect;
+              const fitMode = item.slide.fitMode || 'fit';
+              if (fitMode === 'fill') {
+                const panPercent = typeof item.slide.panX === 'number' ? item.slide.panX : 0;
+                const zoom = item.slide.zoom || 1.0;
+                const imgW = slideImg.naturalWidth;
+                const imgH = slideImg.naturalHeight;
+                
+                const targetAspect = cw / ch;
+                let cropW = (imgH * targetAspect) / zoom;
+                let cropH = imgH / zoom;
+                if (cropW > imgW) {
+                  cropW = imgW;
+                  cropH = imgW / targetAspect;
+                }
+                const maxPanX = Math.max(0, imgW - cropW);
+                const cropX = (panPercent / 100) * maxPanX;
+                const cropY = (imgH - cropH) / 2;
+
+                ctx.drawImage(slideImg, cropX, cropY, cropW, cropH, 30, 180, cw - 60, ch - 360);
+              } else {
+                const availW = cw - 60;
+                const availH = ch - 360;
+                const scale = Math.min(availW / slideImg.naturalWidth, availH / slideImg.naturalHeight);
+                const drawW = slideImg.naturalWidth * scale;
+                const drawH = slideImg.naturalHeight * scale;
+                const drawX = (cw - drawW) / 2;
+                const drawY = (ch - drawH) / 2;
+
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.fillRect(drawX - 4, drawY - 4, drawW + 8, drawH + 8);
+                ctx.drawImage(slideImg, drawX, drawY, drawW, drawH);
+                ctx.strokeStyle = '#f59e0b';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(drawX, drawY, drawW, drawH);
               }
-              const maxPanX = Math.max(0, imgW - cropW);
-              const cropX = (panPercent / 100) * maxPanX;
-              const cropY = (imgH - cropH) / 2;
-
-              ctx.drawImage(slideImg, cropX, cropY, cropW, cropH, 30, 180, cw - 60, ch - 360);
-            } else {
-              const availW = cw - 60;
-              const availH = ch - 360;
-              const scale = Math.min(availW / slideImg.naturalWidth, availH / slideImg.naturalHeight);
-              const drawW = slideImg.naturalWidth * scale;
-              const drawH = slideImg.naturalHeight * scale;
-              const drawX = (cw - drawW) / 2;
-              const drawY = (ch - drawH) / 2;
-
-              ctx.fillStyle = 'rgba(0,0,0,0.5)';
-              ctx.fillRect(drawX - 4, drawY - 4, drawW + 8, drawH + 8);
-              ctx.drawImage(slideImg, drawX, drawY, drawW, drawH);
-              ctx.strokeStyle = '#f59e0b';
-              ctx.lineWidth = 3;
-              ctx.strokeRect(drawX, drawY, drawW, drawH);
             }
+          } catch (slideDrawErr) {
+            console.warn('Slide draw note:', slideDrawErr);
           }
 
           // Top Header Banner
@@ -3260,31 +3305,35 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
           const vw = hiddenVideo.videoWidth || 1920;
           const vh = hiddenVideo.videoHeight || 1080;
 
-          if (layoutMode === 'blur_pad') {
-            ctx.save();
-            ctx.filter = 'blur(20px) brightness(0.6)';
-            ctx.drawImage(hiddenVideo, -50, -50, cw + 100, ch + 100);
-            ctx.restore();
+          try {
+            if (layoutMode === 'blur_pad') {
+              ctx.save();
+              ctx.filter = 'blur(20px) brightness(0.6)';
+              ctx.drawImage(hiddenVideo, -50, -50, cw + 100, ch + 100);
+              ctx.restore();
 
-            const scale = cw / vw;
-            const drawH = vh * scale;
-            const drawY = (ch - drawH) / 2;
-            ctx.drawImage(hiddenVideo, 0, drawY, cw, drawH);
-          } else {
-            const cropL = Math.max(0, Math.min(90, manualCrop?.cropLeft || 0));
-            const cropR = Math.max(0, Math.min(90, manualCrop?.cropRight || 0));
-            const cropT = Math.max(0, Math.min(90, manualCrop?.cropTop || 0));
-            const cropB = Math.max(0, Math.min(90, manualCrop?.cropBottom || 0));
+              const scale = cw / vw;
+              const drawH = vh * scale;
+              const drawY = (ch - drawH) / 2;
+              ctx.drawImage(hiddenVideo, 0, drawY, cw, drawH);
+            } else {
+              const cropL = Math.max(0, Math.min(90, manualCrop?.cropLeft || 0));
+              const cropR = Math.max(0, Math.min(90, manualCrop?.cropRight || 0));
+              const cropT = Math.max(0, Math.min(90, manualCrop?.cropTop || 0));
+              const cropB = Math.max(0, Math.min(90, manualCrop?.cropBottom || 0));
 
-            const keepWPercent = Math.max(5, 100 - cropL - cropR);
-            const keepHPercent = Math.max(5, 100 - cropT - cropB);
+              const keepWPercent = Math.max(5, 100 - cropL - cropR);
+              const keepHPercent = Math.max(5, 100 - cropT - cropB);
 
-            const sx = (cropL / 100) * vw;
-            const sy = (cropT / 100) * vh;
-            const sw = (keepWPercent / 100) * vw;
-            const sh = (keepHPercent / 100) * vh;
+              const sx = (cropL / 100) * vw;
+              const sy = (cropT / 100) * vh;
+              const sw = (keepWPercent / 100) * vw;
+              const sh = (keepHPercent / 100) * vh;
 
-            ctx.drawImage(hiddenVideo, sx, sy, sw, sh, 0, 0, cw, ch);
+              ctx.drawImage(hiddenVideo, sx, sy, sw, sh, 0, 0, cw, ch);
+            }
+          } catch (drawVidErr) {
+            console.warn('Video draw frame note:', drawVidErr);
           }
 
           elapsed += 1 / 30;
@@ -3311,11 +3360,14 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
       try { audioCtx.close(); } catch (e) {}
     }
 
-    const isMp4 = mimeType.includes('mp4');
-    const finalBlob = new Blob(recordedChunks, { type: mimeType });
+    const recordedMime = recorder.mimeType || mimeType || 'video/webm';
+    const isMp4 = recordedMime.includes('mp4');
+    const finalBlob = new Blob(recordedChunks, { type: recordedMime });
     const blobUrl = URL.createObjectURL(finalBlob);
     const ext = isMp4 ? 'mp4' : 'webm';
-    const outName = videoFilename ? `short_9x16_${videoFilename.replace(/\.[^/.]+$/, '')}.${ext}` : `tiktok_short_9x16.${ext}`;
+    const outName = videoFilename 
+      ? `short_9x16_${slides.length > 0 ? 'with_slides_' : ''}${videoFilename.replace(/\.[^/.]+$/, '')}.${ext}` 
+      : `tiktok_short_9x16.${ext}`;
 
     currentSequenceState.stitchedBlobUrl = blobUrl;
 
@@ -3323,22 +3375,21 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
       downloadBtn.classList.remove('opacity-75');
       downloadBtn.href = blobUrl;
       downloadBtn.download = outName;
-      downloadBtn.innerHTML = `<i data-lucide="download" class="w-4 h-4"></i><span>Download 9:16 Short</span>`;
+      downloadBtn.innerHTML = `<i data-lucide="download" class="w-4 h-4"></i><span>Download Full 9:16 Short (${Math.round(totalDuration)}s ${slides.length > 0 ? '+ Pictures' : ''})</span>`;
       if (window.lucide) lucide.createIcons();
     }
 
     if (exportProgressBar) exportProgressBar.style.width = '100%';
     if (exportStatusText) {
       exportStatusText.textContent = slides.length > 0
-        ? `✅ Ready! Video + ${slides.length} picture slide(s) stitched into vertical short.`
+        ? `✅ Ready! Full ${Math.round(totalDuration)}s video + ${slides.length} picture slide(s) stitched into vertical short.`
         : `✅ Ready! 9:16 vertical short rendered with custom crop.`;
       exportStatusText.classList.remove('text-amber-400');
       exportStatusText.classList.add('text-emerald-400');
     }
 
     if (renderedPlayer) {
-      const prevTime = renderedPlayer.currentTime;
-      const wasPlaying = !renderedPlayer.paused;
+      const isPaused = renderedPlayer.paused;
       renderedPlayer.src = blobUrl;
       renderedPlayer.style.position = 'relative';
       renderedPlayer.style.width = '100%';
@@ -3348,13 +3399,14 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
       renderedPlayer.style.maxWidth = '100%';
       renderedPlayer.style.maxHeight = '100%';
       renderedPlayer.style.objectFit = 'contain';
-      renderedPlayer.currentTime = prevTime || 0;
-      if (wasPlaying) {
+      renderedPlayer.ontimeupdate = null;
+      renderedPlayer.currentTime = 0;
+      if (!isPaused) {
         renderedPlayer.play().catch(() => {});
       }
     }
 
-    showToast(`✅ 9:16 vertical video ready to download! (${Math.round(finalBlob.size / 1024)} KB)`, 'success');
+    showToast(`✅ Full 9:16 vertical video ready to download! (${Math.round(finalBlob.size / 1024)} KB, ${Math.round(totalDuration)}s)`, 'success');
 
   } catch (exportErr) {
     console.warn('Canvas export notice:', exportErr);
