@@ -2364,7 +2364,7 @@ function buildVideoFilter({
   return filterSections.join(';');
 }
 
-// Helper to extract active end-card slides (supports multiple slides!)
+// Helper to extract active end-card slides (supports multiple slides and Intro/Outro positioning)
 function extractActiveEndCards(endCards, endCard, imageOverlays) {
   let list = [];
   if (Array.isArray(endCards) && endCards.length > 0) {
@@ -2372,30 +2372,33 @@ function extractActiveEndCards(endCards, endCard, imageOverlays) {
   } else if (endCard && endCard.imagePath) {
     list = [endCard];
   } else if (Array.isArray(imageOverlays)) {
-    list = imageOverlays.filter(ov => ov && (ov.isEndCard || ov.position === 'endcard'));
+    list = imageOverlays.filter(ov => ov && (ov.isEndCard || ov.position === 'endcard' || ov.position === 'intro' || ov.position === 'outro'));
   }
 
   const active = [];
   list.forEach((item, idx) => {
     if (item && item.imagePath && fs.existsSync(item.imagePath) && item.enabled !== false) {
+      const isIntro = item.position === 'intro';
       active.push({
         id: item.id || `slide_${idx + 1}`,
         imagePath: item.imagePath,
+        position: isIntro ? 'intro' : 'outro',
         duration: Math.max(1, Math.min(10, parseFloat(item.duration) || 3)),
         zoom: Math.max(1.0, Math.min(2.5, parseFloat(item.zoom) || 1.45)),
         focus: item.focus || 'left',
-        title: item.title || (item.filename ? item.filename.replace(/\.[^/.]+$/, '').toUpperCase() : (list.length > 1 ? `SLIDE [${idx + 1}/${list.length}]` : 'OUTRO SLIDE')),
-        subtitle: item.subtitle || 'Screenshot & save for your next match'
+        title: item.title || (item.filename ? item.filename.replace(/\.[^/.]+$/, '').toUpperCase() : (isIntro ? 'INTRO HOOK' : (list.length > 1 ? `SLIDE [${idx + 1}/${list.length}]` : 'OUTRO SLIDE'))),
+        subtitle: item.subtitle || (isIntro ? 'Watch until the end!' : 'Screenshot & save for your next match')
       });
     }
   });
   return active;
 }
 
-// Clean, consistent, zoomed end-card outro builder with zero clashing red lines
+// Clean, consistent, zoomed slide builder supporting Intro (Before Video) & Outro (After Video)
 function buildEndCardFilters(activeEndCards) {
   let endSlidesFilters = '';
-  let concatLabels = '[v0]';
+  let introLabels = '';
+  let outroLabels = '';
 
   activeEndCards.forEach((ec, i) => {
     const inIdx = ec.inputIndex;
@@ -2419,10 +2422,16 @@ function buildEndCardFilters(activeEndCards) {
       `drawbox=x=0:y=226:w=1080:h=4:c=0xF59E0B:t=fill,` +
       `drawbox=x=0:y=1680:w=1080:h=150:c=black@0.88:t=fill,` +
       `drawbox=x=0:y=1680:w=1080:h=3:c=0xF59E0B:t=fill,` +
-      `fps=30,setsar=1[v_end_${i}];`;
-    concatLabels += `[v_end_${i}]`;
+      `fps=30,setsar=1[v_slide_${i}];`;
+
+    if (ec.position === 'intro') {
+      introLabels += `[v_slide_${i}]`;
+    } else {
+      outroLabels += `[v_slide_${i}]`;
+    }
   });
 
+  const concatLabels = `${introLabels}[v0]${outroLabels}`;
   return { endSlidesFilters, concatLabels };
 }
 
@@ -2780,10 +2789,9 @@ app.post('/api/render-short', (req, res) => {
     if (hasEndCard) {
       const { endSlidesFilters, concatLabels } = buildEndCardFilters(activeEndCards);
 
-      videoFilterComplex = `${vFilterRaw};[v0_raw]fps=30,setsar=1[v0];` +
+      videoFilterComplex = `${vFilterRaw};[v0_raw]fps=30,setsar=1,subtitles=${relativeAssPath}[v0];` +
         endSlidesFilters +
-        `${concatLabels}concat=n=${1 + activeEndCards.length}:v=1:a=0[vcat];` +
-        `[vcat]subtitles=${relativeAssPath}[vout]`;
+        `${concatLabels}concat=n=${1 + activeEndCards.length}:v=1:a=0[vout]`;
     } else {
       videoFilterComplex = `${vFilterRaw};[v0_raw]subtitles=${relativeAssPath}[vout]`;
     }

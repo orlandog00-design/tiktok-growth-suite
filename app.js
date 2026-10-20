@@ -1783,6 +1783,13 @@ function setSlideDuration(idx, dur) {
   }
 }
 
+function setSlidePosition(idx, pos) {
+  if (endCardSlides[idx]) {
+    endCardSlides[idx].position = pos;
+    renderEndCardState();
+  }
+}
+
 function setSlideZoom(idx, zoomVal) {
   if (endCardSlides[idx]) {
     endCardSlides[idx].zoom = parseFloat(zoomVal);
@@ -1842,7 +1849,9 @@ function renderEndCardState() {
   addMoreEl?.classList.remove('hidden');
 
   listEl.innerHTML = endCardSlides.map((slide, idx) => {
-    const roleLabel = `Slide #${idx + 1}`;
+    const isIntro = slide.position === 'intro';
+    const roleLabel = isIntro ? `Intro #${idx + 1}` : `Outro #${idx + 1}`;
+    const badgeColor = isIntro ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
     const currentZoom = slide.zoom || 1.45;
     const currentFocus = slide.focus || 'left';
 
@@ -1851,16 +1860,16 @@ function renderEndCardState() {
         <!-- HEADER ROW -->
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2.5 overflow-hidden">
-            <img src="${slide.imageUrl}" alt="Loadout" class="w-14 h-10 object-cover rounded-lg border border-brand-border shrink-0 bg-black">
+            <img src="${slide.imageUrl}" alt="Slide" class="w-14 h-10 object-cover rounded-lg border border-brand-border shrink-0 bg-black">
             <div class="overflow-hidden">
               <div class="flex items-center gap-1.5">
-                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono">
+                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded font-mono ${badgeColor}">
                   ${roleLabel}
                 </span>
                 <span class="text-xs font-bold text-white truncate max-w-[150px]">${slide.filename}</span>
               </div>
               <div class="text-[10px] text-slate-400 font-mono mt-0.5">
-                Full-Screen • ${slide.duration}s • Zoom: <span class="text-amber-400 font-bold">${Math.round(currentZoom * 100)}%</span>
+                ${isIntro ? 'Before Video' : 'After Video'} • ${slide.duration}s • Zoom: <span class="text-amber-400 font-bold">${Math.round(currentZoom * 100)}%</span>
               </div>
             </div>
           </div>
@@ -1869,6 +1878,22 @@ function renderEndCardState() {
             ${idx < endCardSlides.length - 1 ? `<button type="button" onclick="moveEndCardSlide(${idx}, 1)" class="text-slate-400 hover:text-white px-2 py-1 rounded bg-black/40 hover:bg-white/10 text-xs font-bold" title="Move Slide Down">▼</button>` : ''}
             <button type="button" onclick="removeEndCardSlide(${idx})" class="text-slate-400 hover:text-red-400 p-1.5 rounded hover:bg-red-500/10 transition ml-1" title="Delete this slide">
               <i data-lucide="trash-2" class="w-4 h-4 text-red-400"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- POSITION SELECTOR: BEFORE OR AFTER VIDEO -->
+        <div class="flex items-center justify-between p-2 rounded-lg bg-black/50 border border-brand-border/60 text-xs">
+          <span class="text-[10px] text-slate-300 font-bold uppercase tracking-wider flex items-center gap-1">
+            <i data-lucide="clock" class="w-3.5 h-3.5 text-emerald-400"></i>
+            Slide Timing:
+          </span>
+          <div class="flex items-center gap-1">
+            <button type="button" onclick="setSlidePosition(${idx}, 'intro')" class="px-2 py-1 rounded-md text-[10px] font-bold transition ${isIntro ? 'bg-purple-500/25 border border-purple-400 text-purple-200 shadow-sm' : 'bg-brand-dark border border-brand-border text-slate-400 hover:text-white'}">
+              ⏮️ Before Video (Intro)
+            </button>
+            <button type="button" onclick="setSlidePosition(${idx}, 'outro')" class="px-2 py-1 rounded-md text-[10px] font-bold transition ${!isIntro ? 'bg-emerald-500/25 border border-emerald-400 text-emerald-200 shadow-sm' : 'bg-brand-dark border border-brand-border text-slate-400 hover:text-white'}">
+              ⏭️ After Video (Outro)
             </button>
           </div>
         </div>
@@ -1971,6 +1996,7 @@ async function handleOverlayImageUpload(event) {
         imagePath: data.imagePath,
         imageUrl: data.imageUrl,
         duration: 3.0,
+        position: 'outro',
         title: defaultTitle,
         subtitle: 'Follow for more!'
       });
