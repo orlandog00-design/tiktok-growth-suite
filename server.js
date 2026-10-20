@@ -2379,12 +2379,16 @@ function extractActiveEndCards(endCards, endCard, imageOverlays) {
   list.forEach((item, idx) => {
     if (item && item.imagePath && fs.existsSync(item.imagePath) && item.enabled !== false) {
       const isIntro = item.position === 'intro';
+      const fitMode = item.fitMode || (item.zoom && parseFloat(item.zoom) > 1.1 ? 'fill' : 'fit');
+      const panX = typeof item.panX === 'number' ? item.panX : (item.focus === 'right' ? 100 : (item.focus === 'center' ? 50 : 0));
       active.push({
         id: item.id || `slide_${idx + 1}`,
         imagePath: item.imagePath,
         position: isIntro ? 'intro' : 'outro',
         duration: Math.max(1, Math.min(10, parseFloat(item.duration) || 3)),
-        zoom: Math.max(1.0, Math.min(2.5, parseFloat(item.zoom) || 1.45)),
+        zoom: Math.max(1.0, Math.min(2.5, parseFloat(item.zoom) || 1.0)),
+        fitMode,
+        panX,
         focus: item.focus || 'left',
         title: item.title || (item.filename ? item.filename.replace(/\.[^/.]+$/, '').toUpperCase() : (isIntro ? 'INTRO HOOK' : (list.length > 1 ? `SLIDE [${idx + 1}/${list.length}]` : 'OUTRO SLIDE'))),
         subtitle: item.subtitle || (isIntro ? 'Watch until the end!' : 'Screenshot & save for your next match')
@@ -2402,27 +2406,39 @@ function buildEndCardFilters(activeEndCards) {
 
   activeEndCards.forEach((ec, i) => {
     const inIdx = ec.inputIndex;
-    const zoom = Math.max(1.0, Math.min(2.5, parseFloat(ec.zoom) || 1.45));
-    const focus = ec.focus || 'left';
-    const targetW = Math.round(1080 * zoom);
+    const zoom = Math.max(1.0, Math.min(2.5, parseFloat(ec.zoom) || 1.0));
+    const fitMode = ec.fitMode || 'fit';
+    const panX = typeof ec.panX === 'number' ? ec.panX : (ec.focus === 'right' ? 100 : (ec.focus === 'center' ? 50 : 0));
 
-    // Focus crop horizontally on attachments so text is large and razor-sharp
-    let cropX = `(iw-1080)/2`;
-    if (focus === 'left') {
-      cropX = `min(50\\, max(0\\, (iw-1080)/2))`;
-    } else if (focus === 'right') {
-      cropX = `max(0\\, iw-1080-40)`;
+    if (fitMode === 'fit') {
+      // 100% Full Fit: displays entire 16:9 screenshot inside 9:16 frame with ambient blur so no text is cut off!
+      endSlidesFilters += 
+        `[${inIdx}:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=25:6,drawbox=x=0:y=0:w=1080:h=1920:c=black@0.55:t=fill[end_bg_${i}];` +
+        `[${inIdx}:v]scale=1080:1920:force_original_aspect_ratio=decrease,drawbox=x=0:y=0:w=iw:h=ih:c=0xF59E0B@0.85:t=4[end_fg_${i}];` +
+        `[end_bg_${i}][end_fg_${i}]overlay=(W-w)/2:(H-h)/2,` +
+        `drawbox=x=0:y=0:w=1080:h=230:c=black@0.92:t=fill,` +
+        `drawbox=x=0:y=226:w=1080:h=4:c=0xF59E0B:t=fill,` +
+        `drawbox=x=0:y=1680:w=1080:h=150:c=black@0.88:t=fill,` +
+        `drawbox=x=0:y=1680:w=1080:h=3:c=0xF59E0B:t=fill,` +
+        `fps=30,setsar=1[v_slide_${i}];`;
+    } else {
+      // Zoomed Fill with Horizontal Pan
+      const targetW = Math.round(1080 * zoom);
+      let cropX = `(iw-1080)*${panX / 100}`;
+      if (panX === 0) cropX = `0`;
+      else if (panX === 100) cropX = `iw-1080`;
+      else if (panX === 50) cropX = `(iw-1080)/2`;
+
+      endSlidesFilters += 
+        `[${inIdx}:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=25:6,drawbox=x=0:y=0:w=1080:h=1920:c=black@0.55:t=fill[end_bg_${i}];` +
+        `[${inIdx}:v]scale=${targetW}:-1,crop=min(iw\\,1080):ih:${cropX}:0,drawbox=x=0:y=0:w=iw:h=ih:c=0xF59E0B@0.85:t=4[end_fg_${i}];` +
+        `[end_bg_${i}][end_fg_${i}]overlay=(W-w)/2:(H-h)/2,` +
+        `drawbox=x=0:y=0:w=1080:h=230:c=black@0.92:t=fill,` +
+        `drawbox=x=0:y=226:w=1080:h=4:c=0xF59E0B:t=fill,` +
+        `drawbox=x=0:y=1680:w=1080:h=150:c=black@0.88:t=fill,` +
+        `drawbox=x=0:y=1680:w=1080:h=3:c=0xF59E0B:t=fill,` +
+        `fps=30,setsar=1[v_slide_${i}];`;
     }
-
-    endSlidesFilters += 
-      `[${inIdx}:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=25:6,drawbox=x=0:y=0:w=1080:h=1920:c=black@0.55:t=fill[end_bg_${i}];` +
-      `[${inIdx}:v]scale=${targetW}:-1,crop=min(iw\\,1080):ih:${cropX}:0,drawbox=x=0:y=0:w=iw:h=ih:c=0xF59E0B@0.85:t=4[end_fg_${i}];` +
-      `[end_bg_${i}][end_fg_${i}]overlay=(W-w)/2:(H-h)/2,` +
-      `drawbox=x=0:y=0:w=1080:h=230:c=black@0.92:t=fill,` +
-      `drawbox=x=0:y=226:w=1080:h=4:c=0xF59E0B:t=fill,` +
-      `drawbox=x=0:y=1680:w=1080:h=150:c=black@0.88:t=fill,` +
-      `drawbox=x=0:y=1680:w=1080:h=3:c=0xF59E0B:t=fill,` +
-      `fps=30,setsar=1[v_slide_${i}];`;
 
     if (ec.position === 'intro') {
       introLabels += `[v_slide_${i}]`;

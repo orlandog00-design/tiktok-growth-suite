@@ -369,31 +369,67 @@
             <div id="inspector-panel-canvas" class="space-y-4">
               <!-- 9:16 LAYOUT SELECTION -->
               <div class="space-y-2">
-                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Vertical 9:16 Reframe Mode</label>
-                <div class="grid grid-cols-3 gap-2">
-                  <button type="button" onclick="selectLayout('blur_pad')" id="layout-blur_pad" class="layout-btn active p-2.5 rounded-xl border border-brand-cyan bg-brand-cyan/10 text-left transition">
-                    <div class="text-xs font-bold text-white flex items-center gap-1.5 mb-0.5">
-                      <i data-lucide="layers" class="w-3.5 h-3.5 text-brand-cyan"></i>
-                      <span>Blurred</span>
+                <div class="flex items-center justify-between">
+                  <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Vertical 9:16 Reframe Mode</label>
+                  <span class="text-[10px] text-amber-400 font-bold">👈 Settings Menus Ready</span>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                  <button type="button" onclick="selectLayout('left_focus')" id="layout-left_focus" class="layout-btn p-2 rounded-xl border border-amber-500/50 bg-amber-500/10 text-left hover:border-amber-400 transition group">
+                    <div class="text-xs font-bold text-white flex items-center gap-1 mb-0.5">
+                      <i data-lucide="arrow-left-to-line" class="w-3.5 h-3.5 text-amber-400"></i>
+                      <span>Left Focus</span>
                     </div>
-                    <p class="text-[9px] text-slate-400">Preserves full 16:9.</p>
+                    <p class="text-[9px] text-amber-300 font-semibold leading-tight">Settings Menus</p>
                   </button>
 
-                  <button type="button" onclick="selectLayout('center_crop')" id="layout-center_crop" class="layout-btn p-2.5 rounded-xl border border-brand-border bg-brand-dark text-left hover:border-slate-600 transition">
-                    <div class="text-xs font-bold text-white flex items-center gap-1.5 mb-0.5">
+                  <button type="button" onclick="selectLayout('center_crop')" id="layout-center_crop" class="layout-btn p-2 rounded-xl border border-brand-border bg-brand-dark text-left hover:border-slate-600 transition">
+                    <div class="text-xs font-bold text-white flex items-center gap-1 mb-0.5">
                       <i data-lucide="crop" class="w-3.5 h-3.5 text-brand-red"></i>
                       <span>Center</span>
                     </div>
-                    <p class="text-[9px] text-slate-400">Auto zooms 9:16.</p>
+                    <p class="text-[9px] text-slate-400 leading-tight">Gameplay / Kills</p>
                   </button>
 
-                  <button type="button" onclick="selectLayout('manual_crop')" id="layout-manual_crop" class="layout-btn p-2.5 rounded-xl border border-brand-border bg-brand-dark text-left hover:border-slate-600 transition">
-                    <div class="text-xs font-bold text-white flex items-center gap-1.5 mb-0.5">
-                      <i data-lucide="sliders" class="w-3.5 h-3.5 text-amber-400"></i>
-                      <span>Manual</span>
+                  <button type="button" onclick="selectLayout('blur_pad')" id="layout-blur_pad" class="layout-btn active p-2 rounded-xl border border-brand-cyan bg-brand-cyan/10 text-left transition">
+                    <div class="text-xs font-bold text-white flex items-center gap-1 mb-0.5">
+                      <i data-lucide="layers" class="w-3.5 h-3.5 text-brand-cyan"></i>
+                      <span>Blurred Fit</span>
                     </div>
-                    <p class="text-[9px] text-slate-400">Custom top/side cuts.</p>
+                    <p class="text-[9px] text-slate-400 leading-tight">100% No Cutoff</p>
                   </button>
+
+                  <button type="button" onclick="selectLayout('manual_crop')" id="layout-manual_crop" class="layout-btn p-2 rounded-xl border border-brand-border bg-brand-dark text-left hover:border-slate-600 transition">
+                    <div class="text-xs font-bold text-white flex items-center gap-1 mb-0.5">
+                      <i data-lucide="sliders" class="w-3.5 h-3.5 text-amber-400"></i>
+                      <span>Slide & Crop</span>
+                    </div>
+                    <p class="text-[9px] text-slate-400 leading-tight">Custom Pan</p>
+                  </button>
+                </div>
+
+                <!-- DEDICATED HORIZONTAL SCREEN SLIDER -->
+                <div id="horizontal-pan-container" class="space-y-2 bg-brand-dark/80 p-3 rounded-xl border border-amber-500/40 shadow-inner">
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="font-bold text-amber-400 flex items-center gap-1.5">
+                      <i data-lucide="move-horizontal" class="w-4 h-4"></i>
+                      <span>↔️ Slide Screen Position (Pan Left/Right)</span>
+                    </span>
+                    <span id="pan-percent-val" class="font-mono text-amber-300 font-bold bg-black/60 px-2 py-0.5 rounded border border-amber-500/30 text-[11px]">0% (👈 Left / Settings)</span>
+                  </div>
+                  <p class="text-[10px] text-slate-400">Drag to slide the vertical 9:16 window across the screen to reveal controller settings on the left or gameplay on the right.</p>
+                  <input type="range" id="pan-slider" min="0" max="100" value="0" step="1" oninput="handlePanSliderInput(this.value)" class="w-full accent-amber-400 cursor-pointer h-2 bg-black/70 rounded-lg">
+                  <div class="grid grid-cols-3 gap-1.5 pt-0.5">
+                    <button type="button" onclick="setPanPreset(0)" class="py-1 px-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-bold text-[10px] flex items-center justify-center gap-1 transition">
+                      👈 Left (Settings)
+                    </button>
+                    <button type="button" onclick="setPanPreset(50)" class="py-1 px-1.5 rounded-lg bg-brand-card hover:bg-slate-700 border border-brand-border text-slate-300 font-bold text-[10px] flex items-center justify-center gap-1 transition">
+                      🎯 Center
+                    </button>
+                    <button type="button" onclick="setPanPreset(100)" class="py-1 px-1.5 rounded-lg bg-brand-card hover:bg-slate-700 border border-brand-border text-slate-300 font-bold text-[10px] flex items-center justify-center gap-1 transition">
+                      👉 Right (Cam)
+                    </button>
+                  </div>
                 </div>
 
                 <!-- MANUAL CROP SLIDERS PANEL -->
@@ -401,7 +437,7 @@
                   <div class="flex items-center justify-between text-xs">
                     <span class="font-bold text-amber-400 flex items-center gap-1">
                       <i data-lucide="crop" class="w-3.5 h-3.5"></i>
-                      Manual Crop Boundaries
+                      Advanced Boundary Sliders
                     </span>
                     <button type="button" onclick="openFullscreenCropper()" class="text-[10px] text-amber-300 underline font-bold">Open Fullscreen ↗</button>
                   </div>
@@ -426,14 +462,14 @@
                         <span>Cut Left:</span>
                         <span id="crop-left-val" class="font-mono text-amber-400 font-bold">0%</span>
                       </div>
-                      <input type="range" id="crop-left-slider" min="0" max="45" value="0" step="1" oninput="updateManualCrop('cropLeft', this.value)" class="w-full accent-amber-400 cursor-pointer">
+                      <input type="range" id="crop-left-slider" min="0" max="68" value="0" step="1" oninput="updateManualCrop('cropLeft', this.value)" class="w-full accent-amber-400 cursor-pointer">
                     </div>
                     <div>
                       <div class="flex justify-between text-slate-400 mb-0.5">
                         <span>Cut Right:</span>
-                        <span id="crop-right-val" class="font-mono text-amber-400 font-bold">0%</span>
+                        <span id="crop-right-val" class="font-mono text-amber-400 font-bold">68%</span>
                       </div>
-                      <input type="range" id="crop-right-slider" min="0" max="45" value="0" step="1" oninput="updateManualCrop('cropRight', this.value)" class="w-full accent-amber-400 cursor-pointer">
+                      <input type="range" id="crop-right-slider" min="0" max="68" value="68" step="1" oninput="updateManualCrop('cropRight', this.value)" class="w-full accent-amber-400 cursor-pointer">
                     </div>
                   </div>
 
@@ -667,6 +703,14 @@
 
                 <!-- END-CARD VIEW (SUPPORTS MULTIPLE SLIDES) -->
                 <div id="endcard-panel" class="space-y-3">
+                  <!-- SETTINGS / SLIDES HELPFUL TIP -->
+                  <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-2.5 text-xs text-amber-200 flex items-start gap-2 shadow-inner">
+                    <i data-lucide="info" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i>
+                    <div class="text-[11px] leading-relaxed">
+                      <strong class="text-amber-300">Settings Videos & Attachments:</strong> Picture slides are automatically included in your final video! By default, slides use <strong class="text-white">Full Fit (Ambient Blur)</strong> so 100% of your settings text is visible without cutoffs. You can also zoom and use the <strong class="text-white">Slide Screen Left</strong> slider to frame the left settings column!
+                    </div>
+                  </div>
+
                   <div id="endcard-empty" class="hidden p-3.5 rounded-xl border border-dashed border-slate-700 bg-brand-dark/50 text-center">
                     <p class="text-xs text-slate-400">No picture slides loaded yet.</p>
                     <p class="text-[10px] text-slate-500 mt-0.5">Click <strong class="text-emerald-400">+ Add Picture / Slide</strong> above to attach any screenshot, meme, logo, or outro slide!</p>
@@ -842,15 +886,66 @@
                   <p class="text-xs">Your rendered vertical 9:16 short will appear here.</p>
                 </div>
 
-                <!-- RENDERED VIDEO PLAYER -->
-                <div id="rendered-video-container" class="hidden flex flex-col items-center w-full max-w-[240px]">
-                  <div class="w-full rounded-2xl overflow-hidden shadow-2xl border border-brand-cyan/40 bg-black aspect-[9/16]">
-                    <video id="rendered-video-player" controls class="w-full h-full object-cover"></video>
+                <!-- RENDERED VIDEO PLAYER & SEQUENCE STAGE -->
+                <div id="rendered-video-container" class="hidden flex flex-col items-center w-full max-w-[280px]">
+                  <!-- SEQUENCE TIMELINE BADGES -->
+                  <div id="rendered-sequence-timeline" class="w-full mb-2 flex items-center gap-1 overflow-x-auto pb-1 text-[10px] font-bold">
+                    <!-- Populated dynamically: [⏮️ Intro 3s] [🎬 Video 8s] [⏭️ Outro 3s] -->
                   </div>
 
+                  <!-- 9:16 VERTICAL VIEWPORT -->
+                  <div class="w-full rounded-2xl overflow-hidden shadow-2xl border-2 border-emerald-500/50 bg-black aspect-[9/16] relative group">
+                    <video id="rendered-video-player" controls playsinline class="w-full h-full object-cover"></video>
+
+                    <!-- SLIDE STAGE OVERLAY (Shown during Intro/Outro picture segments) -->
+                    <div id="rendered-slide-stage" class="absolute inset-0 z-20 hidden flex flex-col justify-between p-3 overflow-hidden bg-black select-none pointer-events-none">
+                      <!-- Ambient Blurred Background -->
+                      <img id="rendered-slide-bg" src="" alt="blur" class="absolute inset-0 w-full h-full object-cover filter blur-xl scale-125 opacity-60">
+                      
+                      <!-- Top Title Banner -->
+                      <div class="relative z-10 w-full bg-black/85 backdrop-blur-md rounded-xl p-2.5 border border-amber-500/50 shadow-lg">
+                        <div class="flex items-center justify-between mb-1">
+                          <span id="rendered-slide-role-badge" class="text-[9px] font-bold px-2 py-0.5 rounded font-mono bg-purple-500/30 text-purple-200 border border-purple-500/40">
+                            ⏮️ INTRO (1/2)
+                          </span>
+                          <span id="rendered-slide-timer" class="text-[10px] font-mono text-amber-400 font-bold">
+                            3.0s
+                          </span>
+                        </div>
+                        <div id="rendered-slide-title" class="text-xs font-black uppercase tracking-wider text-amber-300 truncate">
+                          SETTINGS OVERVIEW
+                        </div>
+                      </div>
+
+                      <!-- Center Image Viewport -->
+                      <div class="relative z-10 flex-1 my-2 flex items-center justify-center overflow-hidden rounded-lg border border-amber-500/30 shadow-2xl bg-black/40">
+                        <img id="rendered-slide-img" src="" alt="Slide Content" class="max-w-full max-h-full object-contain transition-all duration-200">
+                      </div>
+
+                      <!-- Bottom Subtitle Banner -->
+                      <div class="relative z-10 w-full bg-black/85 backdrop-blur-md rounded-xl p-2 border border-brand-border/80 text-center shadow-lg">
+                        <p id="rendered-slide-subtitle" class="text-[11px] font-bold text-white leading-tight">
+                          Screenshot & save for your next match
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- EXPORT STATUS / PROGRESS -->
+                  <div id="rendered-export-status" class="w-full mt-2 hidden text-center bg-black/60 p-2 rounded-xl border border-amber-500/30">
+                    <div class="text-[11px] font-bold text-amber-400 flex items-center justify-center gap-1.5">
+                      <span class="w-3.5 h-3.5 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin"></span>
+                      <span id="rendered-export-status-text">Stitching pictures into 9:16 MP4...</span>
+                    </div>
+                    <div class="w-full bg-brand-dark rounded-full h-1.5 mt-1.5 overflow-hidden border border-brand-border">
+                      <div id="rendered-export-progress-bar" class="bg-gradient-to-r from-amber-400 to-emerald-400 h-full w-0 transition-all duration-150"></div>
+                    </div>
+                  </div>
+
+                  <!-- DOWNLOAD BUTTON (COMBINED WITH PICTURES) -->
                   <a id="download-clip-btn" href="#" download="tiktok_short.mp4" class="w-full mt-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg shadow-emerald-500/20 text-center flex items-center justify-center gap-2 text-xs transition">
                     <i data-lucide="download" class="w-4 h-4"></i>
-                    <span>Download 1080x1920 MP4</span>
+                    <span>Download 1080x1920 Short (With Pictures)</span>
                   </a>
 
                   <button type="button" onclick="sendToHashtagsGenerator()" class="w-full mt-2 bg-brand-dark hover:bg-slate-800 border border-emerald-500/40 text-emerald-300 font-bold py-2 px-3 rounded-xl text-center flex items-center justify-center gap-1.5 text-xs transition">
@@ -1624,21 +1719,45 @@
         <div class="space-y-1.5">
           <label class="block text-[11px] font-semibold text-slate-300">Quick Framing Presets:</label>
           <div class="grid grid-cols-2 gap-2">
+            <button type="button" onclick="applyCropPreset('left_focus')" class="px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400 text-xs font-bold text-amber-200 text-left transition flex items-center gap-1.5 shadow-sm">
+              <i data-lucide="arrow-left-to-line" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>👈 Left Focus (Settings)</span>
+            </button>
             <button type="button" onclick="applyCropPreset('center_zoom')" class="px-3 py-2 rounded-xl bg-brand-card hover:bg-slate-800 border border-brand-border text-xs font-bold text-white text-left transition flex items-center gap-1.5">
               <i data-lucide="focus" class="w-3.5 h-3.5 text-brand-cyan"></i>
-              <span>Center Zoom (9:16)</span>
+              <span>🎯 Center Zoom (9:16)</span>
             </button>
             <button type="button" onclick="applyCropPreset('blurred_fit')" class="px-3 py-2 rounded-xl bg-brand-card hover:bg-slate-800 border border-brand-border text-xs font-bold text-white text-left transition flex items-center gap-1.5">
               <i data-lucide="layers" class="w-3.5 h-3.5 text-brand-cyan"></i>
-              <span>Blurred Mirror</span>
-            </button>
-            <button type="button" onclick="applyCropPreset('left_focus')" class="px-3 py-2 rounded-xl bg-brand-card hover:bg-slate-800 border border-brand-border text-xs font-bold text-white text-left transition flex items-center gap-1.5">
-              <i data-lucide="arrow-left" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span>Left-Side Focus</span>
+              <span>📱 Blurred Fit (100%)</span>
             </button>
             <button type="button" onclick="applyCropPreset('right_focus')" class="px-3 py-2 rounded-xl bg-brand-card hover:bg-slate-800 border border-brand-border text-xs font-bold text-white text-left transition flex items-center gap-1.5">
               <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span>Right-Side Focus</span>
+              <span>👉 Right-Side Focus</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- FULLSCREEN HORIZONTAL SCREEN PAN SLIDER -->
+        <div class="space-y-2 bg-black/60 p-3 rounded-xl border border-amber-500/50 shadow-inner">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-amber-400 flex items-center gap-1.5">
+              <i data-lucide="move-horizontal" class="w-4 h-4"></i>
+              <span>↔️ Slide Screen Left/Right (Horizontal Pan)</span>
+            </span>
+            <span id="fs-pan-percent-val" class="font-mono text-amber-300 font-bold bg-black/80 px-2 py-0.5 rounded border border-amber-500/40 text-[11px]">0% (👈 Left / Settings)</span>
+          </div>
+          <p class="text-[10px] text-slate-400">Slide the vertical 9:16 frame across the video. Move left to frame controller settings, move center for crosshair kills.</p>
+          <input type="range" id="fs-pan-slider" min="0" max="100" value="0" step="1" oninput="handlePanSliderInput(this.value)" class="w-full accent-amber-400 cursor-pointer h-2 bg-black/80 rounded-lg">
+          <div class="grid grid-cols-3 gap-1 pt-0.5">
+            <button type="button" onclick="setPanPreset(0)" class="py-1 px-1.5 rounded-lg bg-amber-500/25 hover:bg-amber-500/35 border border-amber-400 text-amber-300 font-bold text-[10px] flex items-center justify-center gap-1">
+              👈 Left (Settings)
+            </button>
+            <button type="button" onclick="setPanPreset(50)" class="py-1 px-1.5 rounded-lg bg-brand-card hover:bg-slate-700 border border-brand-border text-slate-300 font-bold text-[10px] flex items-center justify-center gap-1">
+              🎯 Center
+            </button>
+            <button type="button" onclick="setPanPreset(100)" class="py-1 px-1.5 rounded-lg bg-brand-card hover:bg-slate-700 border border-brand-border text-slate-300 font-bold text-[10px] flex items-center justify-center gap-1">
+              👉 Right (Cam)
             </button>
           </div>
         </div>

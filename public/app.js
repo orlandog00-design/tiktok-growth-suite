@@ -1689,34 +1689,112 @@ let manualCrop = {
   cropTop: 0,
   cropBottom: 0,
   cropLeft: 0,
-  cropRight: 0,
+  cropRight: 68,
+  panX: 0,
   fitMode: 'fill'
 };
 let imageOverlays = [];
 
 function selectLayout(mode) {
   layoutMode = mode;
-  document.querySelectorAll('.layout-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.layout-btn').forEach(btn => {
+    btn.classList.remove('active', 'border-brand-cyan', 'bg-brand-cyan/10', 'border-amber-400', 'bg-amber-500/20');
+    btn.classList.add('border-brand-border', 'bg-brand-dark');
+  });
+
   const activeBtn = document.getElementById(`layout-${mode}`);
-  if (activeBtn) activeBtn.classList.add('active');
+  if (activeBtn) {
+    activeBtn.classList.add('active');
+    activeBtn.classList.remove('border-brand-border', 'bg-brand-dark');
+    if (mode === 'left_focus') {
+      activeBtn.classList.add('border-amber-400', 'bg-amber-500/20');
+    } else {
+      activeBtn.classList.add('border-brand-cyan', 'bg-brand-cyan/10');
+    }
+  }
 
   const manualPanel = document.getElementById('manual-crop-panel');
   const cropGuide = document.getElementById('manual-crop-guide');
 
-  if (mode === 'manual_crop') {
+  if (mode === 'left_focus') {
+    handlePanSliderInput(0);
+    if (cropGuide) {
+      cropGuide.classList.remove('hidden');
+      updateCropGuideVisual();
+    }
+    showToast('👈 Left Focus: Slid 9:16 frame to left edge (Settings & Menus)', 'info');
+  } else if (mode === 'center_crop') {
+    handlePanSliderInput(50);
+    if (cropGuide) {
+      cropGuide.classList.remove('hidden');
+      updateCropGuideVisual();
+    }
+  } else if (mode === 'manual_crop') {
     if (manualPanel) manualPanel.classList.remove('hidden');
     if (cropGuide) {
       cropGuide.classList.remove('hidden');
       updateCropGuideVisual();
     }
   } else {
+    // blur_pad
     if (manualPanel) manualPanel.classList.add('hidden');
     if (cropGuide) cropGuide.classList.add('hidden');
   }
 }
 
+function handlePanSliderInput(val) {
+  const panPercent = Math.max(0, Math.min(100, parseFloat(val) || 0));
+  manualCrop.panX = panPercent;
+  // 9:16 vertical window takes up ~32% of 16:9 widescreen
+  const maxSlide = 68; // 100% - 32%
+  manualCrop.cropLeft = Math.round((panPercent / 100) * maxSlide);
+  manualCrop.cropRight = Math.round(((100 - panPercent) / 100) * maxSlide);
+  manualCrop.fitMode = 'fill';
+  
+  const panValEl = document.getElementById('pan-percent-val');
+  const fsPanValEl = document.getElementById('fs-pan-percent-val');
+  let label = `${Math.round(panPercent)}%`;
+  if (panPercent <= 12) label = `${Math.round(panPercent)}% (👈 Left / Settings)`;
+  else if (panPercent >= 40 && panPercent <= 60) label = `${Math.round(panPercent)}% (🎯 Center)`;
+  else if (panPercent >= 88) label = `${Math.round(panPercent)}% (👉 Right / Cam)`;
+  
+  if (panValEl) panValEl.textContent = label;
+  if (fsPanValEl) fsPanValEl.textContent = label;
+
+  const panSlider = document.getElementById('pan-slider');
+  if (panSlider && panSlider.value !== val.toString()) panSlider.value = val;
+  const fsPanSlider = document.getElementById('fs-pan-slider');
+  if (fsPanSlider && fsPanSlider.value !== val.toString()) fsPanSlider.value = val;
+
+  ['left', 'right'].forEach(side => {
+    const key = 'crop' + side.charAt(0).toUpperCase() + side.slice(1);
+    const s1 = document.getElementById(`crop-${side}-slider`);
+    const v1 = document.getElementById(`crop-${side}-val`);
+    if (s1) s1.value = manualCrop[key];
+    if (v1) v1.textContent = manualCrop[key] + '%';
+    const s2 = document.getElementById(`fs-crop-${side}-slider`);
+    const v2 = document.getElementById(`fs-crop-${side}-val`);
+    if (s2) s2.value = manualCrop[key];
+    if (v2) v2.textContent = manualCrop[key] + '%';
+  });
+
+  updateCropGuideVisual();
+  updateFullscreenCropGuide();
+}
+
+function setPanPreset(percent) {
+  handlePanSliderInput(percent);
+  if (percent === 0) {
+    showToast('👈 Left Focus: 9:16 frame slid to left edge for settings & menus', 'info');
+  } else if (percent === 50) {
+    showToast('🎯 Center: 9:16 frame centered for gameplay & crosshairs', 'info');
+  } else if (percent === 100) {
+    showToast('👉 Right Focus: 9:16 frame slid to right edge for webcam & inspect', 'info');
+  }
+}
+
 function updateManualCrop(key, value) {
-  manualCrop[key] = value;
+  manualCrop[key] = parseFloat(value) || 0;
   const valLabel = document.getElementById(`crop-${key.replace('crop', '').toLowerCase()}-val`);
   if (valLabel) {
     valLabel.textContent = `${value}%`;
@@ -1727,10 +1805,10 @@ function updateManualCrop(key, value) {
 function updateCropGuideVisual() {
   const guide = document.getElementById('manual-crop-guide');
   if (!guide) return;
-  guide.style.top = `${manualCrop.cropTop}%`;
-  guide.style.bottom = `${manualCrop.cropBottom}%`;
-  guide.style.left = `${manualCrop.cropLeft}%`;
-  guide.style.right = `${manualCrop.cropRight}%`;
+  guide.style.top = `${manualCrop.cropTop || 0}%`;
+  guide.style.bottom = `${manualCrop.cropBottom || 0}%`;
+  guide.style.left = `${manualCrop.cropLeft || 0}%`;
+  guide.style.right = `${manualCrop.cropRight || 0}%`;
 }
 
 // WEAPON BUILD LOADOUT OUTRO & OVERLAY STATE (SUPPORTS MULTIPLE WEAPONS/SLIDES)
@@ -1790,6 +1868,29 @@ function setSlidePosition(idx, pos) {
   }
 }
 
+function setSlideFitMode(idx, mode) {
+  if (endCardSlides[idx]) {
+    endCardSlides[idx].fitMode = mode;
+    renderEndCardState();
+  }
+}
+
+function setSlidePanX(idx, val) {
+  if (endCardSlides[idx]) {
+    endCardSlides[idx].panX = parseFloat(val) || 0;
+    // Live update preview immediately
+    const imgEl = document.getElementById(`slide-preview-img-${idx}`);
+    if (imgEl) {
+      imgEl.style.objectPosition = `${endCardSlides[idx].panX}% center`;
+    }
+    const valEl = document.getElementById(`slide-pan-val-${idx}`);
+    if (valEl) {
+      const p = Math.round(endCardSlides[idx].panX);
+      valEl.textContent = p <= 12 ? '👈 Left (Settings)' : (p >= 40 && p <= 60 ? '🎯 Center' : (p >= 88 ? '👉 Right' : `${p}%`));
+    }
+  }
+}
+
 function setSlideZoom(idx, zoomVal) {
   if (endCardSlides[idx]) {
     endCardSlides[idx].zoom = parseFloat(zoomVal);
@@ -1800,6 +1901,9 @@ function setSlideZoom(idx, zoomVal) {
 function setSlideFocus(idx, focusVal) {
   if (endCardSlides[idx]) {
     endCardSlides[idx].focus = focusVal;
+    if (focusVal === 'left') endCardSlides[idx].panX = 0;
+    else if (focusVal === 'center') endCardSlides[idx].panX = 50;
+    else if (focusVal === 'right') endCardSlides[idx].panX = 100;
     renderEndCardState();
   }
 }
@@ -1807,12 +1911,16 @@ function setSlideFocus(idx, focusVal) {
 function updateSlideTitle(idx, val) {
   if (endCardSlides[idx]) {
     endCardSlides[idx].title = val;
+    const titlePreview = document.getElementById(`slide-preview-title-${idx}`);
+    if (titlePreview) titlePreview.textContent = val || 'SLIDE TITLE';
   }
 }
 
 function updateSlideSubtitle(idx, val) {
   if (endCardSlides[idx]) {
     endCardSlides[idx].subtitle = val;
+    const subPreview = document.getElementById(`slide-preview-sub-${idx}`);
+    if (subPreview) subPreview.textContent = val || 'Screenshot & save for your next match';
   }
 }
 
@@ -1851,97 +1959,135 @@ function renderEndCardState() {
   listEl.innerHTML = endCardSlides.map((slide, idx) => {
     const isIntro = slide.position === 'intro';
     const roleLabel = isIntro ? `Intro #${idx + 1}` : `Outro #${idx + 1}`;
-    const badgeColor = isIntro ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
-    const currentZoom = slide.zoom || 1.45;
-    const currentFocus = slide.focus || 'left';
+    const badgeColor = isIntro ? 'bg-purple-500/25 text-purple-300 border border-purple-500/40' : 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/40';
+    const currentFit = slide.fitMode || 'fit';
+    const currentPanX = typeof slide.panX === 'number' ? slide.panX : 0;
+    const currentZoom = slide.zoom || 1.0;
+
+    let panLabel = `${Math.round(currentPanX)}%`;
+    if (currentPanX <= 12) panLabel = '👈 Left (Settings)';
+    else if (currentPanX >= 40 && currentPanX <= 60) panLabel = '🎯 Center';
+    else if (currentPanX >= 88) panLabel = '👉 Right';
 
     return `
-      <div class="space-y-3 bg-brand-dark/90 border border-emerald-500/40 rounded-xl p-3.5 shadow-lg">
-        <!-- HEADER ROW -->
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2.5 overflow-hidden">
-            <img src="${slide.imageUrl}" alt="Slide" class="w-14 h-10 object-cover rounded-lg border border-brand-border shrink-0 bg-black">
-            <div class="overflow-hidden">
-              <div class="flex items-center gap-1.5">
-                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded font-mono ${badgeColor}">
+      <div class="space-y-3 bg-brand-dark/95 border border-emerald-500/40 rounded-xl p-3.5 shadow-xl">
+        <!-- TOP ROW WITH 9:16 LIVE MINI-PREVIEW & HEADER -->
+        <div class="flex gap-3">
+          <!-- LIVE 9:16 VERTICAL MINI-PREVIEW BOX -->
+          <div class="relative w-24 h-36 rounded-xl overflow-hidden border border-amber-500/50 bg-black shrink-0 flex flex-col justify-between p-1.5 shadow-2xl select-none group">
+            <!-- Ambient blurred background -->
+            <img src="${slide.imageUrl}" alt="blur" class="absolute inset-0 w-full h-full object-cover filter blur-md scale-150 opacity-60 pointer-events-none">
+            
+            <!-- Top Title Bar in Preview -->
+            <div class="relative z-10 bg-black/90 rounded px-1 py-0.5 border border-amber-500/40 text-center shadow">
+              <span id="slide-preview-title-${idx}" class="text-[7.5px] font-black uppercase text-amber-300 block truncate leading-tight">${slide.title || 'SLIDE TITLE'}</span>
+            </div>
+
+            <!-- Foreground Image Viewport -->
+            <div class="relative z-10 flex-1 my-1 overflow-hidden rounded flex items-center justify-center bg-black/40 border border-white/10">
+              <img id="slide-preview-img-${idx}" src="${slide.imageUrl}" alt="Slide" class="transition-all duration-150 pointer-events-none ${currentFit === 'fill' ? 'w-full h-full object-cover' : 'max-w-full max-h-full object-contain'}" style="${currentFit === 'fill' ? `object-position: ${currentPanX}% center; transform: scale(${currentZoom});` : ''}">
+            </div>
+
+            <!-- Bottom Subtitle Bar in Preview -->
+            <div class="relative z-10 bg-black/90 rounded px-1 py-0.5 border border-white/20 text-center shadow">
+              <span id="slide-preview-sub-${idx}" class="text-[6.5px] font-semibold text-slate-200 block truncate leading-tight">${slide.subtitle || 'Screenshot & save'}</span>
+            </div>
+          </div>
+
+          <!-- SLIDE DETAILS & ORDER CONTROLS -->
+          <div class="flex-1 flex flex-col justify-between overflow-hidden">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5 overflow-hidden">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded font-mono ${badgeColor}">
                   ${roleLabel}
                 </span>
-                <span class="text-xs font-bold text-white truncate max-w-[150px]">${slide.filename}</span>
+                <span class="text-xs font-bold text-white truncate max-w-[130px]">${slide.filename}</span>
               </div>
-              <div class="text-[10px] text-slate-400 font-mono mt-0.5">
-                ${isIntro ? 'Before Video' : 'After Video'} • ${slide.duration}s • Zoom: <span class="text-amber-400 font-bold">${Math.round(currentZoom * 100)}%</span>
+              <div class="flex items-center gap-1">
+                ${idx > 0 ? `<button type="button" onclick="moveEndCardSlide(${idx}, -1)" class="text-slate-400 hover:text-white px-2 py-1 rounded bg-black/60 hover:bg-white/10 text-xs font-bold" title="Move Slide Up">▲</button>` : ''}
+                ${idx < endCardSlides.length - 1 ? `<button type="button" onclick="moveEndCardSlide(${idx}, 1)" class="text-slate-400 hover:text-white px-2 py-1 rounded bg-black/60 hover:bg-white/10 text-xs font-bold" title="Move Slide Down">▼</button>` : ''}
+                <button type="button" onclick="removeEndCardSlide(${idx})" class="text-slate-400 hover:text-red-400 p-1.5 rounded hover:bg-red-500/10 transition ml-1" title="Delete this slide">
+                  <i data-lucide="trash-2" class="w-4 h-4 text-red-400"></i>
+                </button>
               </div>
             </div>
-          </div>
-          <div class="flex items-center gap-1">
-            ${idx > 0 ? `<button type="button" onclick="moveEndCardSlide(${idx}, -1)" class="text-slate-400 hover:text-white px-2 py-1 rounded bg-black/40 hover:bg-white/10 text-xs font-bold" title="Move Slide Up">▲</button>` : ''}
-            ${idx < endCardSlides.length - 1 ? `<button type="button" onclick="moveEndCardSlide(${idx}, 1)" class="text-slate-400 hover:text-white px-2 py-1 rounded bg-black/40 hover:bg-white/10 text-xs font-bold" title="Move Slide Down">▼</button>` : ''}
-            <button type="button" onclick="removeEndCardSlide(${idx})" class="text-slate-400 hover:text-red-400 p-1.5 rounded hover:bg-red-500/10 transition ml-1" title="Delete this slide">
-              <i data-lucide="trash-2" class="w-4 h-4 text-red-400"></i>
-            </button>
-          </div>
-        </div>
 
-        <!-- POSITION SELECTOR: BEFORE OR AFTER VIDEO -->
-        <div class="flex items-center justify-between p-2 rounded-lg bg-black/50 border border-brand-border/60 text-xs">
-          <span class="text-[10px] text-slate-300 font-bold uppercase tracking-wider flex items-center gap-1">
-            <i data-lucide="clock" class="w-3.5 h-3.5 text-emerald-400"></i>
-            Slide Timing:
-          </span>
-          <div class="flex items-center gap-1">
-            <button type="button" onclick="setSlidePosition(${idx}, 'intro')" class="px-2 py-1 rounded-md text-[10px] font-bold transition ${isIntro ? 'bg-purple-500/25 border border-purple-400 text-purple-200 shadow-sm' : 'bg-brand-dark border border-brand-border text-slate-400 hover:text-white'}">
-              ⏮️ Before Video (Intro)
-            </button>
-            <button type="button" onclick="setSlidePosition(${idx}, 'outro')" class="px-2 py-1 rounded-md text-[10px] font-bold transition ${!isIntro ? 'bg-emerald-500/25 border border-emerald-400 text-emerald-200 shadow-sm' : 'bg-brand-dark border border-brand-border text-slate-400 hover:text-white'}">
-              ⏭️ After Video (Outro)
-            </button>
-          </div>
-        </div>
+            <!-- TIMING: BEFORE OR AFTER VIDEO -->
+            <div class="flex items-center justify-between p-1.5 rounded-lg bg-black/60 border border-brand-border/60 text-xs mt-1.5">
+              <span class="text-[10px] text-slate-300 font-bold uppercase tracking-wider flex items-center gap-1">
+                <i data-lucide="clock" class="w-3.5 h-3.5 text-emerald-400"></i>
+                Timing:
+              </span>
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="setSlidePosition(${idx}, 'intro')" class="px-2 py-1 rounded text-[10px] font-bold transition ${isIntro ? 'bg-purple-500/30 border border-purple-400 text-purple-200' : 'bg-brand-dark border border-brand-border text-slate-400 hover:text-white'}">
+                  ⏮️ Before Video
+                </button>
+                <button type="button" onclick="setSlidePosition(${idx}, 'outro')" class="px-2 py-1 rounded text-[10px] font-bold transition ${!isIntro ? 'bg-emerald-500/30 border border-emerald-400 text-emerald-200' : 'bg-brand-dark border border-brand-border text-slate-400 hover:text-white'}">
+                  ⏭️ After Video
+                </button>
+              </div>
+            </div>
 
-        <!-- ZOOM & READABILITY CONTROLS -->
-        <div class="p-2 rounded-lg bg-black/50 border border-brand-border/60 space-y-1.5">
-          <div class="flex items-center justify-between">
-            <span class="text-[10px] font-bold text-amber-400 flex items-center gap-1">
-              <i data-lucide="zoom-in" class="w-3 h-3"></i>
-              Attachment Zoom & Readability:
-            </span>
-            <span class="text-[10px] font-mono text-slate-300 font-bold">${Math.round(currentZoom * 100)}% Scale</span>
-          </div>
-          <div class="grid grid-cols-4 gap-1">
-            <button type="button" onclick="setSlideZoom(${idx}, 1.0)" class="px-1 py-1 rounded text-[10px] font-bold transition ${currentZoom === 1.0 ? 'bg-amber-500/25 border border-amber-500 text-white' : 'bg-brand-dark border border-brand-border text-slate-400 hover:text-white'}">100% Fit</button>
-            <button type="button" onclick="setSlideZoom(${idx}, 1.25)" class="px-1 py-1 rounded text-[10px] font-bold transition ${currentZoom === 1.25 ? 'bg-amber-500/25 border border-amber-500 text-white' : 'bg-brand-dark border border-brand-border text-slate-400 hover:text-white'}">125%</button>
-            <button type="button" onclick="setSlideZoom(${idx}, 1.45)" class="px-1 py-1 rounded text-[10px] font-bold transition ${(currentZoom === 1.45) ? 'bg-amber-500/25 border border-amber-500 text-white' : 'bg-brand-dark border border-brand-border text-slate-400 hover:text-white'}">145% ⭐</button>
-            <button type="button" onclick="setSlideZoom(${idx}, 1.70)" class="px-1 py-1 rounded text-[10px] font-bold transition ${currentZoom === 1.70 ? 'bg-amber-500/25 border border-amber-500 text-white' : 'bg-brand-dark border border-brand-border text-slate-400 hover:text-white'}">170% Big</button>
-          </div>
-          <div class="flex items-center justify-between text-[10px] pt-1">
-            <span class="text-slate-400">Align:</span>
-            <div class="flex gap-1">
-              <button type="button" onclick="setSlideFocus(${idx}, 'left')" class="px-2 py-0.5 rounded text-[10px] font-bold ${currentFocus === 'left' ? 'bg-brand-cyan/20 border border-brand-cyan text-brand-cyan' : 'bg-brand-dark border border-brand-border text-slate-400'}">Left (Attachments)</button>
-              <button type="button" onclick="setSlideFocus(${idx}, 'center')" class="px-2 py-0.5 rounded text-[10px] font-bold ${currentFocus === 'center' ? 'bg-brand-cyan/20 border border-brand-cyan text-brand-cyan' : 'bg-brand-dark border border-brand-border text-slate-400'}">Center</button>
+            <!-- FRAMING MODE: FULL FIT (NO CUTOFF) VS ZOOM & SLIDE -->
+            <div class="p-2 rounded-lg bg-black/60 border border-brand-border/60 space-y-1.5 mt-1.5">
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-slate-300 font-bold flex items-center gap-1">
+                  <i data-lucide="crop" class="w-3 h-3 text-amber-400"></i>
+                  Framing:
+                </span>
+                <div class="flex items-center gap-1">
+                  <button type="button" onclick="setSlideFitMode(${idx}, 'fit')" class="px-2 py-0.5 rounded text-[10px] font-bold transition ${currentFit === 'fit' ? 'bg-emerald-500/30 border border-emerald-400 text-emerald-200' : 'bg-brand-dark border border-brand-border text-slate-400 hover:text-white'}" title="Shows 100% of entire screenshot with ambient blur so no text is cut off!">
+                    📱 Full Fit (No Cutoff ⭐)
+                  </button>
+                  <button type="button" onclick="setSlideFitMode(${idx}, 'fill')" class="px-2 py-0.5 rounded text-[10px] font-bold transition ${currentFit === 'fill' ? 'bg-amber-500/30 border border-amber-400 text-amber-200' : 'bg-brand-dark border border-brand-border text-slate-400 hover:text-white'}" title="Fills vertical frame and allows sliding horizontally">
+                    🔍 Zoom & Slide
+                  </button>
+                </div>
+              </div>
+
+              <!-- SLIDE SCREEN HORIZONTAL SLIDER (FOR ZOOM & SLIDE) -->
+              ${currentFit === 'fill' ? `
+                <div class="space-y-1 pt-1 border-t border-brand-border/40">
+                  <div class="flex items-center justify-between text-[10px]">
+                    <span class="text-amber-400 font-bold">↔️ Slide Screen Left/Right:</span>
+                    <span id="slide-pan-val-${idx}" class="font-mono text-amber-300 font-bold">${panLabel}</span>
+                  </div>
+                  <input type="range" min="0" max="100" value="${currentPanX}" step="1" oninput="setSlidePanX(${idx}, this.value)" class="w-full accent-amber-400 cursor-pointer h-1.5 bg-black/80 rounded">
+                  <div class="grid grid-cols-3 gap-1 pt-0.5">
+                    <button type="button" onclick="setSlidePanX(${idx}, 0)" class="py-0.5 px-1 rounded text-[9px] font-bold ${currentPanX === 0 ? 'bg-amber-500/30 border border-amber-400 text-amber-300' : 'bg-brand-dark border border-brand-border text-slate-400'}">👈 Left (Settings)</button>
+                    <button type="button" onclick="setSlidePanX(${idx}, 50)" class="py-0.5 px-1 rounded text-[9px] font-bold ${currentPanX === 50 ? 'bg-amber-500/30 border border-amber-400 text-amber-300' : 'bg-brand-dark border border-brand-border text-slate-400'}">🎯 Center</button>
+                    <button type="button" onclick="setSlidePanX(${idx}, 100)" class="py-0.5 px-1 rounded text-[9px] font-bold ${currentPanX === 100 ? 'bg-amber-500/30 border border-amber-400 text-amber-300' : 'bg-brand-dark border border-brand-border text-slate-400'}">👉 Right</button>
+                  </div>
+                </div>
+              ` : `
+                <div class="text-[10px] text-emerald-400/90 italic pt-0.5">
+                  ✅ 100% of entire screenshot visible with ambient background blur. Perfect for settings menus!
+                </div>
+              `}
             </div>
           </div>
         </div>
 
-        <!-- DURATION & TOP HEADER -->
-        <div class="grid grid-cols-2 gap-2 text-xs">
+        <!-- DURATION & TITLE ROW -->
+        <div class="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-brand-border/40">
           <div>
             <label class="block text-[10px] text-slate-400 mb-1">Slide Duration</label>
             <div class="grid grid-cols-3 gap-1">
-              <button type="button" onclick="setSlideDuration(${idx}, 2)" class="px-1.5 py-1 rounded text-[11px] font-bold transition ${slide.duration === 2 ? 'bg-emerald-500/25 border border-emerald-500 text-white' : 'bg-brand-dark border border-brand-border text-slate-300 hover:border-slate-500'}">2s</button>
-              <button type="button" onclick="setSlideDuration(${idx}, 3)" class="px-1.5 py-1 rounded text-[11px] font-bold transition ${slide.duration === 3 ? 'bg-emerald-500/25 border border-emerald-500 text-white' : 'bg-brand-dark border border-brand-border text-slate-300 hover:border-slate-500'}">3s</button>
-              <button type="button" onclick="setSlideDuration(${idx}, 4.5)" class="px-1.5 py-1 rounded text-[11px] font-bold transition ${slide.duration === 4.5 ? 'bg-emerald-500/25 border border-emerald-500 text-white' : 'bg-brand-dark border border-brand-border text-slate-300 hover:border-slate-500'}">4.5s</button>
+              <button type="button" onclick="setSlideDuration(${idx}, 2)" class="px-1.5 py-1 rounded text-[11px] font-bold transition ${slide.duration === 2 ? 'bg-emerald-500/30 border border-emerald-400 text-white' : 'bg-brand-dark border border-brand-border text-slate-300 hover:border-slate-500'}">2s</button>
+              <button type="button" onclick="setSlideDuration(${idx}, 3)" class="px-1.5 py-1 rounded text-[11px] font-bold transition ${slide.duration === 3 ? 'bg-emerald-500/30 border border-emerald-400 text-white' : 'bg-brand-dark border border-brand-border text-slate-300 hover:border-slate-500'}">3s</button>
+              <button type="button" onclick="setSlideDuration(${idx}, 4.5)" class="px-1.5 py-1 rounded text-[11px] font-bold transition ${slide.duration === 4.5 ? 'bg-emerald-500/30 border border-emerald-400 text-white' : 'bg-brand-dark border border-brand-border text-slate-300 hover:border-slate-500'}">4.5s</button>
             </div>
           </div>
           <div>
-            <label class="block text-[10px] text-slate-400 mb-1">Slide Title / Caption</label>
-            <input type="text" value="${slide.title}" oninput="updateSlideTitle(${idx}, this.value)" class="w-full bg-black/60 border border-brand-border rounded px-2 py-1 text-xs font-mono text-white focus:border-brand-cyan">
+            <label class="block text-[10px] text-slate-400 mb-1">Top Slide Title</label>
+            <input type="text" value="${slide.title || ''}" oninput="updateSlideTitle(${idx}, this.value)" placeholder="e.g. BEST WARZONE SETTINGS" class="w-full bg-black/60 border border-brand-border rounded px-2 py-1 text-xs font-mono text-white focus:border-brand-cyan">
           </div>
         </div>
 
         <!-- SUBTITLE CALLOUT -->
         <div class="text-[10px] text-slate-400 flex items-center justify-between pt-1 border-t border-brand-border/40">
-          <span>Slide Bottom Caption:</span>
-          <input type="text" value="${slide.subtitle}" oninput="updateSlideSubtitle(${idx}, this.value)" class="w-2/3 bg-black/60 border border-brand-border rounded px-2 py-0.5 text-[10px] font-mono text-slate-300 focus:border-brand-cyan">
+          <span>Bottom Caption:</span>
+          <input type="text" value="${slide.subtitle || ''}" oninput="updateSlideSubtitle(${idx}, this.value)" placeholder="e.g. Screenshot & save for your next match" class="w-2/3 bg-black/60 border border-brand-border rounded px-2 py-0.5 text-[10px] font-mono text-slate-300 focus:border-brand-cyan">
         </div>
       </div>
     `;
@@ -1997,8 +2143,11 @@ async function handleOverlayImageUpload(event) {
         imageUrl: data.imageUrl,
         duration: 3.0,
         position: 'outro',
+        fitMode: 'fit', // Default to 100% Full Fit (Ambient Blur) so settings aren't cut off!
+        panX: 0, // Left Focus for settings
+        zoom: 1.0,
         title: defaultTitle,
-        subtitle: 'Follow for more!'
+        subtitle: 'Screenshot & save for your next match'
       });
 
       const start = parseFloat(document.getElementById('trim-start')?.value) || 0;
@@ -2564,6 +2713,510 @@ function clearSubtitles() {
   document.getElementById('subtitles-input').value = '';
 }
 
+// ==========================================
+// CLIENT-SIDE 9:16 MULTI-STAGE SEQUENCER & RECORDER
+// Plays Intro Slides ➔ Video Clip ➔ Outro Slides
+// ==========================================
+let currentSequenceState = {
+  active: false,
+  playlist: [],
+  currentIndex: 0,
+  timerId: null,
+  countdownInterval: null,
+  layoutMode: 'blur_pad',
+  manualCrop: null
+};
+
+let currentExportController = null;
+
+function stopRenderedSequencePlayback() {
+  currentSequenceState.active = false;
+  if (currentSequenceState.timerId) clearTimeout(currentSequenceState.timerId);
+  if (currentSequenceState.countdownInterval) clearInterval(currentSequenceState.countdownInterval);
+  const slideStage = document.getElementById('rendered-slide-stage');
+  if (slideStage) slideStage.classList.add('hidden');
+}
+
+function startRenderedSequencePlayback({ videoUrl, videoFilename, startTime, endTime, layoutMode, manualCrop, endCardSlides }) {
+  stopRenderedSequencePlayback();
+
+  const renderedPlayer = document.getElementById('rendered-video-player');
+  const slideStage = document.getElementById('rendered-slide-stage');
+  const timelineEl = document.getElementById('rendered-sequence-timeline');
+  const downloadBtn = document.getElementById('download-clip-btn');
+
+  const slides = Array.isArray(endCardSlides) ? endCardSlides : [];
+  const introSlides = slides.filter(s => s.position === 'intro');
+  const outroSlides = slides.filter(s => s.position !== 'intro');
+
+  const playlist = [];
+
+  introSlides.forEach((slide, idx) => {
+    playlist.push({
+      type: 'slide',
+      role: 'intro',
+      roleIndex: idx + 1,
+      totalRole: introSlides.length,
+      slide,
+      duration: Math.max(1, parseFloat(slide.duration) || 3)
+    });
+  });
+
+  const clipDuration = Math.max(0.5, endTime - startTime);
+  playlist.push({
+    type: 'video',
+    role: 'video',
+    url: videoUrl,
+    start: startTime,
+    end: endTime,
+    duration: clipDuration
+  });
+
+  outroSlides.forEach((slide, idx) => {
+    playlist.push({
+      type: 'slide',
+      role: 'outro',
+      roleIndex: idx + 1,
+      totalRole: outroSlides.length,
+      slide,
+      duration: Math.max(1, parseFloat(slide.duration) || 3)
+    });
+  });
+
+  currentSequenceState = {
+    active: true,
+    playlist,
+    currentIndex: 0,
+    timerId: null,
+    countdownInterval: null,
+    layoutMode: layoutMode || 'blur_pad',
+    manualCrop: manualCrop || {}
+  };
+
+  if (timelineEl) {
+    if (playlist.length > 1) {
+      timelineEl.classList.remove('hidden');
+      timelineEl.innerHTML = playlist.map((item, i) => {
+        const isVid = item.type === 'video';
+        const isIntro = item.role === 'intro';
+        const icon = isVid ? '🎬' : (isIntro ? '⏮️' : '⏭️');
+        const name = isVid ? 'Clip' : (isIntro ? `Intro #${item.roleIndex}` : `Outro #${item.roleIndex}`);
+        const durStr = `${Math.round(item.duration * 10) / 10}s`;
+        return `
+          <button type="button" onclick="jumpToSequenceIndex(${i})" id="seq-pill-${i}" class="px-2 py-1 rounded-lg border border-brand-border bg-black/60 text-[10px] font-bold text-slate-400 hover:text-white transition flex items-center gap-1 shrink-0 whitespace-nowrap">
+            <span>${icon}</span>
+            <span>${name}</span>
+            <span class="font-mono text-slate-500">(${durStr})</span>
+          </button>
+        `;
+      }).join('');
+    } else {
+      timelineEl.classList.add('hidden');
+      timelineEl.innerHTML = '';
+    }
+  }
+
+  renderedPlayer.src = videoUrl;
+  renderedPlayer.volume = 1.0;
+  renderedPlayer.muted = false;
+
+  if (layoutMode === 'blur_pad') {
+    renderedPlayer.style.objectFit = 'contain';
+    renderedPlayer.style.objectPosition = 'center center';
+  } else {
+    const panX = typeof manualCrop?.panX === 'number' ? manualCrop.panX : 0;
+    renderedPlayer.style.objectFit = 'cover';
+    renderedPlayer.style.objectPosition = `${panX}% center`;
+  }
+
+  playCurrentSequenceItem();
+
+  triggerClientVideoExport({
+    videoUrl,
+    videoFilename,
+    startTime,
+    endTime,
+    layoutMode,
+    manualCrop,
+    playlist
+  });
+}
+
+function playCurrentSequenceItem() {
+  if (!currentSequenceState.active || currentSequenceState.playlist.length === 0) return;
+
+  const item = currentSequenceState.playlist[currentSequenceState.currentIndex];
+  const renderedPlayer = document.getElementById('rendered-video-player');
+  const slideStage = document.getElementById('rendered-slide-stage');
+
+  currentSequenceState.playlist.forEach((_, i) => {
+    const pill = document.getElementById(`seq-pill-${i}`);
+    if (pill) {
+      if (i === currentSequenceState.currentIndex) {
+        pill.className = 'px-2 py-1 rounded-lg border border-amber-400 bg-amber-500/20 text-[10px] font-bold text-amber-200 transition flex items-center gap-1 shrink-0 whitespace-nowrap shadow-sm';
+      } else {
+        pill.className = 'px-2 py-1 rounded-lg border border-brand-border bg-black/60 text-[10px] font-bold text-slate-400 hover:text-white transition flex items-center gap-1 shrink-0 whitespace-nowrap';
+      }
+    }
+  });
+
+  if (currentSequenceState.timerId) clearTimeout(currentSequenceState.timerId);
+  if (currentSequenceState.countdownInterval) clearInterval(currentSequenceState.countdownInterval);
+
+  if (item.type === 'slide') {
+    renderedPlayer.pause();
+    renderedPlayer.ontimeupdate = null;
+    slideStage?.classList.remove('hidden');
+
+    const bgEl = document.getElementById('rendered-slide-bg');
+    const imgEl = document.getElementById('rendered-slide-img');
+    const titleEl = document.getElementById('rendered-slide-title');
+    const subEl = document.getElementById('rendered-slide-subtitle');
+    const badgeEl = document.getElementById('rendered-slide-role-badge');
+    const timerEl = document.getElementById('rendered-slide-timer');
+
+    if (bgEl) bgEl.src = item.slide.imageUrl;
+    if (imgEl) {
+      imgEl.src = item.slide.imageUrl;
+      if (item.slide.fitMode === 'fill') {
+        const panX = typeof item.slide.panX === 'number' ? item.slide.panX : 0;
+        const zoom = item.slide.zoom || 1.0;
+        imgEl.className = 'w-full h-full object-cover transition-all duration-150';
+        imgEl.style.objectPosition = `${panX}% center`;
+        imgEl.style.transform = `scale(${zoom})`;
+      } else {
+        imgEl.className = 'max-w-full max-h-full object-contain transition-all duration-150';
+        imgEl.style.objectPosition = '';
+        imgEl.style.transform = '';
+      }
+    }
+
+    if (titleEl) titleEl.textContent = item.slide.title || (item.role === 'intro' ? 'INTRO HOOK' : 'SETTINGS OVERVIEW');
+    if (subEl) subEl.textContent = item.slide.subtitle || (item.role === 'intro' ? 'Watch until the end!' : 'Screenshot & save for your next match');
+    
+    if (badgeEl) {
+      badgeEl.textContent = item.role === 'intro' ? `⏮️ INTRO (${item.roleIndex}/${item.totalRole})` : `⏭️ OUTRO (${item.roleIndex}/${item.totalRole})`;
+      badgeEl.className = item.role === 'intro' 
+        ? 'text-[9px] font-bold px-2 py-0.5 rounded font-mono bg-purple-500/30 text-purple-200 border border-purple-500/40' 
+        : 'text-[9px] font-bold px-2 py-0.5 rounded font-mono bg-emerald-500/30 text-emerald-200 border border-emerald-500/40';
+    }
+
+    let remainingTime = item.duration;
+    if (timerEl) timerEl.textContent = `${remainingTime.toFixed(1)}s`;
+
+    currentSequenceState.countdownInterval = setInterval(() => {
+      remainingTime = Math.max(0, remainingTime - 0.1);
+      if (timerEl) timerEl.textContent = `${remainingTime.toFixed(1)}s`;
+    }, 100);
+
+    currentSequenceState.timerId = setTimeout(() => {
+      clearInterval(currentSequenceState.countdownInterval);
+      advanceSequenceNext();
+    }, item.duration * 1000);
+
+  } else if (item.type === 'video') {
+    slideStage?.classList.add('hidden');
+
+    renderedPlayer.currentTime = item.start;
+    renderedPlayer.play().catch(() => {});
+
+    renderedPlayer.ontimeupdate = () => {
+      if (renderedPlayer.currentTime >= item.end) {
+        renderedPlayer.ontimeupdate = null;
+        advanceSequenceNext();
+      }
+    };
+  }
+}
+
+function advanceSequenceNext() {
+  if (!currentSequenceState.active) return;
+  currentSequenceState.currentIndex = (currentSequenceState.currentIndex + 1) % currentSequenceState.playlist.length;
+  playCurrentSequenceItem();
+}
+
+function jumpToSequenceIndex(idx) {
+  if (!currentSequenceState.active || idx < 0 || idx >= currentSequenceState.playlist.length) return;
+  currentSequenceState.currentIndex = idx;
+  playCurrentSequenceItem();
+}
+
+async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, endTime, layoutMode, manualCrop, playlist }) {
+  const exportStatus = document.getElementById('rendered-export-status');
+  const exportStatusText = document.getElementById('rendered-export-status-text');
+  const exportProgressBar = document.getElementById('rendered-export-progress-bar');
+  const downloadBtn = document.getElementById('download-clip-btn');
+
+  const slides = playlist.filter(p => p.type === 'slide');
+  if (slides.length === 0) {
+    if (downloadBtn) {
+      downloadBtn.href = videoUrl;
+      downloadBtn.download = videoFilename ? `short_${videoFilename}` : 'tiktok_short.mp4';
+      downloadBtn.innerHTML = `<i data-lucide="download" class="w-4 h-4"></i><span>Download 1080x1920 Short</span>`;
+      lucide.createIcons();
+    }
+    return;
+  }
+
+  if (currentExportController) {
+    currentExportController.aborted = true;
+  }
+  const ctrl = { aborted: false };
+  currentExportController = ctrl;
+
+  try {
+    if (exportStatus) exportStatus.classList.remove('hidden');
+    if (exportStatusText) {
+      exportStatusText.textContent = `Assembling 9:16 vertical video with ${slides.length} picture slide(s)...`;
+      exportStatusText.classList.remove('text-emerald-400');
+      exportStatusText.classList.add('text-amber-400');
+    }
+    if (exportProgressBar) exportProgressBar.style.width = '10%';
+
+    const cw = 720;
+    const ch = 1280;
+    const canvas = document.createElement('canvas');
+    canvas.width = cw;
+    canvas.height = ch;
+    const ctx = canvas.getContext('2d');
+
+    const hiddenVideo = document.createElement('video');
+    hiddenVideo.src = videoUrl;
+    hiddenVideo.muted = true;
+    hiddenVideo.playsInline = true;
+    hiddenVideo.crossOrigin = 'anonymous';
+
+    await new Promise((res) => {
+      hiddenVideo.onloadedmetadata = () => res();
+      hiddenVideo.onerror = () => res();
+      setTimeout(res, 2000);
+    });
+
+    if (ctrl.aborted) return;
+
+    const stream = canvas.captureStream(30);
+
+    let mimeType = 'video/webm';
+    if (typeof MediaRecorder !== 'undefined') {
+      if (MediaRecorder.isTypeSupported('video/mp4;codecs=avc1')) mimeType = 'video/mp4;codecs=avc1';
+      else if (MediaRecorder.isTypeSupported('video/mp4')) mimeType = 'video/mp4';
+      else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) mimeType = 'video/webm;codecs=vp9';
+      else if (MediaRecorder.isTypeSupported('video/webm')) mimeType = 'video/webm';
+    }
+
+    const recordedChunks = [];
+    const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 4000000 });
+    recorder.ondataavailable = (e) => {
+      if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+    };
+
+    recorder.start(100);
+
+    const totalDuration = playlist.reduce((acc, it) => acc + it.duration, 0);
+    let elapsed = 0;
+
+    const slideImages = {};
+    for (const item of playlist) {
+      if (item.type === 'slide' && item.slide?.imageUrl && !slideImages[item.slide.imageUrl]) {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.src = item.slide.imageUrl;
+        await new Promise(r => { img.onload = r; img.onerror = r; setTimeout(r, 1500); });
+        slideImages[item.slide.imageUrl] = img;
+      }
+    }
+
+    if (ctrl.aborted) {
+      recorder.stop();
+      return;
+    }
+
+    for (let pIdx = 0; pIdx < playlist.length; pIdx++) {
+      if (ctrl.aborted) break;
+      const item = playlist[pIdx];
+
+      if (item.type === 'slide') {
+        const slideImg = slideImages[item.slide?.imageUrl];
+        const frames = Math.round(item.duration * 30);
+        const frameInterval = 1000 / 30;
+
+        for (let f = 0; f < frames; f++) {
+          if (ctrl.aborted) break;
+
+          ctx.fillStyle = '#090d16';
+          ctx.fillRect(0, 0, cw, ch);
+
+          if (slideImg && slideImg.complete && slideImg.naturalWidth > 0) {
+            ctx.save();
+            ctx.filter = 'blur(20px) brightness(0.6)';
+            ctx.drawImage(slideImg, -50, -50, cw + 100, ch + 100);
+            ctx.restore();
+
+            const fitMode = item.slide.fitMode || 'fit';
+            if (fitMode === 'fill') {
+              const panPercent = typeof item.slide.panX === 'number' ? item.slide.panX : 0;
+              const zoom = item.slide.zoom || 1.0;
+              const imgW = slideImg.naturalWidth;
+              const imgH = slideImg.naturalHeight;
+              
+              const targetAspect = cw / ch;
+              let cropW = (imgH * targetAspect) / zoom;
+              let cropH = imgH / zoom;
+              if (cropW > imgW) {
+                cropW = imgW;
+                cropH = imgW / targetAspect;
+              }
+              const maxPanX = Math.max(0, imgW - cropW);
+              const cropX = (panPercent / 100) * maxPanX;
+              const cropY = (imgH - cropH) / 2;
+
+              ctx.drawImage(slideImg, cropX, cropY, cropW, cropH, 30, 180, cw - 60, ch - 360);
+            } else {
+              const availW = cw - 60;
+              const availH = ch - 360;
+              const scale = Math.min(availW / slideImg.naturalWidth, availH / slideImg.naturalHeight);
+              const drawW = slideImg.naturalWidth * scale;
+              const drawH = slideImg.naturalHeight * scale;
+              const drawX = (cw - drawW) / 2;
+              const drawY = (ch - drawH) / 2;
+
+              ctx.fillStyle = 'rgba(0,0,0,0.5)';
+              ctx.fillRect(drawX - 4, drawY - 4, drawW + 8, drawH + 8);
+              ctx.drawImage(slideImg, drawX, drawY, drawW, drawH);
+              ctx.strokeStyle = '#f59e0b';
+              ctx.lineWidth = 3;
+              ctx.strokeRect(drawX, drawY, drawW, drawH);
+            }
+          }
+
+          // Top Header Banner
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.92)';
+          ctx.fillRect(0, 0, cw, 170);
+          ctx.fillStyle = '#f59e0b';
+          ctx.fillRect(0, 166, cw, 4);
+
+          // Top Role Badge
+          ctx.fillStyle = item.role === 'intro' ? '#a855f7' : '#10b981';
+          ctx.fillRect(30, 25, 170, 32);
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 15px monospace';
+          ctx.fillText(item.role === 'intro' ? '⏮️ INTRO HOOK' : '⏭️ OUTRO SLIDE', 40, 46);
+
+          // Top Title Text
+          ctx.fillStyle = '#fef08a';
+          ctx.font = '900 26px sans-serif';
+          const title = (item.slide.title || 'SETTINGS SLIDE').toUpperCase();
+          ctx.fillText(title.length > 28 ? title.slice(0, 26) + '...' : title, 30, 105);
+
+          // Bottom Subtitle Banner
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+          ctx.fillRect(0, ch - 140, cw, 140);
+          ctx.fillStyle = '#f59e0b';
+          ctx.fillRect(0, ch - 140, cw, 3);
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 20px sans-serif';
+          ctx.textAlign = 'center';
+          const sub = item.slide.subtitle || 'Screenshot & save for your next match';
+          ctx.fillText(sub.length > 42 ? sub.slice(0, 40) + '...' : sub, cw / 2, ch - 65);
+          ctx.textAlign = 'left';
+
+          elapsed += frameInterval / 1000;
+          if (exportProgressBar) {
+            exportProgressBar.style.width = `${Math.min(95, Math.round((elapsed / totalDuration) * 90) + 10)}%`;
+          }
+
+          await new Promise(r => setTimeout(r, frameInterval));
+        }
+
+      } else if (item.type === 'video') {
+        hiddenVideo.currentTime = item.start;
+        await new Promise(r => {
+          hiddenVideo.onseeked = () => r();
+          setTimeout(r, 600);
+        });
+
+        hiddenVideo.play().catch(() => {});
+
+        const panPercent = typeof manualCrop?.panX === 'number' ? manualCrop.panX : 0;
+        const fitMode = layoutMode;
+
+        while (!hiddenVideo.paused && !hiddenVideo.ended && hiddenVideo.currentTime < item.end && !ctrl.aborted) {
+          const vw = hiddenVideo.videoWidth || 1920;
+          const vh = hiddenVideo.videoHeight || 1080;
+
+          if (fitMode === 'blur_pad') {
+            ctx.save();
+            ctx.filter = 'blur(20px) brightness(0.6)';
+            ctx.drawImage(hiddenVideo, -50, -50, cw + 100, ch + 100);
+            ctx.restore();
+
+            const scale = cw / vw;
+            const drawH = vh * scale;
+            const drawY = (ch - drawH) / 2;
+            ctx.drawImage(hiddenVideo, 0, drawY, cw, drawH);
+          } else {
+            const targetAspect = cw / ch;
+            const cropW = vh * targetAspect;
+            const cropH = vh;
+            const maxPanX = Math.max(0, vw - cropW);
+            const cropX = (panPercent / 100) * maxPanX;
+
+            ctx.drawImage(hiddenVideo, cropX, 0, cropW, cropH, 0, 0, cw, ch);
+          }
+
+          elapsed += 1 / 30;
+          if (exportProgressBar) {
+            exportProgressBar.style.width = `${Math.min(95, Math.round((elapsed / totalDuration) * 90) + 10)}%`;
+          }
+
+          await new Promise(r => requestAnimationFrame(r));
+        }
+
+        hiddenVideo.pause();
+      }
+    }
+
+    if (ctrl.aborted) {
+      recorder.stop();
+      return;
+    }
+
+    recorder.stop();
+    await new Promise(r => { recorder.onstop = r; });
+
+    const isMp4 = mimeType.includes('mp4');
+    const finalBlob = new Blob(recordedChunks, { type: mimeType });
+    const blobUrl = URL.createObjectURL(finalBlob);
+    const ext = isMp4 ? 'mp4' : 'webm';
+    const outName = videoFilename ? `short_with_slides_${videoFilename.replace(/\.[^/.]+$/, '')}.${ext}` : `tiktok_short_with_slides.${ext}`;
+
+    if (downloadBtn) {
+      downloadBtn.href = blobUrl;
+      downloadBtn.download = outName;
+      downloadBtn.innerHTML = `<i data-lucide="download" class="w-4 h-4"></i><span>Download 9:16 Short (With Pictures)</span>`;
+      lucide.createIcons();
+    }
+
+    if (exportProgressBar) exportProgressBar.style.width = '100%';
+    if (exportStatusText) {
+      exportStatusText.textContent = `✅ Ready! Video + ${slides.length} picture slide(s) stitched into vertical short.`;
+      exportStatusText.classList.remove('text-amber-400');
+      exportStatusText.classList.add('text-emerald-400');
+    }
+
+    showToast(`✅ 9:16 vertical video with all pictures ready to download! (${Math.round(finalBlob.size / 1024)} KB)`, 'success');
+
+  } catch (exportErr) {
+    console.warn('Canvas export notice:', exportErr);
+    if (exportStatus) exportStatus.classList.add('hidden');
+    if (downloadBtn) {
+      downloadBtn.href = videoUrl;
+      downloadBtn.download = videoFilename ? `short_${videoFilename}` : 'tiktok_short.mp4';
+    }
+  }
+}
+
 async function startRenderShort() {
   if (typeof selectInspectorTab === 'function') selectInspectorTab('export');
   if (!activeVideo.path && !activeVideo.url) {
@@ -2603,8 +3256,8 @@ async function startRenderShort() {
           hookCardMode,
           hookCardText: document.getElementById('hookcard-text-input')?.value?.trim() || '',
           imageOverlays: pictureMode === 'invideo' ? imageOverlays : [],
-          endCards: pictureMode === 'endcard' ? endCardSlides : [],
-          endCard: (pictureMode === 'endcard' && endCardSlides.length > 0) ? endCardSlides[0] : null,
+          endCards: endCardSlides,
+          endCard: endCardSlides.length > 0 ? endCardSlides[0] : null,
           bgMusicTrack,
           customAudioPath: customAudioTracks.length > 0 ? customAudioTracks[0].audioPath : null,
           customAudioTracks,
@@ -2643,26 +3296,17 @@ async function startRenderShort() {
       downloadBtn.download = data.filename || 'tiktok_short.mp4';
       showToast('Short clip rendered successfully in 9:16 vertical format!', 'success');
     } else if (activeVideo.url) {
-      // PREPARE AND PLAY THE USER'S ACTUAL UPLOADED VIDEO
-      renderedPlayer.src = activeVideo.url;
-      renderedPlayer.currentTime = startTime;
-      renderedPlayer.volume = 1.0;
-      renderedPlayer.muted = false;
-      renderedPlayer.load();
-      renderedPlayer.onloadeddata = () => {
-        renderedPlayer.currentTime = startTime;
-        renderedPlayer.play().catch(() => {});
-      };
-      // Loop within trimmed segment
-      renderedPlayer.ontimeupdate = () => {
-        if (renderedPlayer.currentTime >= endTime) {
-          renderedPlayer.currentTime = startTime;
-        }
-      };
-
-      downloadBtn.href = activeVideo.url;
-      downloadBtn.download = activeVideo.filename ? `short_${activeVideo.filename}` : 'trimmed_segment.mp4';
-      showToast('Your uploaded video has been trimmed and formatted in 9:16 vertical short format!', 'success');
+      // PREPARE AND PLAY THE USER'S ACTUAL VIDEO + PICTURE SLIDES SEQUENCE
+      startRenderedSequencePlayback({
+        videoUrl: activeVideo.url,
+        videoFilename: activeVideo.filename,
+        startTime,
+        endTime,
+        layoutMode,
+        manualCrop,
+        endCardSlides
+      });
+      showToast('Short formatted in 9:16 vertical format with all picture slides ready!', 'success');
     } else {
       throw new Error('No active video found to render. Please upload a clip first.');
     }
@@ -2789,12 +3433,16 @@ async function autoCreateFullVideo() {
       showToast(`Full ${data.duration || 15}s video auto-created with Voiceover & Subtitles!`, 'success');
       renderedPlayer.play().catch(() => {});
     } else if (activeVideo?.url) {
-      renderedPlayer.src = activeVideo.url;
-      renderedPlayer.load();
-      downloadBtn.href = activeVideo.url;
-      downloadBtn.download = activeVideo.filename ? `auto_${activeVideo.filename}` : 'tiktok_autovideo.mp4';
-      showToast('Video created with your uploaded clip and voiceover script ready!', 'success');
-      renderedPlayer.play().catch(() => {});
+      startRenderedSequencePlayback({
+        videoUrl: activeVideo.url,
+        videoFilename: activeVideo.filename,
+        startTime: parseFloat(document.getElementById('trim-start')?.value) || 0,
+        endTime: parseFloat(document.getElementById('trim-end')?.value) || 10,
+        layoutMode: layoutMode || 'blur_pad',
+        manualCrop,
+        endCardSlides
+      });
+      showToast('Video created with your uploaded clip and picture slides ready!', 'success');
     } else {
       renderedPlayer.src = '/sample/demo_clip.mp4';
       renderedPlayer.load();
@@ -3237,7 +3885,7 @@ function updateManualCropFromFullscreen(key, val) {
 
   selectLayout('manual_crop');
   updateFullscreenCropGuide();
-  updateManualCropGuide();
+  updateCropGuideVisual();
 }
 
 function updateFullscreenCropGuide() {
@@ -3245,26 +3893,28 @@ function updateFullscreenCropGuide() {
   const player = document.getElementById('fullscreen-video-player');
   if (!guide || !player) return;
 
-  if (layoutMode !== 'manual_crop') {
+  if (layoutMode !== 'manual_crop' && layoutMode !== 'left_focus' && layoutMode !== 'center_crop') {
     guide.classList.add('hidden');
     return;
   }
 
   guide.classList.remove('hidden');
-  guide.style.top = `${manualCrop.cropTop}%`;
-  guide.style.bottom = `${manualCrop.cropBottom}%`;
-  guide.style.left = `${manualCrop.cropLeft}%`;
-  guide.style.right = `${manualCrop.cropRight}%`;
+  guide.style.top = `${manualCrop.cropTop || 0}%`;
+  guide.style.bottom = `${manualCrop.cropBottom || 0}%`;
+  guide.style.left = `${manualCrop.cropLeft || 0}%`;
+  guide.style.right = `${manualCrop.cropRight || 0}%`;
 }
 
 function applyCropPreset(preset) {
-  if (preset === 'center_zoom') {
-    manualCrop.cropTop = 0;
-    manualCrop.cropBottom = 0;
-    manualCrop.cropLeft = 21;
-    manualCrop.cropRight = 21;
-    manualCrop.fitMode = 'fill';
+  if (preset === 'left_focus') {
+    setPanPreset(0);
+    selectLayout('left_focus');
+  } else if (preset === 'center_zoom') {
+    setPanPreset(50);
     selectLayout('center_crop');
+  } else if (preset === 'right_focus') {
+    setPanPreset(100);
+    selectLayout('manual_crop');
   } else if (preset === 'blurred_fit') {
     manualCrop.cropTop = 0;
     manualCrop.cropBottom = 0;
@@ -3272,20 +3922,6 @@ function applyCropPreset(preset) {
     manualCrop.cropRight = 0;
     manualCrop.fitMode = 'blur_fit';
     selectLayout('blur_pad');
-  } else if (preset === 'left_focus') {
-    manualCrop.cropTop = 0;
-    manualCrop.cropBottom = 0;
-    manualCrop.cropLeft = 0;
-    manualCrop.cropRight = 42;
-    manualCrop.fitMode = 'fill';
-    selectLayout('manual_crop');
-  } else if (preset === 'right_focus') {
-    manualCrop.cropTop = 0;
-    manualCrop.cropBottom = 0;
-    manualCrop.cropLeft = 42;
-    manualCrop.cropRight = 0;
-    manualCrop.fitMode = 'fill';
-    selectLayout('manual_crop');
   }
 
   ['top', 'bottom', 'left', 'right'].forEach(side => {
@@ -3302,12 +3938,12 @@ function applyCropPreset(preset) {
   });
 
   updateFullscreenCropGuide();
-  updateManualCropGuide();
+  updateCropGuideVisual();
   showToast(`Applied preset: ${preset.replace('_', ' ').toUpperCase()}`, 'info');
 }
 
 function resetCropSliders() {
-  applyCropPreset('blurred_fit');
+  applyCropPreset('left_focus');
 }
 
 // ==========================================
