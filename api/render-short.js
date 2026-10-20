@@ -8,36 +8,34 @@ module.exports = async (req, res) => {
     return res.status(200).end();
   }
 
-  const TUNNEL_URL = 'https://entirely-merry-championship-permalink.trycloudflare.com';
+  const TUNNEL_URL = process.env.TUNNEL_URL;
 
-  try {
-    // Attempt forward to live local/cloud FFmpeg server via tunnel
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 12000);
+  if (TUNNEL_URL && !TUNNEL_URL.includes('entirely-merry')) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 2000);
 
-    const backendRes = await fetch(`${TUNNEL_URL}/api/render-short`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(req.body || {}),
-      signal: controller.signal
-    });
-    clearTimeout(timeout);
+      const backendRes = await fetch(`${TUNNEL_URL}/api/render-short`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(req.body || {}),
+        signal: controller.signal
+      });
+      clearTimeout(timeout);
 
-    if (backendRes.ok) {
-      const data = await backendRes.json();
-      if (data.outputUrl && data.outputUrl.startsWith('/')) {
-        data.outputUrl = `${TUNNEL_URL}${data.outputUrl}`;
+      if (backendRes.ok) {
+        const data = await backendRes.json();
+        if (data.outputUrl && data.outputUrl.startsWith('/')) {
+          data.outputUrl = `${TUNNEL_URL}${data.outputUrl}`;
+        }
+        return res.json(data);
       }
-      return res.json(data);
-    } else {
-      const errData = await backendRes.json().catch(() => ({}));
-      console.warn('Backend FFmpeg returned non-200:', errData);
+    } catch (err) {
+      console.warn('FFmpeg tunnel unreachable, delegating to client-side 9:16 engine:', err.message);
     }
-  } catch (err) {
-    console.warn('FFmpeg tunnel unreachable from Lambda, delegating to client-side 9:16 engine:', err.message);
   }
 
-  // Graceful fallback response instructing client-side canvas renderer
+  // Instant response instructing client-side canvas renderer with zero network delay
   return res.json({
     success: true,
     clientRender: true,

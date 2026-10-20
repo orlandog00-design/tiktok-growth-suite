@@ -3069,7 +3069,9 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
     hiddenVideo.src = videoUrl;
     hiddenVideo.muted = true;
     hiddenVideo.playsInline = true;
-    hiddenVideo.crossOrigin = 'anonymous';
+    if (typeof videoUrl === 'string' && videoUrl.startsWith('http')) {
+      hiddenVideo.crossOrigin = 'anonymous';
+    }
 
     await new Promise((res) => {
       hiddenVideo.onloadedmetadata = () => res();
@@ -3092,7 +3094,6 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
         if (tracks.length > 0) {
           stream.addTrack(tracks[0]);
         }
-        hiddenVideo.muted = false;
       }
     } catch (audioErr) {
       console.log('Audio routing note:', audioErr);
@@ -3239,9 +3240,23 @@ async function triggerClientVideoExport({ videoUrl, videoFilename, startTime, en
           setTimeout(r, 600);
         });
 
-        hiddenVideo.play().catch(() => {});
+        try {
+          await hiddenVideo.play();
+        } catch (playErr) {
+          console.warn('Autoplay note:', playErr);
+        }
 
-        while (!hiddenVideo.paused && !hiddenVideo.ended && hiddenVideo.currentTime < item.end && !ctrl.aborted) {
+        const stepTime = 1 / 30;
+        let simTime = item.start;
+        const endTime = item.end;
+
+        while (simTime < endTime && !ctrl.aborted) {
+          if (!hiddenVideo.paused && !hiddenVideo.ended && hiddenVideo.currentTime > simTime) {
+            simTime = hiddenVideo.currentTime;
+          } else {
+            simTime += stepTime;
+            hiddenVideo.currentTime = Math.min(endTime, simTime);
+          }
           const vw = hiddenVideo.videoWidth || 1920;
           const vh = hiddenVideo.videoHeight || 1080;
 
@@ -3371,7 +3386,29 @@ async function startRenderShort() {
     selectLayout('manual_crop');
   }
 
-  // Show loading
+  const isUploadedClientFile = !!activeVideo.file || (activeVideo.url && activeVideo.url.startsWith('blob:'));
+
+  // INSTANT CLIENT-SIDE RENDER FOR UPLOADED USER VIDEOS (ZERO NETWORK DELAY, NO SPINNER LOOP)
+  if (isUploadedClientFile || !activeVideo.path) {
+    document.getElementById('render-empty').classList.add('hidden');
+    document.getElementById('render-loading').classList.add('hidden');
+    document.getElementById('rendered-video-container').classList.remove('hidden');
+    document.getElementById('render-done-badge').classList.remove('hidden');
+
+    startRenderedSequencePlayback({
+      videoUrl: activeVideo.url,
+      videoFilename: activeVideo.filename,
+      startTime,
+      endTime,
+      layoutMode,
+      manualCrop,
+      endCardSlides
+    });
+    showToast('Short rendered in 9:16 vertical format with your custom crop!', 'success');
+    return;
+  }
+
+  // Show loading for server videos
   document.getElementById('render-empty').classList.add('hidden');
   document.getElementById('rendered-video-container').classList.add('hidden');
   document.getElementById('render-loading').classList.remove('hidden');
@@ -3384,9 +3421,13 @@ async function startRenderShort() {
   try {
     let data = null;
     try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 3500);
+
       const res = await fetch('/api/render-short', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           videoPath: activeVideo.path,
           startTime,
@@ -3413,12 +3454,13 @@ async function startRenderShort() {
           aiVoice: selectedAiVoice
         })
       });
+      clearTimeout(timeout);
 
       if (res.ok) {
         data = await res.json().catch(() => null);
       }
     } catch (networkErr) {
-      console.warn('Backend render fetch failed, falling back to client-side playback:', networkErr);
+      console.warn('Backend render fetch note, falling back to client-side engine:', networkErr);
     }
 
     const renderedPlayer = document.getElementById('rendered-video-player');
@@ -3507,7 +3549,27 @@ async function autoCreateFullVideo() {
     return;
   }
 
-  // Show loading
+  const isUploadedClientFile = !!activeVideo?.file || (activeVideo?.url && activeVideo.url.startsWith('blob:'));
+  if (isUploadedClientFile || !activeVideo?.path) {
+    document.getElementById('render-empty').classList.add('hidden');
+    document.getElementById('render-loading').classList.add('hidden');
+    document.getElementById('rendered-video-container').classList.remove('hidden');
+    document.getElementById('render-done-badge').classList.remove('hidden');
+
+    startRenderedSequencePlayback({
+      videoUrl: activeVideo.url,
+      videoFilename: activeVideo.filename,
+      startTime: parseFloat(document.getElementById('trim-start')?.value) || 0,
+      endTime: parseFloat(document.getElementById('trim-end')?.value) || 10,
+      layoutMode: layoutMode || 'blur_pad',
+      manualCrop,
+      endCardSlides
+    });
+    showToast('Video created with your uploaded clip and picture slides ready!', 'success');
+    return;
+  }
+
+  // Show loading for server gameplay template
   document.getElementById('render-empty').classList.add('hidden');
   document.getElementById('rendered-video-container').classList.add('hidden');
   document.getElementById('render-loading').classList.remove('hidden');
@@ -3519,9 +3581,13 @@ async function autoCreateFullVideo() {
   autoBtn.innerHTML = `<span class="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></span> Auto-Creating Voiceover & Video...`;
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3500);
+
     const res = await fetch('/api/auto-create-video', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
       body: JSON.stringify({
         scriptText,
         videoPath: activeVideo ? activeVideo.path : null,
@@ -3549,6 +3615,7 @@ async function autoCreateFullVideo() {
         aiVoice: selectedAiVoice
       })
     });
+    clearTimeout(timeout);
 
     let data = null;
     try {
@@ -3562,9 +3629,8 @@ async function autoCreateFullVideo() {
     const renderedPlayer = document.getElementById('rendered-video-player');
     const downloadBtn = document.getElementById('download-clip-btn');
 
-    const isUploadedClientFile = !!activeVideo?.file || (activeVideo?.url && activeVideo.url.startsWith('blob:'));
     const isDemoOutput = data && data.outputUrl && (data.outputUrl.includes('demo_clip') || (data.filename && data.filename.includes('demo')));
-    const canUseServerOutput = data && data.outputUrl && !data.clientRender && (!isUploadedClientFile || !isDemoOutput);
+    const canUseServerOutput = data && data.outputUrl && !data.clientRender && !isDemoOutput;
 
     if (canUseServerOutput) {
       renderedPlayer.src = data.outputUrl;
@@ -3594,6 +3660,10 @@ async function autoCreateFullVideo() {
       showToast('Video generated with gameplay template!', 'success');
       renderedPlayer.play().catch(() => {});
     }
+
+    document.getElementById('render-loading').classList.add('hidden');
+    document.getElementById('rendered-video-container').classList.remove('hidden');
+    document.getElementById('render-done-badge').classList.remove('hidden');
   } catch (err) {
     console.error('Auto create error:', err);
     document.getElementById('render-loading').classList.add('hidden');
