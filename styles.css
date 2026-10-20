@@ -1,0 +1,73 @@
+/* Custom styling for TikTok Creator Suite */
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: #0B0C10;
+}
+
+/* Tab button active state */
+.tab-btn.active {
+  background: rgba(37, 244, 238, 0.12);
+  color: #25F4EE;
+  border: 1px solid rgba(37, 244, 238, 0.3);
+}
+
+.tab-btn:not(.active) {
+  color: #94A3B8;
+}
+
+.tab-btn:not(.active):hover {
+  color: #F8FAFC;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Category Pill Active */
+.cat-pill.active {
+  background: #FE2C55 !important;
+  color: #FFFFFF !important;
+  border-color: #FE2C55 !important;
+}
+
+/* Layout Button Active */
+.layout-btn.active {
+  border-color: #25F4EE !important;
+  background-color: rgba(37, 244, 238, 0.08) !important;
+}
+
+/* Subtitle Style Preset Active */
+.substyle-btn.active {
+  border-color: #25F4EE !important;
+  background-color: rgba(37, 244, 238, 0.12) !important;
+  color: #25F4EE !important;
+}
+
+/* Hook Card Active */
+.hook-card.selected {
+  border-color: #FE2C55 !important;
+  background-color: rgba(254, 44, 85, 0.08) !important;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #11131A;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #25293A;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3B425A;
+}
+
+/* Toast Animation */
+#toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}

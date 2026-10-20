@@ -48,17 +48,17 @@
 
       <!-- TAB BUTTONS -->
       <nav class="flex items-center gap-2 bg-brand-dark/60 p-1.5 rounded-xl border border-brand-border">
-        <button id="tab-trends-btn" onclick="switchTab('trends')" class="tab-btn active px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all">
-          <i data-lucide="flame" class="w-4 h-4 text-orange-500"></i>
-          Trend Radar
+        <button id="tab-clipper-btn" onclick="switchTab('clipper')" class="tab-btn active px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all">
+          <i data-lucide="scissors" class="w-4 h-4 text-brand-red"></i>
+          Video Editor
         </button>
         <button id="tab-script-btn" onclick="switchTab('script')" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all">
-          <i data-lucide="file-text" class="w-4 h-4 text-brand-cyan"></i>
+          <i data-lucide="sparkles" class="w-4 h-4 text-brand-cyan"></i>
           AI Script Studio
         </button>
-        <button id="tab-clipper-btn" onclick="switchTab('clipper')" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all">
-          <i data-lucide="scissors" class="w-4 h-4 text-brand-red"></i>
-          Shorts Clipper & Captions
+        <button id="tab-trends-btn" onclick="switchTab('trends')" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all">
+          <i data-lucide="flame" class="w-4 h-4 text-orange-500"></i>
+          Trending Sounds
         </button>
         <button id="tab-hashtags-btn" onclick="switchTab('hashtags')" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all">
           <i data-lucide="hash" class="w-4 h-4 text-emerald-400"></i>
@@ -84,375 +84,10 @@
 
   <!-- MAIN CONTAINER -->
   <main class="flex-1 max-w-7xl w-full mx-auto p-6">
-
     <!-- ======================================================== -->
-    <!-- TAB 1: TREND RADAR                                       -->
+    <!-- TAB 1: VIDEO EDITOR & SHORTS STUDIO (CAPCUT PRO)         -->
     <!-- ======================================================== -->
-    <section id="tab-trends" class="tab-content">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <div>
-          <div class="flex items-center gap-2 mb-1 flex-wrap">
-            <h2 class="text-2xl font-bold flex items-center gap-2">
-              🔥 Breakout Trend Radar
-            </h2>
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              REAL-TIME SYNC
-            </span>
-            <span id="trend-countdown-pill" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-brand-card text-slate-300 border border-brand-border">
-              <i data-lucide="timer" class="w-3 h-3 text-brand-cyan"></i>
-              <span>Next Sync: <strong id="trend-countdown" class="text-brand-cyan">60s</strong></span>
-            </span>
-            <span class="text-[11px] text-slate-500 font-mono">Updated: <span id="trend-last-updated" class="text-slate-400 font-bold">Just now</span></span>
-          </div>
-          <p class="text-sm text-slate-400">Scans live game patches, TikTok viral sounds, and breakout velocity patterns every 60 seconds.</p>
-        </div>
-
-        <div class="flex items-center gap-2.5 flex-wrap">
-          <button type="button" onclick="toggleAutoTrendSync()" id="auto-sync-toggle-btn" class="px-3 py-2 rounded-xl bg-brand-card hover:bg-slate-800 border border-brand-border text-emerald-400 text-xs font-bold flex items-center gap-1.5 transition">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" id="auto-sync-dot"></span>
-            <span id="auto-sync-label">Auto-Refresh: ON</span>
-          </button>
-          <button type="button" onclick="refreshLiveTrendsWithAi()" id="refresh-trends-btn" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-black text-xs font-black shadow-lg shadow-orange-500/20 flex items-center gap-2 transition">
-            <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="refresh-trends-icon"></i>
-            <span>Refresh Live Trends</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- VIRAL TOPIC SEARCH BAR -->
-      <div class="mb-5 bg-brand-card/90 p-3.5 rounded-2xl border border-brand-border shadow-xl backdrop-blur relative">
-        <div class="flex flex-col sm:flex-row items-center gap-2.5">
-          <div class="relative flex-1 w-full">
-            <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-            <input 
-              type="text" 
-              id="trend-search-input" 
-              placeholder="Search any game or topic (e.g. Fortnite, Minecraft, Valorant, AI Tools, Crypto)..." 
-              onkeydown="if(event.key === 'Enter') handleTopicSearch()"
-              class="w-full bg-brand-dark border border-brand-border rounded-xl pl-10 pr-28 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-cyan transition font-medium"
-            />
-            <button 
-              type="button" 
-              onclick="handleTopicSearch()" 
-              id="trend-search-btn"
-              class="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-brand-cyan to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-black text-xs font-black flex items-center gap-1.5 transition shadow"
-            >
-              <i data-lucide="sparkles" class="w-3.5 h-3.5" id="trend-search-icon"></i>
-              <span id="trend-search-btn-text">Scan Viral</span>
-            </button>
-          </div>
-
-          <button 
-            type="button" 
-            onclick="clearTopicSearch()" 
-            id="trend-clear-search-btn"
-            class="hidden px-3 py-2 rounded-xl bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-400 hover:text-white text-xs font-bold flex items-center gap-1 transition"
-          >
-            <i data-lucide="x" class="w-3.5 h-3.5"></i>
-            <span>Clear</span>
-          </button>
-        </div>
-
-        <!-- QUICK POPULAR GAME / TOPIC PRESETS -->
-        <div class="flex items-center gap-1.5 flex-wrap mt-2.5 text-[11px] text-slate-400">
-          <span class="font-bold text-slate-500 text-[10px] uppercase tracking-wider">Quick Scan:</span>
-          <button type="button" onclick="quickSearchTopic('Roblox')" class="px-2 py-1 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 transition hover:text-amber-300 hover:border-amber-300/40">🧱 Roblox</button>
-          <button type="button" onclick="quickSearchTopic('COD Multiplayer')" class="px-2 py-1 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 transition hover:text-orange-400 hover:border-orange-400/40">🎖️ COD Multiplayer</button>
-          <button type="button" onclick="quickSearchTopic('Fortnite')" class="px-2 py-1 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 transition hover:text-brand-cyan hover:border-brand-cyan/40">🎯 Fortnite</button>
-          <button type="button" onclick="quickSearchTopic('Warzone Season 6')" class="px-2 py-1 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 transition hover:text-amber-400 hover:border-amber-400/40">⚡ Warzone S6</button>
-          <button type="button" onclick="quickSearchTopic('Minecraft')" class="px-2 py-1 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 transition hover:text-emerald-400 hover:border-emerald-400/40">⛏️ Minecraft</button>
-          <button type="button" onclick="quickSearchTopic('Valorant')" class="px-2 py-1 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 transition hover:text-red-400 hover:border-red-400/40">🔥 Valorant</button>
-          <button type="button" onclick="quickSearchTopic('GTA 6')" class="px-2 py-1 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 transition hover:text-pink-400 hover:border-pink-400/40">🌴 GTA 6</button>
-          <button type="button" onclick="quickSearchTopic('AI Tools')" class="px-2 py-1 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 transition hover:text-cyan-400 hover:border-cyan-400/40">🤖 AI Tools</button>
-        </div>
-
-        <!-- ACTIVE SEARCH STATUS BADGE -->
-        <div id="trend-search-status" class="hidden mt-2 pt-2 border-t border-brand-border/40 flex items-center justify-between text-xs">
-          <span class="text-slate-300 flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-brand-cyan animate-ping"></span>
-            Showing live breakout virals for: <span id="trend-search-query-label" class="font-bold text-brand-cyan"></span>
-          </span>
-          <button type="button" onclick="clearTopicSearch()" class="text-slate-400 hover:text-brand-red text-[11px] underline">Reset to Default</button>
-        </div>
-      <!-- VIRAL IDEA STUDIO: HERO PROMPT FOR CUSTOM CONCEPTS -->
-      <div class="mb-6 p-5 rounded-2xl bg-gradient-to-r from-brand-card via-slate-900 to-brand-card border-2 border-brand-cyan/40 shadow-2xl shadow-brand-cyan/10">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/30">
-                <i data-lucide="sparkles" class="w-3 h-3"></i> AI VIRAL IDEA STUDIO
-              </span>
-              <span class="text-xs text-amber-400 font-semibold">✨ Turn ANY idea or clip into a viral video</span>
-            </div>
-            <h3 class="text-base sm:text-lg font-black text-white mt-1">Have an idea or gameplay highlight? Type it below to viralize it:</h3>
-          </div>
-        </div>
-
-        <div class="flex flex-col sm:flex-row gap-2">
-          <div class="relative flex-1">
-            <input 
-              type="text" 
-              id="trend-custom-idea-input" 
-              placeholder="e.g. “Got another nuke with the boys”, “1v4 clutch with 1 HP”, “Funniest death comms”..." 
-              onkeydown="if(event.key === 'Enter') launchCustomIdeaFromRadar()"
-              class="w-full bg-brand-dark/90 border border-brand-cyan/50 focus:border-brand-cyan rounded-xl px-4 py-3 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-cyan/30 transition shadow-inner font-medium"
-            />
-          </div>
-          <button 
-            type="button" 
-            onclick="launchCustomIdeaFromRadar()" 
-            class="bg-gradient-to-r from-brand-cyan to-teal-400 hover:from-cyan-400 hover:to-teal-300 text-black font-black px-6 py-3 rounded-xl shadow-lg shadow-brand-cyan/20 flex items-center justify-center gap-2 text-xs sm:text-sm transition transform active:scale-95 whitespace-nowrap"
-          >
-            <i data-lucide="wand-2" class="w-4 h-4"></i>
-            <span>Viralize My Idea ➔</span>
-          </button>
-        </div>
-
-        <!-- QUICK IDEA CHIPS -->
-        <div class="flex items-center gap-1.5 flex-wrap mt-3 text-xs text-slate-300">
-          <span class="text-slate-400 text-[11px] font-bold">Try an idea:</span>
-          <button type="button" onclick="setQuickIdea('Got another nuke with the boys in Rebirth')" class="px-2.5 py-1 rounded-lg bg-brand-dark/80 hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-brand-cyan transition text-[11px]">💣 "Got another nuke with the boys"</button>
-          <button type="button" onclick="setQuickIdea('1v4 clutch with 1 HP when teammates choked')" class="px-2.5 py-1 rounded-lg bg-brand-dark/80 hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-amber-400 transition text-[11px]">🔥 "1v4 clutch with 1 HP"</button>
-          <button type="button" onclick="setQuickIdea('Funniest toxic death comms in Search and Destroy')" class="px-2.5 py-1 rounded-lg bg-brand-dark/80 hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-pink-400 transition text-[11px]">💀 "Funniest death comms"</button>
-          <button type="button" onclick="setQuickIdea('The secret Roblox glitch winning every server')" class="px-2.5 py-1 rounded-lg bg-brand-dark/80 hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-emerald-400 transition text-[11px]">🧱 "Roblox glitch secret"</button>
-        </div>
-      </div>
-
-      <!-- CATEGORY FILTERS -->
-      <div class="flex flex-wrap items-center gap-2 mb-6" id="trend-categories">
-        <button onclick="filterTrends('all')" class="cat-pill active px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-border text-white border border-slate-600 transition">All Niches</button>
-        <button onclick="filterTrends('gaming')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-amber-400 border border-amber-500/30 hover:text-white transition">🎮 Warzone & COD</button>
-        <button onclick="filterTrends('tech')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">🤖 Tech & AI</button>
-        <button onclick="filterTrends('finance')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">💼 Wealth & Finance</button>
-        <button onclick="filterTrends('mystery')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">👽 Dark Mysteries</button>
-        <button onclick="filterTrends('storytelling')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">📖 Viral Stories</button>
-        <button onclick="filterTrends('psychology')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">🧠 Psychology</button>
-      </div>
-
-      <!-- TRENDS GRID -->
-      <div id="trends-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <!-- Rendered dynamically via app.js -->
-      </div>
-    </section>
-
-    <!-- ======================================================== -->
-    <!-- TAB 2: AI SCRIPT & HOOK STUDIO                           -->
-    <!-- ======================================================== -->
-    <section id="tab-script" class="tab-content hidden">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-        <!-- LEFT CONFIGURATION COLUMN -->
-        <div class="lg:col-span-5 bg-brand-card p-6 rounded-2xl border border-brand-border flex flex-col gap-5 shadow-xl">
-          <div class="border-b border-brand-border pb-4">
-            <h2 class="text-xl font-bold flex items-center gap-2">
-              <i data-lucide="sparkles" class="w-5 h-5 text-brand-cyan"></i>
-              Viral Script Generator
-            </h2>
-            <p class="text-xs text-slate-400">Generates 4 high-retention hooks, visual pacing cues, and engagement CTAs.</p>
-          </div>
-
-          <form id="script-form" class="flex flex-col gap-4">
-            <!-- IDEA ARCHETYPE PRESETS -->
-            <div>
-              <div class="flex items-center justify-between mb-1.5">
-                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Your Custom Idea / Clip Concept</label>
-                <span class="text-[10px] text-brand-cyan font-bold">✨ Any Concept Supported</span>
-              </div>
-              <div class="flex items-center gap-1.5 flex-wrap mb-2">
-                <span class="text-[10px] text-slate-500 font-bold uppercase">Quick Themes:</span>
-                <button type="button" onclick="setScriptIdeaPreset('nuke')" class="px-2 py-0.5 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-brand-cyan text-[11px] transition">💣 Nuke & Streak</button>
-                <button type="button" onclick="setScriptIdeaPreset('clutch')" class="px-2 py-0.5 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-amber-400 text-[11px] transition">🔥 1v4 Clutch</button>
-                <button type="button" onclick="setScriptIdeaPreset('comms')" class="px-2 py-0.5 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-pink-400 text-[11px] transition">💀 Funny Comms</button>
-                <button type="button" onclick="setScriptIdeaPreset('loadout')" class="px-2 py-0.5 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-orange-400 text-[11px] transition">👑 Meta Class</button>
-                <button type="button" onclick="setScriptIdeaPreset('roblox')" class="px-2 py-0.5 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-emerald-400 text-[11px] transition">🧱 Roblox</button>
-              </div>
-              <textarea id="script-topic" rows="3" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-brand-cyan text-slate-100 placeholder-slate-500 resize-none transition" placeholder="e.g. “Got another nuke with the boys”, “1v4 clutch with 1 HP when teammates choked”, “Funniest death comms in Search & Destroy”..."></textarea>
-            </div>
-
-            <!-- NICHE & TONE ROW -->
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Niche</label>
-                <select id="script-niche" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brand-cyan text-slate-200">
-                  <option value="Call of Duty / Warzone Meta">🎮 Warzone Meta & Loadouts</option>
-                  <option value="Warzone Movement & Rebirth">🏃 Warzone Movement & Tips</option>
-                  <option value="Gaming Clutch & Rage Comms">🔥 1v4 Clutch & Rage Comms</option>
-                  <option value="Dark Mysteries & Conspiracies">👽 Dark Mysteries & Conspiracies (No Gameplay)</option>
-                  <option value="Viral Reddit Stories & Confessions">📖 Viral Reddit Stories & Drama (No Gameplay)</option>
-                  <option value="Mind-Blowing Science & History Facts">🧠 Mind-Blowing Facts (No Gameplay)</option>
-                  <option value="Tech & AI Life Hacks">🤖 Tech & AI Hacks (No Gameplay)</option>
-                  <option value="Personal Finance & Money Secrets">💰 Money & Wealth Hacks (No Gameplay)</option>
-                  <option value="Fitness & Health">💪 Fitness & Gym</option>
-                  <option value="General Entertainment">🚀 Custom / Any Topic</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Tone & Pacing</label>
-                <select id="script-tone" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brand-cyan text-slate-200">
-                  <option value="High Energy & Urgent">High Energy & Urgent</option>
-                  <option value="Secretive & Whispered">Secretive / Insider</option>
-                  <option value="Authoritative & Direct">Authoritative & Direct</option>
-                  <option value="Sarcastic & Relatable">Sarcastic & Relatable</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- DURATION & GOAL ROW -->
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Target Length</label>
-                <select id="script-duration" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brand-cyan text-slate-200">
-                  <option value="30">~30 Seconds (Fast)</option>
-                  <option value="45">~45 Seconds (Balanced)</option>
-                  <option value="60">~60 Seconds (Deep Dive)</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Engagement Goal</label>
-                <select id="script-goal" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brand-cyan text-slate-200">
-                  <option value="comments">Max Comments & Debate</option>
-                  <option value="saves">Max Saves & Bookmarks</option>
-                  <option value="follows">Profile Visits & Follows</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- GENERATE BUTTON -->
-            <button type="submit" id="generate-script-btn" class="w-full mt-2 bg-gradient-to-r from-brand-red to-pink-600 hover:from-red-600 hover:to-pink-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-brand-red/25 flex items-center justify-center gap-2 transition-all transform active:scale-[0.98]">
-              <i data-lucide="wand-2" class="w-5 h-5"></i>
-              Generate Viral Script
-            </button>
-          </form>
-        </div>
-
-        <!-- RIGHT OUTPUT COLUMN -->
-        <div class="lg:col-span-7 flex flex-col gap-5">
-
-          <!-- HOOK SELECTOR CAROUSEL / GRID -->
-          <div class="bg-brand-card p-5 rounded-2xl border border-brand-border">
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <i data-lucide="anchor" class="w-4 h-4 text-brand-red"></i>
-                Select Viral Hook (First 3 Seconds)
-              </h3>
-              <span class="text-xs text-brand-cyan font-mono" id="selected-hook-badge">Hook #1 Selected</span>
-            </div>
-
-            <div id="hooks-container" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div class="p-3.5 rounded-xl border border-brand-border bg-brand-dark/50 text-xs text-slate-400">
-                Generate a script to see 4 retention-tested hook variations.
-              </div>
-            </div>
-          </div>
-
-          <!-- TELEPROMPTER SCRIPT VIEWER -->
-          <div class="bg-brand-card p-5 rounded-2xl border border-brand-border flex-1 flex flex-col">
-            <div class="flex items-center justify-between mb-3 border-b border-brand-border pb-3">
-              <div class="flex items-center gap-2">
-                <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                  <i data-lucide="tv" class="w-4 h-4 text-brand-cyan"></i>
-                  Teleprompter Script with Cues
-                </h3>
-              </div>
-              <div class="flex items-center gap-3 text-xs font-mono text-slate-400" id="script-metrics">
-                <span>0 Words</span>
-                <span>•</span>
-                <span>~0s Est.</span>
-              </div>
-            </div>
-
-            <!-- SCRIPT SEGMENTS LIST -->
-            <div id="script-segments" class="space-y-3 flex-1 overflow-y-auto max-h-[380px] pr-1">
-              <div class="text-center py-12 text-slate-500 text-sm">
-                Enter a topic on the left and click "Generate Viral Script" to populate your teleprompter.
-              </div>
-            </div>
-
-            <!-- SEO & ACTION BAR -->
-            <div class="border-t border-brand-border pt-4 mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div class="text-xs text-slate-400 truncate max-w-sm" id="seo-preview">
-                SEO: Ready to optimize
-              </div>
-
-              <div class="flex items-center gap-2 w-full sm:w-auto">
-                <button onclick="copyFullScript()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-200 flex items-center gap-1.5 transition">
-                  <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy
-                </button>
-                <button onclick="downloadScriptTxt()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-200 flex items-center gap-1.5 transition">
-                  <i data-lucide="download" class="w-3.5 h-3.5"></i> Save
-                </button>
-                <button onclick="sendScriptToClipper()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-200 flex items-center gap-1.5 transition">
-                  <i data-lucide="scissors" class="w-3.5 h-3.5 text-brand-cyan"></i> To Clipper
-                </button>
-                <button onclick="autoCreateVideoFromScript()" class="px-4 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-amber-400 to-orange-500 text-black hover:from-amber-300 hover:to-orange-400 flex items-center gap-1.5 shadow-lg shadow-amber-500/20 transition">
-                  <i data-lucide="zap" class="w-3.5 h-3.5 fill-current"></i> Auto-Create Video
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- INTERACTIVE IDEA CO-PILOT & CHAT REFINEMENT CARD -->
-          <div class="bg-gradient-to-r from-brand-card via-slate-900 to-brand-card p-5 rounded-2xl border border-brand-cyan/40 shadow-xl flex flex-col gap-3">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-brand-cyan animate-pulse"></span>
-                <h3 class="text-sm font-extrabold uppercase tracking-wider text-white flex items-center gap-1.5">
-                  <i data-lucide="message-square" class="w-4 h-4 text-brand-cyan"></i>
-                  Communicate & Refine Your Idea (Idea Co-Pilot)
-                </h3>
-              </div>
-              <span class="text-[10px] font-mono text-brand-cyan font-bold bg-brand-cyan/10 border border-brand-cyan/30 px-2 py-0.5 rounded-full">Interactive AI</span>
-            </div>
-            <p class="text-xs text-slate-400">Communicate any adjustments to the AI—e.g. add screaming teammate comms, change the hook angle, focus on the ending nuke explosion, or shorten pacing.</p>
-
-            <!-- LIVE REFINEMENT STATUS BADGE -->
-            <div id="copilot-status-badge" class="hidden text-xs py-1.5 px-3 rounded-xl bg-brand-dark/80 border border-brand-border text-slate-300 flex items-center justify-between">
-              <span id="copilot-status-text" class="truncate font-mono text-[11px] text-amber-300"></span>
-              <span class="text-[10px] text-emerald-400 font-bold">✓ Script Synced</span>
-            </div>
-
-            <!-- ONE-CLICK QUICK REFINEMENT PILLS -->
-            <div class="flex items-center gap-1.5 flex-wrap text-xs">
-              <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Quick Directives:</span>
-              <button type="button" onclick="sendCoPilotRefinement('Add funny comms of my teammate screaming on proximity chat')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-brand-cyan text-[11px] transition">🎙️ + Screaming Comms</button>
-              <button type="button" onclick="sendCoPilotRefinement('Make the hook more suspenseful and dramatic with a ticking countdown')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-amber-400 text-[11px] transition">💥 + Dramatic Suspense Hook</button>
-              <button type="button" onclick="sendCoPilotRefinement('Focus heavily on the final 10 seconds of holding the nuke bomb site')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-orange-400 text-[11px] transition">💣 + Focus Nuke Detonation</button>
-              <button type="button" onclick="sendCoPilotRefinement('Make it an intense 1v4 clutch with 1 HP survival')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-pink-400 text-[11px] transition">🔥 + 1v4 Clutch Angle</button>
-              <button type="button" onclick="sendCoPilotRefinement('Shorten the script to 15 seconds ultra-fast pacing')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-emerald-400 text-[11px] transition">⚡ + 15s Fast Pacing</button>
-            </div>
-
-            <!-- CHAT INPUT BAR -->
-            <div class="flex gap-2 pt-1">
-              <input 
-                type="text" 
-                id="copilot-refine-input" 
-                placeholder="Type your idea or adjustment (e.g. “Add my boy yelling in the mic”, “Make it toxic”, “Focus on Rebirth Island”)..." 
-                onkeydown="if(event.key === 'Enter') handleCoPilotSubmit()"
-                class="flex-1 bg-brand-dark border border-brand-border focus:border-brand-cyan rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none transition font-medium"
-              />
-              <button 
-                type="button" 
-                id="copilot-submit-btn" 
-                onclick="handleCoPilotSubmit()" 
-                class="px-4 py-2 rounded-xl bg-gradient-to-r from-brand-cyan to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-black text-xs font-black flex items-center gap-1.5 shadow-md shadow-brand-cyan/20 transition whitespace-nowrap active:scale-95"
-              >
-                <i data-lucide="send" class="w-3.5 h-3.5"></i>
-                <span>Send Direction</span>
-              </button>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
-        <!-- ======================================================== -->
-    <!-- TAB 3: SHORTS CLIPPER & SUBTITLE ENGINE                   -->
-    <!-- ======================================================== -->
-    <section id="tab-clipper" class="tab-content hidden">
+    <section id="tab-clipper" class="tab-content">
       <div class="space-y-5">
 
         <!-- STUDIO HEADER & QUICK ACTION BAR -->
@@ -464,10 +99,10 @@
               </span>
               <div>
                 <h2 class="text-xl font-black text-white flex items-center gap-2">
-                  <span>Shorts Clipper & Captions Studio</span>
+                  <span>Video Editor & Shorts Studio</span>
                   <span class="text-[10px] px-2 py-0.5 rounded-full bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/40 font-mono font-bold">CapCut Pro</span>
                 </h2>
-                <p class="text-xs text-slate-400 mt-0.5">Reframe to 9:16 vertical TikTok format, assemble multi-clip sequence reels, and burn kinetic captions.</p>
+                <p class="text-xs text-slate-400 mt-0.5">Assemble multi-clip reels, reframe 9:16 vertical video, and burn auto kinetic captions.</p>
               </div>
             </div>
           </div>
@@ -1233,6 +868,331 @@
     </section>
 
     <!-- ======================================================== -->
+    <!-- TAB 2: AI SCRIPT & HOOK STUDIO                           -->
+    <!-- ======================================================== -->
+    <section id="tab-script" class="tab-content hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- LEFT CONFIGURATION COLUMN -->
+        <div class="lg:col-span-5 bg-brand-card p-6 rounded-2xl border border-brand-border flex flex-col gap-5 shadow-xl">
+          <div class="border-b border-brand-border pb-4">
+            <h2 class="text-xl font-bold flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-5 h-5 text-brand-cyan"></i>
+              AI Script Studio
+            </h2>
+            <p class="text-xs text-slate-400">Turn any clip idea, highlight, or topic into 4 viral hooks and a complete teleprompter script.</p>
+          </div>
+
+          <form id="script-form" class="flex flex-col gap-4">
+            <!-- IDEA ARCHETYPE PRESETS -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <label for="script-topic" class="block text-xs font-bold uppercase tracking-wider text-slate-200">
+                  What is your video about?
+                </label>
+                <span class="text-[10px] text-brand-cyan font-bold bg-brand-cyan/10 px-2 py-0.5 rounded-full border border-brand-cyan/20">✨ Any Topic Supported</span>
+              </div>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Quick Ideas:</span>
+                <button type="button" onclick="setScriptIdeaPreset('controller')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-brand-cyan text-[11px] font-semibold transition">🎮 Controller Settings</button>
+                <button type="button" onclick="setScriptIdeaPreset('loadout')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-orange-400 text-[11px] font-semibold transition">👑 Weapon Meta</button>
+                <button type="button" onclick="setScriptIdeaPreset('clutch')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-amber-400 text-[11px] font-semibold transition">🔥 1v4 Clutch</button>
+                <button type="button" onclick="setScriptIdeaPreset('nuke')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-brand-red text-[11px] font-semibold transition">💣 Nuke Contract</button>
+                <button type="button" onclick="setScriptIdeaPreset('fortnite')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-purple-400 text-[11px] font-semibold transition">⚡ Fortnite</button>
+                <button type="button" onclick="setScriptIdeaPreset('roblox')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-emerald-400 text-[11px] font-semibold transition">🧱 Roblox</button>
+                <button type="button" onclick="setScriptIdeaPreset('audio')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-teal-400 text-[11px] font-semibold transition">🎧 Footstep Audio</button>
+                <button type="button" onclick="setScriptIdeaPreset('movement')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-blue-400 text-[11px] font-semibold transition">🏃 Movement</button>
+                <button type="button" onclick="setScriptIdeaPreset('comms')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-pink-400 text-[11px] font-semibold transition">💀 Funny Comms</button>
+                <button type="button" onclick="setScriptIdeaPreset('tech')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-cyan-400 text-[11px] font-semibold transition">💡 AI & Tech</button>
+              </div>
+              <textarea id="script-topic" rows="3" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-cyan text-slate-100 placeholder-slate-500 resize-none transition shadow-inner" placeholder="e.g. “best controller settings for warzone TRY NOW!”, “1v4 clutch with 1 HP when teammates choked”, “how to rank up fast in Fortnite”..."></textarea>
+            </div>
+
+            <!-- COLLAPSIBLE ADVANCED SETTINGS ACCORDION -->
+            <details class="bg-brand-dark/40 border border-brand-border/80 rounded-xl p-3 text-xs group transition">
+              <summary class="cursor-pointer font-bold text-slate-300 flex items-center justify-between select-none">
+                <span class="flex items-center gap-1.5 text-slate-300 group-hover:text-white transition">
+                  <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-brand-cyan"></i>
+                  <span>⚙️ Advanced Options (Niche, Tone, Duration, Goal)</span>
+                </span>
+                <span class="text-[10px] text-slate-500 font-mono">Optional</span>
+              </summary>
+              <div class="pt-3 space-y-3 border-t border-brand-border/60 mt-3">
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Niche</label>
+                    <select id="script-niche" class="w-full bg-brand-dark border border-brand-border rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-brand-cyan">
+                      <option value="Call of Duty / Warzone Meta">🎮 Warzone Meta & Loadouts</option>
+                      <option value="Warzone Movement & Rebirth">🏃 Warzone Movement & Tips</option>
+                      <option value="Gaming Clutch & Rage Comms">🔥 1v4 Clutch & Rage Comms</option>
+                      <option value="General Entertainment">🚀 General Gaming / Custom</option>
+                      <option value="Tech & AI Life Hacks">🤖 Tech & AI Hacks</option>
+                      <option value="Mind-Blowing Science & History Facts">🧠 Mind-Blowing Facts</option>
+                      <option value="Dark Mysteries & Conspiracies">👽 Dark Mysteries</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Tone</label>
+                    <select id="script-tone" class="w-full bg-brand-dark border border-brand-border rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-brand-cyan">
+                      <option value="High Energy & Urgent">High Energy & Urgent</option>
+                      <option value="Secretive & Whispered">Secretive / Insider</option>
+                      <option value="Authoritative & Direct">Authoritative & Direct</option>
+                      <option value="Sarcastic & Relatable">Sarcastic & Relatable</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Length</label>
+                    <select id="script-duration" class="w-full bg-brand-dark border border-brand-border rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-brand-cyan">
+                      <option value="30">~30 Seconds (Fast)</option>
+                      <option value="45">~45 Seconds (Balanced)</option>
+                      <option value="60">~60 Seconds (Deep Dive)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Goal</label>
+                    <select id="script-goal" class="w-full bg-brand-dark border border-brand-border rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-brand-cyan">
+                      <option value="comments">Max Comments & Debate</option>
+                      <option value="saves">Max Saves & Bookmarks</option>
+                      <option value="follows">Profile Visits & Follows</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <!-- GENERATE BUTTON -->
+            <button type="submit" id="generate-script-btn" class="w-full mt-2 bg-gradient-to-r from-brand-red to-pink-600 hover:from-red-600 hover:to-pink-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-brand-red/25 flex items-center justify-center gap-2 transition-all transform active:scale-[0.98]">
+              <i data-lucide="wand-2" class="w-5 h-5"></i>
+              <span>Generate Viral Script</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- RIGHT OUTPUT COLUMN -->
+        <div class="lg:col-span-7 flex flex-col gap-5">
+
+          <!-- HOOK SELECTOR CAROUSEL / GRID -->
+          <div class="bg-brand-card p-5 rounded-2xl border border-brand-border">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="anchor" class="w-4 h-4 text-brand-red"></i>
+                Select Viral Hook (First 3 Seconds)
+              </h3>
+              <span class="text-xs text-brand-cyan font-mono" id="selected-hook-badge">Hook #1 Selected</span>
+            </div>
+
+            <div id="hooks-container" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="p-3.5 rounded-xl border border-brand-border bg-brand-dark/50 text-xs text-slate-400">
+                Generate a script to see 4 retention-tested hook variations.
+              </div>
+            </div>
+          </div>
+
+          <!-- TELEPROMPTER SCRIPT VIEWER -->
+          <div class="bg-brand-card p-5 rounded-2xl border border-brand-border flex-1 flex flex-col">
+            <div class="flex items-center justify-between mb-3 border-b border-brand-border pb-3">
+              <div class="flex items-center gap-2">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                  <i data-lucide="tv" class="w-4 h-4 text-brand-cyan"></i>
+                  Teleprompter Script with Cues
+                </h3>
+              </div>
+              <div class="flex items-center gap-3 text-xs font-mono text-slate-400" id="script-metrics">
+                <span>0 Words</span>
+                <span>•</span>
+                <span>~0s Est.</span>
+              </div>
+            </div>
+
+            <!-- SCRIPT SEGMENTS LIST -->
+            <div id="script-segments" class="space-y-3 flex-1 overflow-y-auto max-h-[380px] pr-1">
+              <div class="text-center py-12 text-slate-500 text-sm">
+                Enter a topic on the left and click "Generate Viral Script" to populate your teleprompter.
+              </div>
+            </div>
+
+            <!-- SEO & ACTION BAR -->
+            <div class="border-t border-brand-border pt-4 mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div class="text-xs text-slate-400 truncate max-w-sm" id="seo-preview">
+                SEO: Ready to optimize
+              </div>
+
+              <div class="flex items-center gap-2 w-full sm:w-auto">
+                <button onclick="copyFullScript()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-200 flex items-center gap-1.5 transition">
+                  <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy
+                </button>
+                <button onclick="downloadScriptTxt()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-200 flex items-center gap-1.5 transition">
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i> Save
+                </button>
+                <button onclick="sendScriptToClipper()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-200 flex items-center gap-1.5 transition">
+                  <i data-lucide="scissors" class="w-3.5 h-3.5 text-brand-cyan"></i> To Clipper
+                </button>
+                <button onclick="autoCreateVideoFromScript()" class="px-4 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-amber-400 to-orange-500 text-black hover:from-amber-300 hover:to-orange-400 flex items-center gap-1.5 shadow-lg shadow-amber-500/20 transition">
+                  <i data-lucide="zap" class="w-3.5 h-3.5 fill-current"></i> Auto-Create Video
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- INTERACTIVE IDEA CO-PILOT & CHAT REFINEMENT CARD -->
+          <div class="bg-gradient-to-r from-brand-card via-slate-900 to-brand-card p-5 rounded-2xl border border-brand-cyan/40 shadow-xl flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-brand-cyan animate-pulse"></span>
+                <h3 class="text-sm font-extrabold uppercase tracking-wider text-white flex items-center gap-1.5">
+                  <i data-lucide="message-square" class="w-4 h-4 text-brand-cyan"></i>
+                  Communicate & Refine Your Idea (Idea Co-Pilot)
+                </h3>
+              </div>
+              <span class="text-[10px] font-mono text-brand-cyan font-bold bg-brand-cyan/10 border border-brand-cyan/30 px-2 py-0.5 rounded-full">Interactive AI</span>
+            </div>
+            <p class="text-xs text-slate-400">Communicate any adjustments to the AI—e.g. add screaming teammate comms, change the hook angle, focus on the ending nuke explosion, or shorten pacing.</p>
+
+            <!-- LIVE REFINEMENT STATUS BADGE -->
+            <div id="copilot-status-badge" class="hidden text-xs py-1.5 px-3 rounded-xl bg-brand-dark/80 border border-brand-border text-slate-300 flex items-center justify-between">
+              <span id="copilot-status-text" class="truncate font-mono text-[11px] text-amber-300"></span>
+              <span class="text-[10px] text-emerald-400 font-bold">✓ Script Synced</span>
+            </div>
+
+            <!-- ONE-CLICK QUICK REFINEMENT PILLS -->
+            <div class="flex items-center gap-1.5 flex-wrap text-xs">
+              <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Quick Directives:</span>
+              <button type="button" onclick="sendCoPilotRefinement('Add funny comms of my teammate screaming on proximity chat')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-brand-cyan text-[11px] transition">🎙️ + Screaming Comms</button>
+              <button type="button" onclick="sendCoPilotRefinement('Make the hook more suspenseful and dramatic with a ticking countdown')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-amber-400 text-[11px] transition">💥 + Dramatic Suspense Hook</button>
+              <button type="button" onclick="sendCoPilotRefinement('Focus heavily on the final 10 seconds of holding the nuke bomb site')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-orange-400 text-[11px] transition">💣 + Focus Nuke Detonation</button>
+              <button type="button" onclick="sendCoPilotRefinement('Make it an intense 1v4 clutch with 1 HP survival')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-pink-400 text-[11px] transition">🔥 + 1v4 Clutch Angle</button>
+              <button type="button" onclick="sendCoPilotRefinement('Shorten the script to 15 seconds ultra-fast pacing')" class="px-2.5 py-1 rounded-lg bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 hover:text-emerald-400 text-[11px] transition">⚡ + 15s Fast Pacing</button>
+            </div>
+
+            <!-- CHAT INPUT BAR -->
+            <div class="flex gap-2 pt-1">
+              <input 
+                type="text" 
+                id="copilot-refine-input" 
+                placeholder="Type your idea or adjustment (e.g. “Add my boy yelling in the mic”, “Make it toxic”, “Focus on Rebirth Island”)..." 
+                onkeydown="if(event.key === 'Enter') handleCoPilotSubmit()"
+                class="flex-1 bg-brand-dark border border-brand-border focus:border-brand-cyan rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none transition font-medium"
+              />
+              <button 
+                type="button" 
+                id="copilot-submit-btn" 
+                onclick="handleCoPilotSubmit()" 
+                class="px-4 py-2 rounded-xl bg-gradient-to-r from-brand-cyan to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-black text-xs font-black flex items-center gap-1.5 shadow-md shadow-brand-cyan/20 transition whitespace-nowrap active:scale-95"
+              >
+                <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                <span>Send Direction</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- TAB 3: TRENDING SOUNDS & TOPICS                          -->
+    <!-- ======================================================== -->
+    <section id="tab-trends" class="tab-content hidden">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+          <div class="flex items-center gap-2 mb-1 flex-wrap">
+            <h2 class="text-2xl font-bold flex items-center gap-2">
+              🔥 Trending Sounds & Topics
+            </h2>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              LIVE AUDIO SYNC
+            </span>
+          </div>
+          <p class="text-sm text-slate-400">Discover trending viral TikTok audio tracks and hot gaming topics. Click "Use in Editor" to apply directly to your video clip.</p>
+        </div>
+
+        <div class="flex items-center gap-2.5 flex-wrap">
+          <button type="button" onclick="refreshLiveTrendsWithAi()" id="refresh-trends-btn" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-black text-xs font-black shadow-lg shadow-orange-500/20 flex items-center gap-2 transition">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="refresh-trends-icon"></i>
+            <span>Refresh Trends</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- VIRAL TOPIC SEARCH BAR -->
+      <div class="mb-5 bg-brand-card/90 p-3.5 rounded-2xl border border-brand-border shadow-xl backdrop-blur relative">
+        <div class="flex flex-col sm:flex-row items-center gap-2.5">
+          <div class="relative flex-1 w-full">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input 
+              type="text" 
+              id="trend-search-input" 
+              placeholder="Search any game or topic (e.g. Fortnite, Roblox, Warzone, Minecraft, AI Tools)..." 
+              onkeydown="if(event.key === 'Enter') handleTopicSearch()"
+              class="w-full bg-brand-dark border border-brand-border rounded-xl pl-10 pr-28 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-cyan transition font-medium"
+            />
+            <button 
+              type="button" 
+              onclick="handleTopicSearch()" 
+              id="trend-search-btn"
+              class="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-brand-cyan to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-black text-xs font-black flex items-center gap-1.5 transition shadow"
+            >
+              <i data-lucide="sparkles" class="w-3.5 h-3.5" id="trend-search-icon"></i>
+              <span id="trend-search-btn-text">Scan Viral</span>
+            </button>
+          </div>
+
+          <button 
+            type="button" 
+            onclick="clearTopicSearch()" 
+            id="trend-clear-search-btn"
+            class="hidden px-3 py-2 rounded-xl bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-400 hover:text-white text-xs font-bold flex items-center gap-1 transition"
+          >
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            <span>Clear</span>
+          </button>
+        </div>
+
+        <!-- QUICK POPULAR GAME / TOPIC PRESETS -->
+        <div class="flex items-center gap-1.5 flex-wrap mt-2.5 text-[11px] text-slate-400">
+          <span class="font-bold text-slate-500 text-[10px] uppercase tracking-wider">Quick Scan:</span>
+          <button type="button" onclick="quickSearchTopic('Roblox')" class="px-2 py-1 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 transition hover:text-amber-300 hover:border-amber-300/40">🧱 Roblox</button>
+          <button type="button" onclick="quickSearchTopic('COD Multiplayer')" class="px-2 py-1 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 transition hover:text-orange-400 hover:border-orange-400/40">🎖️ COD Multiplayer</button>
+          <button type="button" onclick="quickSearchTopic('Fortnite')" class="px-2 py-1 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 transition hover:text-brand-cyan hover:border-brand-cyan/40">🎯 Fortnite</button>
+          <button type="button" onclick="quickSearchTopic('Warzone Season 6')" class="px-2 py-1 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 transition hover:text-amber-400 hover:border-amber-400/40">⚡ Warzone S6</button>
+          <button type="button" onclick="quickSearchTopic('Minecraft')" class="px-2 py-1 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 transition hover:text-emerald-400 hover:border-emerald-400/40">⛏️ Minecraft</button>
+          <button type="button" onclick="quickSearchTopic('Valorant')" class="px-2 py-1 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 transition hover:text-red-400 hover:border-red-400/40">🔥 Valorant</button>
+          <button type="button" onclick="quickSearchTopic('GTA 6')" class="px-2 py-1 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 transition hover:text-pink-400 hover:border-pink-400/40">🌴 GTA 6</button>
+          <button type="button" onclick="quickSearchTopic('AI Tools')" class="px-2 py-1 rounded-md bg-brand-dark hover:bg-slate-800 border border-brand-border text-slate-300 transition hover:text-cyan-400 hover:border-cyan-400/40">🤖 AI Tools</button>
+        </div>
+
+        <!-- ACTIVE SEARCH STATUS BADGE -->
+        <div id="trend-search-status" class="hidden mt-2 pt-2 border-t border-brand-border/40 flex items-center justify-between text-xs">
+          <span class="text-slate-300 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-brand-cyan animate-ping"></span>
+            Showing live breakout virals for: <span id="trend-search-query-label" class="font-bold text-brand-cyan"></span>
+          </span>
+          <button type="button" onclick="clearTopicSearch()" class="text-slate-400 hover:text-brand-red text-[11px] underline">Reset to Default</button>
+        </div>
+      </div>
+
+      <!-- CATEGORY FILTERS -->
+      <div class="flex flex-wrap items-center gap-2 mb-6" id="trend-categories">
+        <button onclick="filterTrends('all')" class="cat-pill active px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-border text-white border border-slate-600 transition">All Niches</button>
+        <button onclick="filterTrends('gaming')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-amber-400 border border-amber-500/30 hover:text-white transition">🎮 Warzone & COD</button>
+        <button onclick="filterTrends('tech')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">🤖 Tech & AI</button>
+        <button onclick="filterTrends('finance')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">💼 Wealth & Finance</button>
+        <button onclick="filterTrends('mystery')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">👽 Dark Mysteries</button>
+        <button onclick="filterTrends('storytelling')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">📖 Viral Stories</button>
+        <button onclick="filterTrends('psychology')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-card text-slate-400 border border-brand-border hover:text-white transition">🧠 Psychology</button>
+      </div>
+
+      <!-- TRENDS GRID -->
+      <div id="trends-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Rendered dynamically via app.js -->
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
     <!-- TAB 4: VIRAL HASHTAGS & TIKTOK SEO GENERATOR             -->
     <!-- ======================================================== -->
     <section id="tab-hashtags" class="tab-content hidden">
@@ -1408,7 +1368,6 @@
 
       </div>
     </section>
-
   </main>
 
   <!-- TOAST NOTIFICATION CONTAINER -->

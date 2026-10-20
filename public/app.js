@@ -1,7 +1,7 @@
 // ==========================================
 // STATE MANAGEMENT
 // ==========================================
-let currentTab = 'trends';
+let currentTab = 'clipper';
 let currentTrends = [];
 let currentScript = null;
 let selectedHookIndex = 0;
@@ -185,6 +185,7 @@ function selectAiVoice(voice) {
 document.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
   initGeminiKeyStatus();
+  switchTab('clipper');
   loadTrends();
   initTrendAutoSync();
   loadHashtagsData('warzone clips');
@@ -1009,12 +1010,16 @@ function generateScriptWithIdea(idea) {
   const nicheSelect = document.getElementById('script-niche');
   const lower = idea.toLowerCase();
   if (nicheSelect) {
-    if (lower.includes('nuke') || lower.includes('clutch') || lower.includes('comm') || lower.includes('1v4') || lower.includes('rebirth')) {
+    if (lower.includes('controller') || lower.includes('sensitivity') || lower.includes('aim assist') || lower.includes('deadzone') || lower.includes('audio') || lower.includes('footstep') || lower.includes('movement')) {
+      nicheSelect.value = 'Warzone Movement & Rebirth';
+    } else if (lower.includes('nuke') || lower.includes('clutch') || lower.includes('comm') || lower.includes('1v4') || lower.includes('rebirth')) {
       nicheSelect.value = 'Gaming Clutch & Rage Comms';
     } else if (lower.includes('loadout') || lower.includes('class') || lower.includes('build') || lower.includes('warzone')) {
       nicheSelect.value = 'Call of Duty / Warzone Meta';
     } else if (lower.includes('roblox') || lower.includes('fortnite') || lower.includes('minecraft')) {
       nicheSelect.value = 'General Entertainment';
+    } else if (lower.includes('ai') || lower.includes('tech') || lower.includes('coding') || lower.includes('automate')) {
+      nicheSelect.value = 'Tech & AI Life Hacks';
     }
   }
 
@@ -1027,26 +1032,46 @@ function setScriptIdeaPreset(type) {
   const nicheSelect = document.getElementById('script-niche');
   const toneSelect = document.getElementById('script-tone');
 
-  if (type === 'nuke') {
-    if (topicInput) topicInput.value = 'Got another nuke with the boys in Rebirth Season 6';
-    if (nicheSelect) nicheSelect.value = 'Gaming Clutch & Rage Comms';
+  if (type === 'controller') {
+    if (topicInput) topicInput.value = 'Best controller settings and sensitivity for Warzone Season 6 (Zero Recoil)';
+    if (nicheSelect) nicheSelect.value = 'Warzone Movement & Rebirth';
+    if (toneSelect) toneSelect.value = 'Secretive & Whispered';
+  } else if (type === 'audio') {
+    if (topicInput) topicInput.value = 'Secret audio mix settings to hear enemy footsteps through walls';
+    if (nicheSelect) nicheSelect.value = 'Warzone Movement & Rebirth';
+    if (toneSelect) toneSelect.value = 'Authoritative & Direct';
+  } else if (type === 'movement') {
+    if (topicInput) topicInput.value = 'Slide cancel omnimovement routine to break cameras in Rebirth Island';
+    if (nicheSelect) nicheSelect.value = 'Warzone Movement & Rebirth';
     if (toneSelect) toneSelect.value = 'High Energy & Urgent';
+  } else if (type === 'loadout') {
+    if (topicInput) topicInput.value = 'Broken Season 6 Voyak KT-3 loadout with zero recoil and 400ms TTK';
+    if (nicheSelect) nicheSelect.value = 'Call of Duty / Warzone Meta';
+    if (toneSelect) toneSelect.value = 'Secretive & Whispered';
   } else if (type === 'clutch') {
     if (topicInput) topicInput.value = '1v4 clutch with 1 HP when teammates choked in final circle';
     if (nicheSelect) nicheSelect.value = 'Gaming Clutch & Rage Comms';
+    if (toneSelect) toneSelect.value = 'High Energy & Urgent';
+  } else if (type === 'nuke') {
+    if (topicInput) topicInput.value = 'Got another nuke with the boys in Rebirth Season 6';
+    if (nicheSelect) nicheSelect.value = 'Gaming Clutch & Rage Comms';
+    if (toneSelect) toneSelect.value = 'High Energy & Urgent';
+  } else if (type === 'fortnite') {
+    if (topicInput) topicInput.value = 'The secret Striker AR Zero Build laser setup in Fortnite Ranked';
+    if (nicheSelect) nicheSelect.value = 'General Entertainment';
+    if (toneSelect) toneSelect.value = 'High Energy & Urgent';
+  } else if (type === 'roblox') {
+    if (topicInput) topicInput.value = 'The secret Dress to Impress speed glitch winning every master server';
+    if (nicheSelect) nicheSelect.value = 'General Entertainment';
     if (toneSelect) toneSelect.value = 'High Energy & Urgent';
   } else if (type === 'comms') {
     if (topicInput) topicInput.value = 'Funniest toxic proximity death comms in Search & Destroy';
     if (nicheSelect) nicheSelect.value = 'Gaming Clutch & Rage Comms';
     if (toneSelect) toneSelect.value = 'Sarcastic & Relatable';
-  } else if (type === 'loadout') {
-    if (topicInput) topicInput.value = 'Broken Season 6 Voyak KT-3 loadout with zero recoil and 400ms TTK';
-    if (nicheSelect) nicheSelect.value = 'Call of Duty / Warzone Meta';
-    if (toneSelect) toneSelect.value = 'Secretive & Whispered';
-  } else if (type === 'roblox') {
-    if (topicInput) topicInput.value = 'The secret Dress to Impress speed glitch winning every master server';
-    if (nicheSelect) nicheSelect.value = 'General Entertainment';
-    if (toneSelect) toneSelect.value = 'High Energy & Urgent';
+  } else if (type === 'tech') {
+    if (topicInput) topicInput.value = 'How to automate viral short-form video creation with AI tools';
+    if (nicheSelect) nicheSelect.value = 'Tech & AI Life Hacks';
+    if (toneSelect) toneSelect.value = 'Authoritative & Direct';
   }
 
   document.getElementById('script-form')?.requestSubmit();

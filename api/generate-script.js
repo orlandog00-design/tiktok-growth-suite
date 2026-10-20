@@ -35,7 +35,9 @@ module.exports = async (req, res) => {
 Your goal is to turn ANY user idea, highlight, or communication into a high-retention 9:16 short-form video script that maximizes watch time, shares, and comments.
 
 CRITICAL INSTRUCTIONS:
-1. ADAPT TO THE USER'S ACTUAL CONCEPT:
+1. STRICT ADHERENCE TO THE USER'S ACTUAL CONCEPT:
+   - If the user asks for CONTROLLER SETTINGS, SENSITIVITY, or DEADZONES (e.g. "best controller settings for warzone TRY NOW!"): The script MUST be 100% about controller sensitivity, stick deadzones, aim response curve (Dynamic), and rotational aim assist. NEVER output a weapon build, proximity chat, or rage script when the user asks for settings!
+   - If the user asks for AUDIO / FOOTSTEP SETTINGS: The script MUST be about audio mix presets, Loudness Equalization, Master volume, and hearing footsteps clearly.
    - If the user writes about a NUKE or high streak (e.g. "Got another nuke with the boys"): write an intense, high-stakes story about the countdown, defending against sweat squads, chaotic comms, and the final victory detonation. DO NOT force it into a gun class setup!
    - If the user writes about a 1v4 CLUTCH: write about isolating 1v1 gunfights, camera breaks, and 1 HP survival.
    - If the user writes about FUNNY / TOXIC COMMS: write about proximity chat reactions, screaming teammates, and lobby banter.
@@ -49,7 +51,7 @@ Output MUST strictly follow this JSON schema:
   "title": "High-CTR title for the video",
   "hooks": [
     {
-      "type": "Hook archetype name (e.g. The 15-Second Siren, Chaos Comms, Disbeliever Challenge)",
+      "type": "Hook archetype name",
       "visual": "[VISUAL: Description of fast-paced visual action or text hook on screen]",
       "spoken": "The exact spoken hook words (under 14 words, punchy)",
       "score": "99% Retention Score"
@@ -65,14 +67,14 @@ Output MUST strictly follow this JSON schema:
     }
   ],
   "recommendedAudio": {
-    "title": "Song name or viral beat style (e.g. Brazilian Phonk Drift, Dark 808 Drill, Sigma Drop)",
+    "title": "Song name or viral beat style",
     "audioId": "phonk_drift"
   },
   "endingCTA": "Punchy call to action to maximize comments or saves",
   "hashtags": ["#tag1", "#tag2", "#tag3", "#tag4", "#tag5"]
 }`;
 
-        let userPrompt = `Create a viral ${duration}-second TikTok script on the user's idea: "${topic}".
+        let userPrompt = `Create a viral ${duration}-second TikTok script on the user's exact idea: "${topic}".
 Niche: ${niche}
 Tone: ${tone}
 Goal: ${goal}
@@ -144,35 +146,67 @@ Provide 4 distinct viral hook options to choose from, followed by 4-5 punchy vid
 
 function classifyIdea(text = '') {
   const kw = text.toLowerCase();
-  if (kw.includes('nuke') || kw.includes('bomb') || kw.includes('champion') || kw.includes('quest') || kw.includes('streak') || kw.includes('30-bomb') || kw.includes('30 bomb') || kw.includes('detonate')) {
-    return 'nuke';
+
+  // Controller Settings & Sensitivity (Strict check before comms/troll!)
+  if (/\b(controller|sens|sensitivity|deadzone|deadzones|aim\s*assist|response\s*curve|stick\s*drift|centering|linear|dynamic)\b/i.test(kw)) {
+    return 'settings_controller';
   }
-  if (kw.includes('clutch') || kw.includes('1v4') || kw.includes('1v3') || kw.includes('1v2') || kw.includes('1 hp') || kw.includes('last alive') || kw.includes('wipe') || kw.includes('squad wipe') || kw.includes('gas play')) {
-    return 'clutch';
+
+  // Audio / Sound / Footstep Settings
+  if (/\b(audio|sound|footstep|footsteps|loudness\s*eq|equalizer|hearing|surround|mix\s*preset)\b/i.test(kw)) {
+    return 'settings_audio';
   }
-  if (kw.includes('comm') || kw.includes('rage') || kw.includes('toxic') || kw.includes('screamed') || kw.includes('yell') || kw.includes('funny') || kw.includes('troll') || kw.includes('proximity') || kw.includes('prox')) {
-    return 'comms';
+
+  // Movement & Mechanics
+  if (/\b(omnimovement|movement|slide\s*cancel|sliding|camera\s*break|bhop|bunny\s*hop|mantle|strafe)\b/i.test(kw)) {
+    return 'movement';
   }
-  if (kw.includes('roblox') || kw.includes('bloxfruits') || kw.includes('dress to impress') || kw.includes('dti') || kw.includes('doors')) {
-    return 'roblox';
-  }
-  if (kw.includes('fortnite') || kw.includes('zero build') || kw.includes('unreal')) {
+
+  // Fortnite
+  if (/\b(fortnite|zero\s*build|v-bucks|vbucks|unreal|ranked\s*fortnite|victory\s*royale|chug\s*jug|battle\s*bus)\b/i.test(kw)) {
     return 'fortnite';
   }
-  if (kw.includes('setting') || kw.includes('aimbot') || kw.includes('aim assist') || kw.includes('footstep') || kw.includes('audio') || kw.includes('movement') || kw.includes('slide cancel')) {
-    return 'settings_movement';
+
+  // Roblox
+  if (/\b(roblox|bloxfruits|blox\s*fruits|dress\s*to\s*impress|dti|doors|robux|brookhaven)\b/i.test(kw)) {
+    return 'roblox';
   }
-  if (kw.includes('loadout') || kw.includes('class') || kw.includes('meta') || kw.includes('ttk') || kw.includes('build') || kw.includes('attachments') || kw.includes('recoil') || kw.includes('gun') || kw.includes('smg') || kw.includes('ar') || kw.includes('sniper')) {
+
+  // Nuke & Champion's Quest
+  if (/\b(nuke|champion'?s?\s*quest|30\s*bomb|30-bomb|tactical\s*nuke|detonate|detonation)\b/i.test(kw)) {
+    return 'nuke';
+  }
+
+  // 1v4 Clutch & Wipes
+  if (/\b(clutch|1v4|1v3|1v2|1\s*hp|last\s*alive|squad\s*wipe|gas\s*play)\b/i.test(kw)) {
+    return 'clutch';
+  }
+
+  // Toxic / Funny Comms & Proximity Chat (Word boundary matches, NEVER inside 'controller'!)
+  if (/\b(comm|comms|death\s*comm|death\s*comms|proximity|prox\s*chat|rage|screamed|screaming|toxic|trash\s*talk|troll|trolling|yell|yelling)\b/i.test(kw)) {
+    return 'comms';
+  }
+
+  // General Settings
+  if (/\b(setting|settings|graphics|fps|fov|optimization)\b/i.test(kw)) {
+    return 'settings_controller';
+  }
+
+  // Weapon Loadout & Meta (requires weapon/gaming context so general "build an app" doesn't trigger)
+  if (/\b(loadout|loadouts|weapon\s*build|gun\s*build|best\s*build|meta\s*build|class\s*setup|best\s*class|meta\s*class|custom\s*class|ttk|attachments?|no\s*recoil|zero\s*recoil|voyak|vmp|mpc|striker|superi|fjx|kar98k?)\b/i.test(kw)) {
     return 'loadout_meta';
   }
-  return 'general_idea';
+  if (/\b(smg|ar|assault\s*rifle|sniper|shotgun)\b/i.test(kw) && /\b(build|meta|gun|class|tier|setup)\b/i.test(kw)) {
+    return 'loadout_meta';
+  }
+
+  return 'custom_concept';
 }
 
 function generateViralScript({ topic, niche, tone, duration, goal, refinement = '' }) {
   const combined = `${topic} ${refinement}`.trim();
   const archetype = classifyIdea(combined);
   const wantsFunny = combined.toLowerCase().includes('funny') || combined.toLowerCase().includes('comm') || combined.toLowerCase().includes('scream') || combined.toLowerCase().includes('laugh');
-  const isShort = duration === '15' || combined.toLowerCase().includes('15s') || combined.toLowerCase().includes('short');
 
   let hookOptions = [];
   let segments = [];
@@ -180,7 +214,289 @@ function generateViralScript({ topic, niche, tone, duration, goal, refinement = 
   let audioRecommendation = { title: 'Brazilian Phonk Drift (136 BPM)', audioId: 'phonk_drift' };
   let hashtags = ['#warzone', '#rebirthisland', '#codclips', '#gaming', '#fyp'];
 
-  if (archetype === 'nuke') {
+  if (archetype === 'settings_controller') {
+    audioRecommendation = { title: 'Suspense Countdown & Drop (130 BPM - Secret Class Reveal)', audioId: 'suspense_drop' };
+    hashtags = ['#controllersettings', '#warzoneaim', '#aimassist', '#warzonetips', '#codsettings', '#gaming'];
+
+    hookOptions = [
+      {
+        type: 'The Hidden Aim Assist Exploit (Curiosity)',
+        visual: '[VISUAL: Thumbsticks micro-adjusting on controller with crosshairs snapping instantly onto target chest]',
+        spoken: 'If your aim feels floaty on controller, change these two hidden settings right now.',
+        score: '99% Viral Retention'
+      },
+      {
+        type: 'The Banned Pro Response Curve (Secret)',
+        visual: '[VISUAL: Controller settings menu showing Dynamic Response Curve and 0.85 ADS multiplier]',
+        spoken: 'Every Warzone pro is secretly running this controller curve to break rotational aim assist.',
+        score: '98% Viral Retention'
+      },
+      {
+        type: 'Stop Playing On Default (Urgent Warning)',
+        visual: '[VISUAL: Firing 40 rounds into a dummy without moving thumbstick - 100% headshot accuracy]',
+        spoken: 'Stop playing on default sensitivity—these 3 numbers eliminate recoil completely.',
+        score: '97% Viral Retention'
+      },
+      {
+        type: 'The Instant Aim Snapping Trick',
+        visual: '[VISUAL: Centering dot locked onto enemy chest before even ADS-ing through doorframe]',
+        spoken: 'Here is why your controller aim assist is not locking on like the streamers.',
+        score: '96% Viral Retention'
+      }
+    ];
+
+    endingCTA = goal === 'saves'
+      ? 'Bookmark and save this video right now before you hop into your next match!'
+      : 'What sensitivity do you currently play on? Drop your numbers in the comments!';
+
+    segments = [
+      {
+        time: '0:00 - 0:03',
+        section: 'The Hook',
+        spoken: hookOptions[0].spoken,
+        visual: hookOptions[0].visual,
+        sfx: '[SFX: Headshot ping / Controller click]'
+      },
+      {
+        time: '0:03 - 0:10',
+        section: 'Deadzones Calibration',
+        spoken: 'First, go to deadzones. Set your Left Stick Min to 2, Right Stick Min to 3, and drop your Max deadzone to 85 for instantaneous stick response.',
+        visual: '[VISUAL: Controller menu with yellow highlight around stick deadzone sliders]',
+        sfx: '[SFX: Menu click chime]'
+      },
+      {
+        time: '0:10 - 0:20',
+        section: 'Sensitivity & Response Curve',
+        spoken: 'Next, switch your Aim Response Curve Type from Standard to Dynamic, set your sensitivity to 6-6, and drop your ADS Sensitivity Multiplier to 0.85.',
+        visual: '[VISUAL: Dynamic response curve graph animation showing instant rotational acceleration]',
+        sfx: '[SFX: Whoosh / Snap]'
+      },
+      {
+        time: '0:20 - 0:26',
+        section: 'Rotational Aim Assist Lock',
+        spoken: 'Finally, make sure Aim Assist Type is set to Default or Black Ops, and keep your left stick slightly engaged while firing to trigger 100% rotational tracking.',
+        visual: '[VISUAL: Side-by-side gameplay showing crosshair tracking an enemy sprinting through smoke with zero human effort]',
+        sfx: '[SFX: Armor crack / Double kill]'
+      },
+      {
+        time: '0:26 - 0:30',
+        section: 'Call To Action',
+        spoken: endingCTA,
+        visual: '[VISUAL: Full summary cheat sheet screen with all controller values on display]',
+        sfx: '[SFX: Camera shutter]'
+      }
+    ];
+  } else if (archetype === 'settings_audio') {
+    audioRecommendation = { title: 'Suspense Countdown & Drop (130 BPM)', audioId: 'suspense_drop' };
+    hashtags = ['#audiosettings', '#warzoneaudio', '#footsteps', '#gamingtips', '#warzone'];
+
+    hookOptions = [
+      {
+        type: 'The Footstep Wallhack (Audio Exploit)',
+        visual: '[VISUAL: Audio visualizer spiking red as enemy footsteps approach through concrete floor]',
+        spoken: 'Turn this hidden audio setting on right now if you cannot hear footsteps.',
+        score: '99% Viral Retention'
+      },
+      {
+        type: 'The Sound EQ Trick',
+        visual: '[VISUAL: Sound settings menu highlighting PC Loudness Equalization / Headphone Bass Boost]',
+        spoken: 'Streamers are not hacking—they just turned on this one sound equalizer setting.',
+        score: '98% Viral Retention'
+      },
+      {
+        type: 'Stop Getting Snuck Up On',
+        visual: '[VISUAL: Turning 180 degrees instantly and pre-firing an enemy sprinting up metal stairs]',
+        spoken: 'Here is the exact audio mix to hear enemies parachuting 100 meters away.',
+        score: '97% Viral Retention'
+      },
+      {
+        type: 'Eliminate Bass Drone',
+        visual: '[VISUAL: Disabling air strike rumble while footstep frequencies boost to 200%]',
+        spoken: 'If precision airstrikes keep deafening your headset, change this immediately.',
+        score: '96% Viral Retention'
+      }
+    ];
+
+    endingCTA = 'Can you hear footsteps properly in Warzone? Tell me what headset you use below!';
+
+    segments = [
+      {
+        time: '0:00 - 0:03',
+        section: 'The Hook',
+        spoken: hookOptions[0].spoken,
+        visual: hookOptions[0].visual,
+        sfx: '[SFX: Footstep crunch + Ear ping]'
+      },
+      {
+        time: '0:03 - 0:10',
+        section: 'Audio Mix Preset',
+        spoken: 'Go into your audio menu and change Audio Mix from Cinema to Headphone Bass Boost. This cuts muddy high frequencies and isolates enemy footsteps.',
+        visual: '[VISUAL: In-game audio settings menu cycling to Headphone Bass Boost]',
+        sfx: '[SFX: Menu select]'
+      },
+      {
+        time: '0:10 - 0:20',
+        section: 'Volume Balance',
+        spoken: 'Drop Master Volume to 80, turn Dialogue down to 30 so announcers do not scream over your fights, and turn Gameplay Music completely to ZERO.',
+        visual: '[VISUAL: Sliders moving to recommended balance with green checkmarks]',
+        sfx: '[SFX: Audio slider whoosh]'
+      },
+      {
+        time: '0:20 - 0:26',
+        section: 'Loudness Equalization',
+        spoken: 'If you are on PC, enable Loudness Equalization in Windows Sound properties—it compresses loud gunshots and makes distant footsteps 3 times louder.',
+        visual: '[VISUAL: Windows sound enhancement panel checking Loudness Equalization box]',
+        sfx: '[SFX: Crisp footstep sound]'
+      },
+      {
+        time: '0:26 - 0:30',
+        section: 'Call To Action',
+        spoken: endingCTA,
+        visual: '[VISUAL: Headset graphic with animated soundwaves and comment prompt]',
+        sfx: '[SFX: Ding]'
+      }
+    ];
+  } else if (archetype === 'movement') {
+    audioRecommendation = { title: 'Brazilian Phonk Drift (136 BPM - Movement/Kills)', audioId: 'phonk_drift' };
+    hashtags = ['#warzonemovement', '#omnimovement', '#rebirthisland', '#camerabreak', '#codtips'];
+
+    hookOptions = [
+      {
+        type: 'The Unhittable Movement Routine',
+        visual: '[VISUAL: Omnimovement sprint sliding sideways through a doorway breaking enemy camera]',
+        spoken: 'This new movement technique makes you literally impossible to hit.',
+        score: '99% Viral Retention'
+      },
+      {
+        type: 'The Camera-Break Secret',
+        visual: '[VISUAL: Enemy POV showing our operator disappearing completely off their screen]',
+        spoken: 'Here is how to break anyone\'s camera using this one omnimovement cancel.',
+        score: '98% Viral Retention'
+      },
+      {
+        type: 'The Infinite Slide Cancel',
+        visual: '[VISUAL: Chaining 4 consecutive tactical sprint slides across open courtyard with zero delay]',
+        spoken: 'Stop regular sprinting—this movement chain gives you permanent tactical sprint.',
+        score: '97% Viral Retention'
+      },
+      {
+        type: 'The Corner Peek Jump Shot',
+        visual: '[VISUAL: Super bunny hop around corner pre-aiming headshot angle]',
+        spoken: 'If you peek corners like this, you will win 9 out of 10 gunfights.',
+        score: '96% Viral Retention'
+      }
+    ];
+
+    endingCTA = 'Can you slide cancel consistently? Rate your movement from 1 to 10 in the comments!';
+
+    segments = [
+      {
+        time: '0:00 - 0:03',
+        section: 'The Hook',
+        spoken: hookOptions[0].spoken,
+        visual: hookOptions[0].visual,
+        sfx: '[SFX: Slide sound + Camera whoosh]'
+      },
+      {
+        time: '0:03 - 0:10',
+        section: 'Sprint Behavior Settings',
+        spoken: 'First, set your Automatic Sprint to Automatic Tactical Sprint, and change Slide/Dive Behavior to Tap to Slide so your inputs register instantly.',
+        visual: '[VISUAL: Controller menu setting Automatic Tactical Sprint to ON]',
+        sfx: '[SFX: Click]'
+      },
+      {
+        time: '0:10 - 0:20',
+        section: 'The Omnimovement Angle',
+        spoken: 'Instead of sliding straight forward, sprint diagonally, hit slide, and immediately flick your left stick backwards to break their aim assist tracking.',
+        visual: '[VISUAL: Controller hand cam showing diagonal thumbstick flick with slow-mo gameplay]',
+        sfx: '[SFX: Phonk beat drop]'
+      },
+      {
+        time: '0:20 - 0:26',
+        section: 'The Execution & Wipe',
+        spoken: 'They shoot at empty air while you pop up on their shoulder and delete them before they can even turn around.',
+        visual: '[VISUAL: Fast double kill spray transfer on two confused enemies]',
+        sfx: '[SFX: Headshot dink + Armor crack]'
+      },
+      {
+        time: '0:26 - 0:30',
+        section: 'Call To Action',
+        spoken: endingCTA,
+        visual: '[VISUAL: Animated follow button with demon movement clip in background]',
+        sfx: '[SFX: Victory chime]'
+      }
+    ];
+  } else if (archetype === 'fortnite') {
+    audioRecommendation = { title: 'Brazilian Phonk Drift (136 BPM)', audioId: 'phonk_drift' };
+    hashtags = ['#fortnite', '#fortnitemeta', '#zerobuild', '#fortniteclips', '#rankedfortnite'];
+
+    hookOptions = [
+      {
+        type: 'The Broken Zero Build Meta',
+        visual: '[VISUAL: Striker AR deleting 250 shield in 0.4 seconds across open field]',
+        spoken: `Stop using regular weapons—this ${topic} setup is completely breaking Fortnite.`,
+        score: '99% Viral Retention'
+      },
+      {
+        type: 'The Hidden Audio Advantage',
+        visual: '[VISUAL: Visualize sound effects HUD showing footstep rings 50 meters away]',
+        spoken: 'This one setting in Fortnite gives you legal wallhacks on every server.',
+        score: '98% Viral Retention'
+      },
+      {
+        type: 'The Uncontested Mythic Vault',
+        visual: '[VISUAL: Dropping directly into secret underground vault grabbing gold loot in 30s]',
+        spoken: 'Nobody is dropping at this secret location, and you get guaranteed gold weapons.',
+        score: '97% Viral Retention'
+      },
+      {
+        type: 'The Unreal Rank Strategy',
+        visual: '[VISUAL: Victory Royale banner splashing with +12% Unreal rank progression]',
+        spoken: 'Here is the exact strategy I used to hit Unreal in Solo Zero Build in 3 days.',
+        score: '96% Viral Retention'
+      }
+    ];
+
+    endingCTA = 'What rank are you in Fortnite right now? Drop your rank in the comments!';
+
+    segments = [
+      {
+        time: '0:00 - 0:03',
+        section: 'The Hook',
+        spoken: hookOptions[0].spoken,
+        visual: hookOptions[0].visual,
+        sfx: '[SFX: Shield break crack + Chime]'
+      },
+      {
+        time: '0:03 - 0:10',
+        section: 'The Core Advantage',
+        spoken: 'While everyone is carrying snipers, this weapon setup has maximum fire rate, zero bullet bloom, and shreds overshields before enemies can react.',
+        visual: '[VISUAL: Side-by-side DPS comparison wiping full shield player instantly]',
+        sfx: '[SFX: Gunfire whoosh]'
+      },
+      {
+        time: '0:10 - 0:20',
+        section: 'The Exact Mod Bench Setup',
+        spoken: 'At the weapon bunker, attach the Red Dot optic, Muzzle Brake for recoil control, Speed Mag, and Laser for 100% hipfire accuracy.',
+        visual: '[VISUAL: Mod bench interface snapping 4 gold attachments onto weapon]',
+        sfx: '[SFX: Tool clink / Ding]'
+      },
+      {
+        time: '0:20 - 0:26',
+        section: 'Gameplay Victory',
+        spoken: 'Look at how easily this lasers enemies flying in the air—you literally cannot miss a shot.',
+        visual: '[VISUAL: Beaming a glider player out of the sky into 1st place Victory Royale]',
+        sfx: '[SFX: Victory Royale fanfare + Phonk drop]'
+      },
+      {
+        time: '0:26 - 0:30',
+        section: 'Call To Action',
+        spoken: endingCTA,
+        visual: '[VISUAL: Victory Royale screen with animated comment prompt]',
+        sfx: '[SFX: Chime]'
+      }
+    ];
+  } else if (archetype === 'nuke') {
     audioRecommendation = { title: 'Brazilian Phonk Drift (136 BPM - Movement/Kills)', audioId: 'phonk_drift' };
     hashtags = ['#warzone', '#warzonenuke', '#rebirthisland', '#championsquest', '#nuke', '#codclips'];
 
@@ -531,32 +847,33 @@ function generateViralScript({ topic, niche, tone, duration, goal, refinement = 
       }
     ];
   } else {
-    // General user idea / Story / Life / Tech / Custom Concept
+    // General user idea / Story / Life / Tech / Custom Concept (Dynamic keyword preservation)
+    const cleanTopic = topic.replace(/[^\w\s]/gi, '').trim();
     audioRecommendation = { title: 'Bouncy 808 Trap (132 BPM)', audioId: 'bouncy_trap' };
     hashtags = ['#viral', '#fyp', '#storytime', '#trending', '#learnontiktok'];
 
     hookOptions = [
       {
         type: 'The Pattern Interrupt (Curiosity)',
-        visual: '[VISUAL: Rapid zoom-in with on-screen bold text pop-up]',
+        visual: `[VISUAL: Rapid zoom-in with on-screen bold text pop-up highlighting ${cleanTopic}]`,
         spoken: `Nobody is talking about ${topic}, but this completely changed everything.`,
         score: '99% Viral Retention'
       },
       {
         type: 'The Stop Doing This (Urgent Contrarian)',
-        visual: '[VISUAL: Hand held up to lens shaking head with warning graphic]',
+        visual: `[VISUAL: Hand held up to lens shaking head with warning graphic on ${cleanTopic}]`,
         spoken: `Stop making this massive mistake with ${topic} before it is too late.`,
         score: '98% Viral Retention'
       },
       {
         type: 'The Feels Illegal Revelation',
-        visual: '[VISUAL: Screen recording showing step-by-step insight with glowing circle]',
+        visual: `[VISUAL: Screen recording showing step-by-step insight with glowing circle around key detail]`,
         spoken: `This one secret about ${topic} feels completely illegal to know.`,
         score: '97% Viral Retention'
       },
       {
         type: 'The Brutal Truth',
-        visual: '[VISUAL: Lean in close to camera with serious expression]',
+        visual: `[VISUAL: Lean in close to camera with serious expression about ${cleanTopic}]`,
         spoken: `I am going to be brutally honest about ${topic}, even if people hate it.`,
         score: '96% Viral Retention'
       }
